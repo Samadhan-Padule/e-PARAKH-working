@@ -254,61 +254,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function continueWithImage() {
 
-        if (!capturedImageData) {
+    if (!capturedImageData) {
 
-            alert(
-                "Please capture a product image first."
-            );
+        alert(
+            "Please capture a product image first."
+        );
 
-            return;
-        }
-
-        /*
-         * The captured image will later be sent
-         * to the backend / OCR / AI pipeline.
-         *
-         * For now, save it temporarily in sessionStorage.
-         */
-
-        try {
-
-            sessionStorage.setItem(
-                "eParakhCapturedImage",
-                capturedImageData
-            );
-
-            sessionStorage.setItem(
-                "eParakhScanSource",
-                "camera"
-            );
-
-            console.log(
-                "Captured image saved for next step."
-            );
-
-            /*
-             * Result / processing page will be
-             * implemented in a later phase.
-             */
-
-            alert(
-                "Image captured successfully. Processing will be added in the next phase."
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Unable to save captured image:",
-                error
-            );
-
-            alert(
-                "Unable to continue with this image."
-            );
-        }
+        return;
     }
 
+    try {
 
+        // Save image for inspection page
+        sessionStorage.setItem(
+            "eParakhCapturedImage",
+            capturedImageData
+        );
+
+        sessionStorage.setItem(
+            "eParakhScanSource",
+            "camera"
+        );
+
+        console.log(
+            "Captured image saved successfully."
+        );
+
+        // Go to inspection page
+        window.location.href =
+            "inspection.html";
+
+    } catch (error) {
+
+        console.error(
+            "Unable to save captured image:",
+            error
+        );
+
+        alert(
+            "Unable to continue with this image."
+        );
+    }
+}
     // ==========================================
     // CAMERA ERROR
     // ==========================================

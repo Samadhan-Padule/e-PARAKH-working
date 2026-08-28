@@ -1,3 +1,4 @@
+
 /* =========================================================
    e-PARAKH — PRODUCT INSPECTION JS
    AI OCR + Inspection Workflow Controller
@@ -72,12 +73,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     if (savedOfficerName && officerName) {
-        officerName.textContent = savedOfficerName;
+
+        officerName.textContent =
+            savedOfficerName;
+
     }
 
 
     if (savedOfficerId && officerId) {
-        officerId.textContent = savedOfficerId;
+
+        officerId.textContent =
+            savedOfficerId;
+
     }
 
 
@@ -108,9 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     words[0][0] +
                     words[words.length - 1][0]
                 ).toUpperCase();
+
         }
 
-        officerInitials.textContent = initials;
+        officerInitials.textContent =
+            initials;
+
     }
 
 
@@ -118,12 +128,28 @@ document.addEventListener("DOMContentLoaded", () => {
        INSPECTION ID
     ===================================================== */
 
-    const inspectionId =
-        generateInspectionId();
+    let inspectionId =
+        localStorage.getItem("currentInspectionId");
+
+
+    if (!inspectionId) {
+
+        inspectionId =
+            generateInspectionId();
+
+        localStorage.setItem(
+            "currentInspectionId",
+            inspectionId
+        );
+
+    }
 
 
     if (inspectionIdElement) {
-        inspectionIdElement.textContent = inspectionId;
+
+        inspectionIdElement.textContent =
+            inspectionId;
+
     }
 
 
@@ -136,6 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
             String(Date.now()).slice(-6);
 
         return `EP-${year}-${randomNumber}`;
+
     }
 
 
@@ -144,21 +171,21 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     const savedImage =
-        localStorage.getItem("scannedProductImage");
+        sessionStorage.getItem(
+            "eParakhCapturedImage"
+        );
 
 
     if (savedImage) {
 
         showProductImage(savedImage);
 
-        /*
-         * Automatically start AI analysis
-         */
         analyzeProductWithAI(savedImage);
 
     } else {
 
         showPlaceholder();
+
     }
 
 
@@ -170,19 +197,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!productImage) return;
 
-        productImage.src = imageSource;
+        productImage.src =
+            imageSource;
 
-        productImage.style.display = "block";
+        productImage.style.display =
+            "block";
 
 
         if (imagePlaceholder) {
-            imagePlaceholder.style.display = "none";
+
+            imagePlaceholder.style.display =
+                "none";
+
         }
 
 
         if (modalImage) {
-            modalImage.src = imageSource;
+
+            modalImage.src =
+                imageSource;
+
         }
+
     }
 
 
@@ -194,156 +230,200 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (productImage) {
 
-            productImage.style.display = "none";
+            productImage.style.display =
+                "none";
 
-            productImage.removeAttribute("src");
+            productImage.removeAttribute(
+                "src"
+            );
+
         }
 
 
         if (imagePlaceholder) {
-            imagePlaceholder.style.display = "flex";
+
+            imagePlaceholder.style.display =
+                "flex";
+
         }
+
     }
 
 
     /* =====================================================
-       AI OCR ANALYSIS
-    ===================================================== */
+   AI OCR ANALYSIS
+===================================================== */
 
-    async function analyzeProductWithAI(imageData) {
+async function analyzeProductWithAI(imageData) {
 
-        showAIStatus(
-            "Analyzing product label with AI OCR...",
-            "loading"
-        );
+    showAIStatus(
+        "Analyzing product label with AI OCR...",
+        "loading"
+    );
 
+    try {
 
-        try {
+        console.log("AI ANALYSIS STARTED");
+        console.log("Image exists:", !!imageData);
+        console.log("Image length:", imageData ? imageData.length : 0);
+        console.log("AI URL:", AI_SERVICE_URL);
 
-            /*
-             * Convert Base64 data URL to Blob
-             */
+        /* Convert captured Base64 image to Blob */
 
-            const response =
-                await fetch(imageData);
+        const response = await fetch(imageData);
 
-            const blob =
-                await response.blob();
-
-
-            /*
-             * Create multipart form
-             */
-
-            const formData =
-                new FormData();
-
-            formData.append(
-                "image",
-                blob,
-                "scanned-product.jpg"
-            );
-
-
-            /*
-             * Send image to Flask AI service
-             */
-
-            const aiResponse =
-                await fetch(
-                    AI_SERVICE_URL,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-
-
-            if (!aiResponse.ok) {
-
-                throw new Error(
-                    `AI service returned HTTP ${aiResponse.status}`
-                );
-            }
-
-
-            const result =
-                await aiResponse.json();
-
-
-            console.log(
-                "AI Analysis Result:",
-                result
-            );
-
-
-            if (
-                !result ||
-                result.status !== "success"
-            ) {
-
-                throw new Error(
-                    "AI analysis failed."
-                );
-            }
-
-
-            /*
-             * Save complete AI response
-             */
-
-            localStorage.setItem(
-                "aiAnalysisResult",
-                JSON.stringify(result)
-            );
-
-
-            /*
-             * Auto-fill inspection form
-             */
-
-            populateInspectionForm(
-                result.extracted_data ||
-                result.product ||
-                {}
-            );
-
-
-            /*
-             * Update checklist
-             */
-
-            updateChecklist(
-                result
-            );
-
-
-            /*
-             * Show success
-
-             */
-
-            showAIStatus(
-                "AI analysis completed. Please review the extracted information.",
-                "success"
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "AI OCR Error:",
-                error
-            );
-
-
-            showAIStatus(
-                "AI analysis could not be completed. Please enter or verify the information manually.",
-                "error"
+        if (!response.ok) {
+            throw new Error(
+                "Unable to read captured product image."
             );
         }
-    }
 
+        const blob = await response.blob();
+
+        console.log(
+            "Image converted:",
+            blob.type,
+            blob.size
+        );
+
+        /* Create multipart form */
+
+        const formData = new FormData();
+
+        formData.append(
+            "image",
+            blob,
+            "scanned-product.jpg"
+        );
+
+        console.log("Sending image to AI service...");
+
+        /* Send image to Flask AI service */
+
+        const aiResponse = await fetch(
+            AI_SERVICE_URL,
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        console.log(
+            "AI HTTP response:",
+            aiResponse.status
+        );
+
+        if (!aiResponse.ok) {
+
+            throw new Error(
+                `AI service returned HTTP ${aiResponse.status}`
+            );
+        }
+
+        /* Read JSON */
+
+        const result = await aiResponse.json();
+
+        console.log("=================================");
+        console.log("FULL AI RESPONSE:");
+        console.log(result);
+        console.log("=================================");
+
+        /*
+         * TEMPORARY DEBUG POPUP
+         * This will show us exactly what
+         * Python is returning.
+         */
+
+        alert(
+            "AI Response received!\n\n" +
+            JSON.stringify(result, null, 2)
+        );
+
+        /* Validate response */
+
+        if (!result) {
+
+            throw new Error(
+                "AI returned an empty response."
+            );
+        }
+
+        /*
+         * Accept both possible response formats:
+         *
+         * {
+         *   status: "success",
+         *   extracted_data: {...}
+         * }
+         *
+         * OR
+         *
+         * {
+         *   success: true,
+         *   data: {...}
+         * }
+         */
+
+        const extractedData =
+            result.extracted_data ||
+            result.product ||
+            result.data ||
+            {};
+
+        console.log(
+            "EXTRACTED DATA:",
+            extractedData
+        );
+
+        /* Save complete AI response */
+
+        localStorage.setItem(
+            "aiAnalysisResult",
+            JSON.stringify(result)
+        );
+
+        /* Populate form */
+
+        populateInspectionForm(
+            extractedData
+        );
+
+        /* Update checklist */
+
+        updateChecklist({
+            extracted_data: extractedData
+        });
+
+        /* Success */
+
+        showAIStatus(
+            "AI analysis completed. Please review the extracted information.",
+            "success"
+        );
+
+        console.log(
+            "AI ANALYSIS COMPLETED SUCCESSFULLY"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "AI OCR ERROR:",
+            error
+        );
+
+        showAIStatus(
+            "AI analysis could not be completed. Please enter or verify the information manually.",
+            "error"
+        );
+
+        alert(
+            "AI Analysis Error:\n\n" +
+            error.message
+        );
+    }
+} 
 
     /* =====================================================
        POPULATE INSPECTION FORM
@@ -351,9 +431,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function populateInspectionForm(data) {
 
-        /*
-         * Product name
-         */
+        if (!data) return;
+
+
+        /* Product name */
 
         setValue(
             "productName",
@@ -361,9 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-         * Manufacturer
-         */
+        /* Manufacturer */
 
         setValue(
             "manufacturer",
@@ -371,9 +450,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-         * Net quantity
-         */
+        /* Net quantity */
 
         setValue(
             "netQuantity",
@@ -381,9 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-         * MRP
-         */
+        /* MRP */
 
         setValue(
             "mrp",
@@ -391,9 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-         * Consumer care
-         */
+        /* Consumer care */
 
         setValue(
             "consumerCare",
@@ -401,9 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-         * Manufacturer address
-         */
+        /* Manufacturer address */
 
         setValue(
             "address",
@@ -411,14 +482,13 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-         * Packing / manufacturing date
-         */
+        /* Packing / manufacturing date */
 
         const dateValue =
             cleanValue(
                 data.date_of_manufacture
             );
+
 
         setValue(
             "packingDate",
@@ -426,58 +496,80 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-         * Additional declarations
-         */
+        /* Additional declarations */
 
         const additional = [];
 
+
         if (data.brand_name) {
+
             additional.push(
                 `Brand: ${data.brand_name}`
             );
+
         }
 
+
         if (data.brand_owner) {
+
             additional.push(
                 `Brand Owner: ${data.brand_owner}`
             );
+
         }
 
+
         if (data.country_of_origin) {
+
             additional.push(
                 `Country of Origin: ${data.country_of_origin}`
             );
+
         }
 
+
         if (data.fssai_license) {
+
             additional.push(
                 `FSSAI License: ${data.fssai_license}`
             );
+
         }
 
+
         if (data.epr_registration) {
+
             additional.push(
                 `EPR Registration: ${data.epr_registration}`
             );
+
         }
 
+
         if (data.batch_number) {
+
             additional.push(
                 `Batch No.: ${data.batch_number}`
             );
+
         }
 
+
         if (data.use_by) {
+
             additional.push(
                 `Use By: ${data.use_by}`
             );
+
         }
 
+
         if (data.ingredients) {
+
             additional.push(
                 `Ingredients: ${data.ingredients}`
             );
+
         }
 
 
@@ -485,6 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
             "additionalDeclarations",
             additional.join("\n")
         );
+
     }
 
 
@@ -498,10 +591,13 @@ document.addEventListener("DOMContentLoaded", () => {
             value === null ||
             value === undefined
         ) {
+
             return "";
+
         }
 
         return String(value).trim();
+
     }
 
 
@@ -509,20 +605,45 @@ document.addEventListener("DOMContentLoaded", () => {
        SET INPUT VALUE
     ===================================================== */
 
-    function setValue(id, value) {
+    function setValue(
+        id,
+        value
+    ) {
 
         const element =
             document.getElementById(id);
 
+
         if (!element) return;
+
 
         if (
             value !== undefined &&
             value !== null
         ) {
 
-            element.value = value;
+            element.value =
+                value;
+
         }
+
+    }
+
+
+    /* =====================================================
+       GET INPUT VALUE
+    ===================================================== */
+
+    function getInputValue(id) {
+
+        const element =
+            document.getElementById(id);
+
+
+        return element
+            ? element.value.trim()
+            : "";
+
     }
 
 
@@ -537,25 +658,30 @@ document.addEventListener("DOMContentLoaded", () => {
             result.product ||
             {};
 
+
         updateCheckItem(
             "Name of Commodity",
             !!data.product_name
         );
+
 
         updateCheckItem(
             "Net Quantity",
             !!data.net_quantity
         );
 
+
         updateCheckItem(
             "MRP Declaration",
             !!data.mrp
         );
 
+
         updateCheckItem(
             "Manufacturer Details",
             !!data.manufacturer
         );
+
 
         updateCheckItem(
             "Packing Details",
@@ -565,10 +691,12 @@ document.addEventListener("DOMContentLoaded", () => {
             )
         );
 
+
         updateCheckItem(
             "Consumer Care",
             !!data.customer_care
         );
+
     }
 
 
@@ -592,6 +720,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const strong =
                 item.querySelector("strong");
 
+
             if (!strong) return;
 
 
@@ -599,22 +728,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 strong.textContent.trim() !==
                 title
             ) {
+
                 return;
+
             }
 
 
             const icon =
-                item.querySelector(".check-icon");
+                item.querySelector(
+                    ".check-icon"
+                );
+
 
             const status =
-                item.querySelector(".check-status");
+                item.querySelector(
+                    ".check-status"
+                );
 
 
             if (detected) {
 
                 if (icon) {
 
-                    icon.textContent = "✓";
+                    icon.textContent =
+                        "✓";
 
                     icon.classList.remove(
                         "pending"
@@ -623,34 +760,46 @@ document.addEventListener("DOMContentLoaded", () => {
                     icon.classList.add(
                         "verified"
                     );
+
                 }
 
 
                 if (status) {
+
                     status.textContent =
                         "Detected";
-                }
 
+                }
 
             } else {
 
                 if (icon) {
 
-                    icon.textContent = "?";
+                    icon.textContent =
+                        "?";
+
+                    icon.classList.remove(
+                        "verified"
+                    );
 
                     icon.classList.add(
                         "pending"
                     );
+
                 }
 
 
                 if (status) {
+
                     status.textContent =
                         "Review";
+
                 }
+
             }
 
         });
+
     }
 
 
@@ -672,10 +821,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!statusBox) {
 
             statusBox =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
+
 
             statusBox.id =
                 "aiStatusBox";
+
 
             statusBox.style.cssText = `
                 margin: 16px 0;
@@ -688,13 +841,18 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
 
-            if (inspectionForm) {
+            if (
+                inspectionForm &&
+                inspectionForm.parentElement
+            ) {
 
                 inspectionForm.parentElement.insertBefore(
                     statusBox,
                     inspectionForm
                 );
+
             }
+
         }
 
 
@@ -713,7 +871,9 @@ document.addEventListener("DOMContentLoaded", () => {
             statusBox.style.color =
                 "#8a6500";
 
-        } else if (type === "success") {
+        } else if (
+            type === "success"
+        ) {
 
             statusBox.style.background =
                 "#edf9f2";
@@ -734,12 +894,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             statusBox.style.color =
                 "#a12626";
+
         }
+
     }
 
 
     /* =====================================================
-       RETAKE
+       RETAKE / SCAN AGAIN
     ===================================================== */
 
     if (retakeBtn) {
@@ -750,8 +912,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 window.location.href =
                     "../scan.html";
+
             }
         );
+
     }
 
 
@@ -767,18 +931,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (
                     !productImage ||
-                    !productImage.src
-                ) {
-
-                    alert(
-                        "No product image available."
-                    );
-
-                    return;
-                }
-
-
-                if (
+                    !productImage.src ||
                     productImage.style.display ===
                     "none"
                 ) {
@@ -788,38 +941,51 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
 
                     return;
+
                 }
 
 
                 if (modalImage) {
+
                     modalImage.src =
                         productImage.src;
+
                 }
 
 
                 if (imageModal) {
 
-                    imageModal.hidden = false;
+                    imageModal.hidden =
+                        false;
 
                     document.body.style.overflow =
                         "hidden";
+
                 }
+
             }
         );
+
     }
 
 
     /* =====================================================
-       CLOSE MODAL
+       CLOSE IMAGE MODAL
     ===================================================== */
 
     function closeImageModal() {
 
         if (imageModal) {
-            imageModal.hidden = true;
+
+            imageModal.hidden =
+                true;
+
         }
 
-        document.body.style.overflow = "";
+
+        document.body.style.overflow =
+            "";
+
     }
 
 
@@ -829,6 +995,7 @@ document.addEventListener("DOMContentLoaded", () => {
             "click",
             closeImageModal
         );
+
     }
 
 
@@ -839,13 +1006,17 @@ document.addEventListener("DOMContentLoaded", () => {
             event => {
 
                 if (
-                    event.target === imageModal
+                    event.target ===
+                    imageModal
                 ) {
 
                     closeImageModal();
+
                 }
+
             }
         );
+
     }
 
 
@@ -860,7 +1031,9 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
 
                 closeImageModal();
+
             }
+
         }
     );
 
@@ -871,72 +1044,130 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getFormData() {
 
-        return {
+        let aiAnalysis = null;
 
-            inspectionId,
 
-            manufacturer:
-                getInputValue("manufacturer"),
+        try {
 
-            productName:
-                getInputValue("productName"),
-
-            netQuantity:
-                getInputValue("netQuantity"),
-
-            mrp:
-                getInputValue("mrp"),
-
-            packingDate:
-                getInputValue("packingDate"),
-
-            consumerCare:
-                getInputValue("consumerCare"),
-
-            address:
-                getInputValue("address"),
-
-            additionalDeclarations:
-                getInputValue(
-                    "additionalDeclarations"
-                ),
-
-            productImage:
-                localStorage.getItem(
-                    "scannedProductImage"
-                ) || "",
-
-            officerName:
-                savedOfficerName || "",
-
-            officerId:
-                savedOfficerId || "",
-
-            aiAnalysis:
+            aiAnalysis =
                 JSON.parse(
                     localStorage.getItem(
                         "aiAnalysisResult"
                     ) || "null"
+                );
+
+        } catch (error) {
+
+            console.error(
+                "Unable to parse AI analysis:",
+                error
+            );
+
+            aiAnalysis = null;
+
+        }
+
+
+        return {
+
+            inspectionId:
+
+                inspectionId,
+
+
+            manufacturer:
+
+                getInputValue(
+                    "manufacturer"
                 ),
 
+
+            productName:
+
+                getInputValue(
+                    "productName"
+                ),
+
+
+            netQuantity:
+
+                getInputValue(
+                    "netQuantity"
+                ),
+
+
+            mrp:
+
+                getInputValue(
+                    "mrp"
+                ),
+
+
+            packingDate:
+
+                getInputValue(
+                    "packingDate"
+                ),
+
+
+            consumerCare:
+
+                getInputValue(
+                    "consumerCare"
+                ),
+
+
+            address:
+
+                getInputValue(
+                    "address"
+                ),
+
+
+            additionalDeclarations:
+
+                getInputValue(
+                    "additionalDeclarations"
+                ),
+
+
+            /* Captured product image */
+
+            productImage:
+
+                sessionStorage.getItem(
+                    "eParakhCapturedImage"
+                ) || "",
+
+
+            /* Officer */
+
+            officerName:
+
+                savedOfficerName || "",
+
+
+            officerId:
+
+                savedOfficerId || "",
+
+
+            /* AI */
+
+            aiAnalysis:
+
+
+                aiAnalysis,
+
+
+            /* Timestamp */
+
             savedAt:
+
                 new Date().toISOString()
+
         };
-    }
 
-
-    /* =====================================================
-       GET INPUT VALUE
-    ===================================================== */
-
-    function getInputValue(id) {
-
-        const element =
-            document.getElementById(id);
-
-        return element
-            ? element.value.trim()
-            : "";
     }
 
 
@@ -953,16 +1184,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data =
                     getFormData();
 
+
                 localStorage.setItem(
                     "inspectionDraft",
                     JSON.stringify(data)
                 );
 
+
                 showMessage(
                     "Inspection draft saved successfully."
                 );
+
             }
         );
+
     }
 
 
@@ -989,40 +1224,71 @@ document.addEventListener("DOMContentLoaded", () => {
                 data.manufacturer
             );
 
+
             setValue(
                 "productName",
                 data.productName
             );
+
 
             setValue(
                 "netQuantity",
                 data.netQuantity
             );
 
+
             setValue(
                 "mrp",
                 data.mrp
             );
+
 
             setValue(
                 "packingDate",
                 data.packingDate
             );
 
+
             setValue(
                 "consumerCare",
                 data.consumerCare
             );
+
 
             setValue(
                 "address",
                 data.address
             );
 
+
             setValue(
                 "additionalDeclarations",
                 data.additionalDeclarations
             );
+
+
+            /*
+             * Restore image from draft if needed.
+             */
+
+            if (
+                data.productImage &&
+                !sessionStorage.getItem(
+                    "eParakhCapturedImage"
+                )
+            ) {
+
+                sessionStorage.setItem(
+                    "eParakhCapturedImage",
+                    data.productImage
+                );
+
+
+                showProductImage(
+                    data.productImage
+                );
+
+            }
 
         } catch (error) {
 
@@ -1030,7 +1296,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Unable to load inspection draft:",
                 error
             );
+
         }
+
     }
 
 
@@ -1047,11 +1315,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 event.preventDefault();
 
 
-                const productImageData =
-                    localStorage.getItem(
-                        "scannedProductImage"
-                    );
+                /*
+                 * IMPORTANT:
+                 * Use the SAME storage key that
+                 * scan.html uses.
+                 */
 
+                 const productImageData =
+    sessionStorage.getItem(
+        "eParakhCapturedImage"
+    );
 
                 if (!productImageData) {
 
@@ -1060,6 +1333,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
 
                     return;
+
                 }
 
 
@@ -1067,21 +1341,35 @@ document.addEventListener("DOMContentLoaded", () => {
                     getFormData();
 
 
+                /*
+                 * Save complete inspection
+                 */
+
                 localStorage.setItem(
                     "currentInspection",
                     JSON.stringify(data)
                 );
 
 
+                /*
+                 * Remove temporary draft
+                 */
+
                 localStorage.removeItem(
                     "inspectionDraft"
                 );
 
 
+                /*
+                 * Move to compliance
+                 */
+
                 window.location.href =
                     "compliance.html";
+
             }
         );
+
     }
 
 
@@ -1102,7 +1390,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 if (!confirmed) {
+
                     return;
+
                 }
 
 
@@ -1110,27 +1400,47 @@ document.addEventListener("DOMContentLoaded", () => {
                     "officerName"
                 );
 
+
                 localStorage.removeItem(
                     "officerId"
                 );
+
 
                 localStorage.removeItem(
                     "inspectionDraft"
                 );
 
+
                 localStorage.removeItem(
                     "currentInspection"
                 );
+
+
+                localStorage.removeItem(
+                    "currentInspectionId"
+                );
+
 
                 localStorage.removeItem(
                     "aiAnalysisResult"
                 );
 
 
+                /*
+                 * Clear captured image
+                 */
+
+                sessionStorage.removeItem(
+                    "eParakhCapturedImage"
+                );
+
+
                 window.location.href =
                     "login.html";
+
             }
         );
+
     }
 
 
@@ -1139,7 +1449,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function showMessage(message) {
+
         alert(message);
+
     }
 
 });
