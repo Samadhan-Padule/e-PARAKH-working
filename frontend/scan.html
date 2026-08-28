@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Scan Product | e-PARAKH</title>
+
+    <link rel="stylesheet" href="css/scanner.css">
+</head>
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="scanner-header">
+
+        <div class="brand">
+
+            <a href="index.html" class="brand-mark">
+                ⚖
+            </a>
+
+            <div class="brand-text">
+                <strong>e-PARAKH</strong>
+                <span>Legal Metrology Compliance System</span>
+            </div>
+
+        </div>
+
+
+        <div class="header-right">
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+                System Online
+            </div>
+
+            <div class="officer-profile">
+
+                <div class="officer-avatar">
+                    O
+                </div>
+
+                <div class="officer-details">
+                    <strong id="officerName">Officer</strong>
+                    <span id="officerId">Authorized Officer</span>
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="logout-btn"
+                id="logoutBtn"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="scanner-main">
+
+        <div class="page-container">
+
+            <!-- PAGE HEADER -->
+
+            <section class="page-heading">
+
+                <div>
+
+                    <span class="page-eyebrow">
+                        INSPECTION WORKSPACE
+                    </span>
+
+                    <h1>
+                        Product Verification
+                    </h1>
+
+                    <p>
+                        Scan or upload a packaged commodity label
+                        to begin Legal Metrology compliance inspection.
+                    </p>
+
+                </div>
+
+
+                <div class="inspection-counter">
+
+                    <span>Today's Inspections</span>
+
+                    <strong id="inspectionCount">
+                        0
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SCANNER GRID
+            ================================================== -->
+
+            <section class="scanner-grid">
+
+
+                <!-- =================================================
+                     SCAN CARD
+                ================================================== -->
+
+                <div class="scan-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-eyebrow">
+                                STEP 01
+                            </span>
+
+                            <h2>
+                                Scan Product
+                            </h2>
+
+                            <p>
+                                Capture the product label using your
+                                device camera or upload an image.
+                            </p>
+
+                        </div>
+
+                        <div class="card-icon">
+                            ◉
+                        </div>
+
+                    </div>
+
+
+                    <!-- CAMERA AREA -->
+
+                    <div
+                        class="camera-area"
+                        id="cameraArea"
+                    >
+
+                        <div class="camera-placeholder">
+
+                            <div class="camera-icon">
+                                📷
+                            </div>
+
+                            <h3>
+                                Ready to Scan
+                            </h3>
+
+                            <p>
+                                Position the packaged commodity label
+                                clearly inside the camera frame.
+                            </p>
+
+                            <button
+                                type="button"
+                                class="primary-btn"
+                                id="startCameraBtn"
+                            >
+                                Start Camera
+                                <span>→</span>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DIVIDER -->
+
+                    <div class="scan-divider">
+                        <span>OR</span>
+                    </div>
+
+
+                    <!-- UPLOAD -->
+
+                    <label
+                        for="productImage"
+                        class="upload-area"
+                    >
+
+                        <div class="upload-icon">
+                            ↑
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Upload Product Label
+                            </strong>
+
+                            <span>
+                                JPG, PNG or WEBP · Maximum 10 MB
+                            </span>
+
+                        </div>
+
+                        <span class="browse-btn">
+                            Browse
+                        </span>
+
+                    </label>
+
+                    <input
+                        type="file"
+                        id="productImage"
+                        accept="image/jpeg,image/png,image/webp"
+                        hidden
+                    >
+
+
+                    <!-- IMAGE PREVIEW -->
+
+                    <div
+                        class="preview-area"
+                        id="previewArea"
+                        hidden
+                    >
+
+                        <div class="preview-header">
+
+                            <div>
+                                <strong>
+                                    Selected Image
+                                </strong>
+
+                                <span id="fileName">
+                                    -
+                                </span>
+                            </div>
+
+                            <button
+                                type="button"
+                                id="removeImageBtn"
+                                class="remove-btn"
+                            >
+                                Remove
+                            </button>
+
+                        </div>
+
+                        <img
+                            id="imagePreview"
+                            src=""
+                            alt="Product label preview"
+                        >
+
+                    </div>
+
+
+                    <!-- CONTINUE -->
+
+                    <button
+                        type="button"
+                        class="continue-btn"
+                        id="continueBtn"
+                        disabled
+                    >
+                        Continue to Inspection
+                        <span>→</span>
+                    </button>
+
+                </div>
+
+
+                <!-- =================================================
+                     INSPECTION INFO CARD
+                ================================================== -->
+
+                <aside class="inspection-card">
+
+                    <div class="card-header compact">
+
+                        <div>
+
+                            <span class="card-eyebrow">
+                                INSPECTION PROCESS
+                            </span>
+
+                            <h2>
+                                How it works
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="process-list">
+
+
+                        <div class="process-item active">
+
+                            <div class="process-number">
+                                01
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Scan / Upload
+                                </strong>
+
+                                <span>
+                                    Capture the packaged commodity
+                                    label clearly.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="process-line"></div>
+
+
+                        <div class="process-item">
+
+                            <div class="process-number">
+                                02
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Extract Details
+                                </strong>
+
+                                <span>
+                                    Product declarations and label
+                                    information are identified.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="process-line"></div>
+
+
+                        <div class="process-item">
+
+                            <div class="process-number">
+                                03
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Verify Compliance
+                                </strong>
+
+                                <span>
+                                    Required Legal Metrology
+                                    declarations are checked.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="process-line"></div>
+
+
+                        <div class="process-item">
+
+                            <div class="process-number">
+                                04
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Generate Result
+                                </strong>
+
+                                <span>
+                                    Inspection status and report
+                                    are generated.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SECURITY -->
+
+                    <div class="security-box">
+
+                        <div class="security-box-icon">
+                            🔒
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Secure Inspection
+                            </strong>
+
+                            <span>
+                                Inspection records are handled
+                                through the authorized system.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </aside>
+
+            </section>
+
+
+            <!-- =================================================
+                 RECENT INSPECTIONS
+            ================================================== -->
+
+            <section class="recent-section" id="recent-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="page-eyebrow">
+                            ACTIVITY
+                        </span>
+
+                        <h2>
+                            Recent Inspections
+                        </h2>
+
+                    </div>
+
+                    <a
+                        href="#recent-section"
+                        class="view-history"
+                    >
+                        View All →
+                    </a>
+
+                </div>
+
+
+                <div
+                    class="empty-state"
+                    id="emptyState"
+                >
+
+                    <div class="empty-icon">
+                        ◫
+                    </div>
+
+                    <h3>
+                        No inspections yet
+                    </h3>
+
+                    <p>
+                        Your completed product inspections
+                        will appear here.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="scanner-footer">
+
+        <span>
+            © 2026 e-PARAKH
+        </span>
+
+        <span>
+            Legal Metrology Compliance System
+        </span>
+
+        <span>
+            Authorized Government Use Only
+        </span>
+
+    </footer>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="js/scanner.js"></script>
+
+</body>
+</html>

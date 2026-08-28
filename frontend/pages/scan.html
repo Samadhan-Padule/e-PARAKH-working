@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="e-PARAKH Product Scanner"
+    >
+
+    <title>Scan Product | e-PARAKH</title>
+
+    <!-- Main CSS -->
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <!-- Scanner CSS -->
+    <link
+        rel="stylesheet"
+        href="../css/scanner.css"
+    >
+</head>
+
+<body>
+
+    <!-- ==========================================
+         HEADER
+    =========================================== -->
+
+    <header class="site-header">
+
+        <div class="container header-inner">
+
+            <a
+                href="../index.html"
+                class="logo"
+                aria-label="e-PARAKH Home"
+            >
+                e-PARAKH
+            </a>
+
+            <a
+                href="../index.html"
+                class="back-btn"
+            >
+                ← Home
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- ==========================================
+         MAIN SCANNER
+    =========================================== -->
+
+    <main class="scanner-page">
+
+        <div class="container">
+
+            <!-- Page Heading -->
+
+            <section class="scanner-heading">
+
+                <span class="section-label">
+                    PRODUCT VERIFICATION
+                </span>
+
+                <h1>
+                    Scan Product
+                </h1>
+
+                <p>
+                    Capture a clear image of the product label
+                    to check its Legal Metrology declarations.
+                </p>
+
+            </section>
+
+
+            <!-- ======================================
+                 CAMERA CONTAINER
+            ======================================= -->
+
+            <section class="scanner-card">
+
+                <div
+                    class="camera-container"
+                    id="cameraContainer"
+                >
+
+                    <!-- Camera Preview -->
+
+                    <video
+                        id="cameraPreview"
+                        class="camera-preview"
+                        autoplay
+                        playsinline
+                        muted
+                    ></video>
+
+
+                    <!-- Camera Placeholder -->
+
+                    <div
+                        id="cameraPlaceholder"
+                        class="camera-placeholder"
+                    >
+
+                        <div class="camera-icon">
+                            📷
+                        </div>
+
+                        <h2>
+                            Camera Access Required
+                        </h2>
+
+                        <p>
+                            Allow camera access to scan
+                            the product label.
+                        </p>
+
+                        <button
+                            type="button"
+                            id="startCameraBtn"
+                            class="btn btn-primary"
+                        >
+                            Start Camera
+                        </button>
+
+                    </div>
+
+
+                    <!-- Camera Overlay -->
+
+                    <div
+                        id="cameraOverlay"
+                        class="camera-overlay"
+                    >
+
+                        <div class="scan-frame">
+
+                            <span class="corner top-left"></span>
+                            <span class="corner top-right"></span>
+                            <span class="corner bottom-left"></span>
+                            <span class="corner bottom-right"></span>
+
+                        </div>
+
+                        <p class="scan-hint">
+                            Position the product label
+                            inside the frame
+                        </p>
+
+                    </div>
+
+
+                    <!-- Camera Error -->
+
+                    <div
+                        id="cameraError"
+                        class="camera-error hidden"
+                    >
+
+                        <h3>
+                            Camera unavailable
+                        </h3>
+
+                        <p id="cameraErrorMessage">
+                            Unable to access your camera.
+                        </p>
+
+                        <button
+                            type="button"
+                            id="retryCameraBtn"
+                            class="btn btn-secondary"
+                        >
+                            Try Again
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================
+                     CAMERA CONTROLS
+                =================================== -->
+
+                <div class="camera-controls">
+
+                    <button
+                        type="button"
+                        id="switchCameraBtn"
+                        class="camera-control-btn"
+                        disabled
+                    >
+                        🔄
+                        <span>Switch Camera</span>
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="captureBtn"
+                        class="capture-btn"
+                        disabled
+                        aria-label="Capture product image"
+                    >
+                        <span class="capture-circle"></span>
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="stopCameraBtn"
+                        class="camera-control-btn"
+                        disabled
+                    >
+                        ⏹
+                        <span>Stop</span>
+                    </button>
+
+                </div>
+
+
+                <!-- ==================================
+                     CAPTURE PREVIEW
+                =================================== -->
+
+                <div
+                    id="capturePreviewContainer"
+                    class="capture-preview-container hidden"
+                >
+
+                    <h2>
+                        Captured Image
+                    </h2>
+
+                    <div class="captured-image-wrapper">
+
+                        <img
+                            id="capturedImage"
+                            src=""
+                            alt="Captured product"
+                        >
+
+                    </div>
+
+                    <div class="preview-actions">
+
+                        <button
+                            type="button"
+                            id="retakeBtn"
+                            class="btn btn-secondary"
+                        >
+                            Retake
+                        </button>
+
+                        <button
+                            type="button"
+                            id="continueBtn"
+                            class="btn btn-primary"
+                        >
+                            Continue
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================
+                     INSTRUCTIONS
+                =================================== -->
+
+                <div class="scanner-instructions">
+
+                    <h2>
+                        Tips for a better scan
+                    </h2>
+
+                    <ul>
+
+                        <li>
+                            Keep the product label clearly visible.
+                        </li>
+
+                        <li>
+                            Avoid glare and strong reflections.
+                        </li>
+
+                        <li>
+                            Make sure the text is readable.
+                        </li>
+
+                        <li>
+                            Hold your phone steady while capturing.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <!-- ==========================================
+         FOOTER
+    =========================================== -->
+
+    <footer class="site-footer">
+
+        <div class="container">
+
+            <p>
+                © <span id="currentYear"></span>
+                e-PARAKH. Legal Metrology Compliance Platform.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ==========================================
+         CAMERA SCRIPT
+    =========================================== -->
+
+    <script src="../js/camera.js"></script>
+
+</body>
+</html>

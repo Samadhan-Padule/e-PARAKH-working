@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product API Test | e-PARAKH</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #102a43;
+            background: #eef5fb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: linear-gradient(135deg, #f8fbfe, #e8f1f8);
+        }
+
+        main {
+            width: min(100%, 560px);
+            padding: 32px;
+            background: #ffffff;
+            border: 1px solid #dce5ee;
+            border-top: 4px solid #1765a0;
+            border-radius: 12px;
+            box-shadow: 0 20px 55px rgba(15, 39, 65, 0.12);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            color: #0c2d50;
+            font-size: 26px;
+        }
+
+        p {
+            margin: 0 0 24px;
+            color: #52677a;
+        }
+
+        .status {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            background: #f1f6fa;
+            color: #164d79;
+            font-weight: 600;
+        }
+
+        .status.error {
+            background: #fff2f2;
+            color: #a12a2a;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        button {
+            padding: 11px 15px;
+            border: 0;
+            border-radius: 6px;
+            background: #1765a0;
+            color: #ffffff;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+        }
+
+        button.secondary {
+            background: #52677a;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        dl {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 12px 16px;
+            margin: 0;
+            padding-top: 20px;
+            border-top: 1px solid #e1e8ef;
+        }
+
+        dt {
+            color: #52677a;
+            font-weight: 700;
+        }
+
+        dd {
+            margin: 0;
+            overflow-wrap: anywhere;
+            color: #102a43;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Product API Test</h1>
+        <p>Temporary authenticated test for creating one sample product.</p>
+
+        <div id="tokenStatus" class="status" role="status"></div>
+
+        <div class="actions">
+            <button id="createProduct" type="button">Create Test Product</button>
+            <button id="checkToken" class="secondary" type="button">Check Saved Token</button>
+        </div>
+
+        <dl aria-live="polite">
+            <dt>HTTP Status</dt>
+            <dd id="httpStatus">Not tested</dd>
+            <dt>Success</dt>
+            <dd id="success">Not tested</dd>
+            <dt>Message</dt>
+            <dd id="message">Not tested</dd>
+            <dt>Product ID</dt>
+            <dd id="productId">Not tested</dd>
+        </dl>
+    </main>
+
+    <script>
+        const tokenStatus = document.getElementById("tokenStatus");
+        const createProductButton = document.getElementById("createProduct");
+        const checkTokenButton = document.getElementById("checkToken");
+        const httpStatus = document.getElementById("httpStatus");
+        const success = document.getElementById("success");
+        const message = document.getElementById("message");
+        const productId = document.getElementById("productId");
+
+        function getSavedToken() {
+            return localStorage.getItem("eParakhToken");
+        }
+
+        function updateTokenStatus() {
+            const tokenExists = getSavedToken() !== null;
+            tokenStatus.textContent = tokenExists
+                ? "Token found — ready for Product API test"
+                : "JWT token not found. Please login first.";
+            tokenStatus.className = tokenExists ? "status" : "status error";
+            createProductButton.disabled = !tokenExists;
+            return tokenExists;
+        }
+
+        checkTokenButton.addEventListener("click", () => {
+            const tokenExists = getSavedToken() !== null;
+            tokenStatus.textContent = tokenExists ? "TRUE" : "FALSE";
+            tokenStatus.className = tokenExists ? "status" : "status error";
+        });
+
+        createProductButton.addEventListener("click", async () => {
+            const token = getSavedToken();
+            if (!token) {
+                updateTokenStatus();
+                return;
+            }
+
+            createProductButton.disabled = true;
+            httpStatus.textContent = "Testing...";
+            success.textContent = "Testing...";
+            message.textContent = "Testing...";
+            productId.textContent = "Not available";
+
+            try {
+                const response = await fetch("http://localhost:5000/api/products", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        productName: "Sample Product",
+                        manufacturer: "Sample Manufacturer",
+                        brandName: "Sample Brand",
+                        netQuantity: "1 kg",
+                        mrp: "100",
+                        source: "MANUAL"
+                    })
+                });
+                const result = await response.json().catch(() => ({}));
+
+                httpStatus.textContent = response.status;
+                success.textContent = result.success === undefined ? "Not returned" : result.success;
+                message.textContent = result.message || "No message returned.";
+                productId.textContent = result.product && result.product._id
+                    ? result.product._id
+                    : "Not returned";
+            } catch (error) {
+                httpStatus.textContent = "Request failed";
+                success.textContent = "false";
+                message.textContent = "Unable to connect to the backend.";
+                productId.textContent = "Not available";
+            } finally {
+                createProductButton.disabled = getSavedToken() === null;
+            }
+        });
+
+        updateTokenStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Compliance Verification | e-PARAKH</title>
+
+    <link rel="stylesheet" href="../css/compliance.css">
+</head>
+
+<body>
+
+<!-- =========================================================
+     GOVERNMENT HEADER
+========================================================= -->
+
+<header class="compliance-header">
+
+    <div class="brand">
+
+        <a href="../index.html" class="brand-mark" aria-label="e-PARAKH Home">
+            ⚖
+        </a>
+
+        <div class="brand-text">
+            <strong>e-PARAKH</strong>
+            <span>Legal Metrology Compliance System</span>
+        </div>
+
+    </div>
+
+    <div class="header-right">
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            <span>System Operational</span>
+        </div>
+
+        <div class="officer-profile">
+
+            <div class="officer-avatar" id="officerAvatar">
+                AO
+            </div>
+
+            <div class="officer-details">
+                <strong id="officerName">Authorized Officer</strong>
+                <span id="officerId">Officer ID</span>
+            </div>
+
+        </div>
+
+        <button
+            type="button"
+            class="logout-btn"
+            id="logoutBtn">
+            Logout
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="compliance-main">
+
+    <div class="page-container">
+
+        <!-- =================================================
+             PAGE HEADING
+        ================================================== -->
+
+        <section class="page-heading">
+
+            <div>
+
+                <span class="page-eyebrow">
+                    STEP 03 · COMPLIANCE VERIFICATION
+                </span>
+
+                <h1>Compliance Assessment</h1>
+
+                <p>
+                    Review the extracted product declarations and verify
+                    compliance with the applicable Legal Metrology
+                    requirements before generating the inspection result.
+                </p>
+
+            </div>
+
+            <div class="inspection-id">
+
+                <span>INSPECTION ID</span>
+
+                <strong id="inspectionId">
+                    EP-2026-000000
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             WORKFLOW PROGRESS
+        ================================================== -->
+
+        <section class="progress-section">
+
+            <div class="progress-step completed">
+
+                <div class="step-number">✓</div>
+
+                <div>
+                    <strong>Product Scan</strong>
+                    <span>Image captured</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line active"></div>
+
+            <div class="progress-step completed">
+
+                <div class="step-number">✓</div>
+
+                <div>
+                    <strong>Declaration</strong>
+                    <span>Details extracted</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line active"></div>
+
+            <div class="progress-step active">
+
+                <div class="step-number">03</div>
+
+                <div>
+                    <strong>Compliance</strong>
+                    <span>Assessment</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line"></div>
+
+            <div class="progress-step">
+
+                <div class="step-number">04</div>
+
+                <div>
+                    <strong>Result</strong>
+                    <span>Final report</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PRODUCT SUMMARY
+        ================================================== -->
+
+        <section class="summary-card">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="card-eyebrow">
+                        PRODUCT INFORMATION
+                    </span>
+
+                    <h2>Inspection Summary</h2>
+                </div>
+
+                <span class="summary-status" id="summaryStatus">
+                    DATA LOADED
+                </span>
+
+            </div>
+
+            <div class="summary-grid">
+
+                <div class="summary-item">
+                    <span>Manufacturer</span>
+                    <strong id="summaryManufacturer">—</strong>
+                </div>
+
+                <div class="summary-item">
+                    <span>Product Name</span>
+                    <strong id="summaryProductName">—</strong>
+                </div>
+
+                <div class="summary-item">
+                    <span>Net Quantity</span>
+                    <strong id="summaryQuantity">—</strong>
+                </div>
+
+                <div class="summary-item">
+                    <span>MRP</span>
+                    <strong id="summaryMrp">—</strong>
+                </div>
+
+                <div class="summary-item">
+                    <span>Packing Date</span>
+                    <strong id="summaryPackingDate">—</strong>
+                </div>
+
+                <div class="summary-item">
+                    <span>Consumer Care</span>
+                    <strong id="summaryConsumerCare">—</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             COMPLIANCE SCORE
+        ================================================== -->
+
+        <section class="assessment-layout">
+
+            <div class="score-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <span class="card-eyebrow">
+                            COMPLIANCE SCORE
+                        </span>
+
+                        <h2>Assessment Status</h2>
+                    </div>
+
+                    <span class="score-badge" id="scoreBadge">
+                        PENDING
+                    </span>
+
+                </div>
+
+                <div class="score-circle" id="scoreCircle">
+
+                    <div class="score-content">
+                        <strong id="complianceScore">0%</strong>
+                        <span>Compliance</span>
+                    </div>
+
+                </div>
+
+                <p class="score-message" id="scoreMessage">
+                    Complete the verification checklist to calculate
+                    the compliance score.
+                </p>
+
+                <div class="score-legend">
+
+                    <div>
+                        <span class="legend-dot compliant"></span>
+                        Compliant
+                    </div>
+
+                    <div>
+                        <span class="legend-dot non-compliant"></span>
+                        Non-Compliant
+                    </div>
+
+                    <div>
+                        <span class="legend-dot pending"></span>
+                        Pending
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CHECKLIST
+            ================================================== -->
+
+            <div class="verification-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <span class="card-eyebrow">
+                            RULE VERIFICATION
+                        </span>
+
+                        <h2>Mandatory Declarations</h2>
+                    </div>
+
+                    <span class="verification-count" id="verificationCount">
+                        0 / 8 VERIFIED
+                    </span>
+
+                </div>
+
+                <p class="section-description">
+                    Verify each declaration against the product packaging
+                    and applicable Legal Metrology requirements.
+                </p>
+
+
+                <div class="rule-list">
+
+                    <!-- Manufacturer -->
+
+                    <label class="rule-item">
+
+                        <input
+                            type="checkbox"
+                            class="rule-checkbox"
+                            data-rule="manufacturer">
+
+                        <span class="custom-checkbox">✓</span>
+
+                        <span class="rule-content">
+
+                            <strong>
+                                Manufacturer / Packer / Importer
+                            </strong>
+
+                            <small>
+                                Name and identification details are
+                                clearly declared.
+                            </small>
+
+                        </span>
+
+                        <span class="rule-status">
+                            Pending
+                        </span>
+
+                    </label>
+
+
+                    <!-- Product Name -->
+
+                    <label class="rule-item">
+
+                        <input
+                            type="checkbox"
+                            class="rule-checkbox"
+                            data-rule="productName">
+
+                        <span class="custom-checkbox">✓</span>
+
+                        <span class="rule-content">
+
+                            <strong>
+                                Common / Generic Product Name
+                            </strong>
+
+                            <small>
+                                Product identity is clearly mentioned.
+                            </small>
+
+                        </span>
+
+                        <span class="rule-status">
+                            Pending
+                        </span>
+
+                    </label>
+
+
+                    <!-- Net Quantity -->
+
+                    <label class="rule-item">
+
+                        <input
+                            type="checkbox"
+                            class="rule-checkbox"
+                            data-rule="quantity">
+
+                        <span class="custom-checkbox">✓</span>
+
+                        <span class="rule-content">
+
+                            <strong>
+                                Net Quantity
+                            </strong>
+
+                            <small>
+                                Quantity is expressed in the prescribed
+                                unit and format.
+                            </small>
+
+                        </span>
+
+                        <span class="rule-status">
+                            Pending
+                        </span>
+
+                    </label>
+
+
+                    <!-- MRP -->
+
+                    <label class="rule-item">
+
+                        <input
+                            type="checkbox"
+                            class="rule-checkbox"
+                            data-rule="mrp">
+
+                        <span class="custom-checkbox">✓</span>
+
+                        <span class="rule-content">
+
+                            <strong>
+                                Maximum Retail Price
+                            </strong>
+
+                            <small>
+                                MRP is declared with applicable
+                                taxes / wording.
+                            </small>
+
+                        </span>
+
+                        <span class="rule-status">
+                            Pending
+                        </span>
+
+                    </label>
+
+
+                    <!-- Date -->
+
+                    <label class="rule-item">
+
+                        <input
+                            type="checkbox"
+                            class="rule-checkbox"
+                            data-rule="date">
+
+                        <span class="custom-checkbox">✓</span>
+
+                        <span class="rule-content">
+
+                            <strong>
+                                Date of Manufacture / Packing
+                            </strong>
+
+                            <small>
+                                Applicable date declaration is present
+                                and readable.
+                            </small>
+
+                        </span>
+
+                        <span class="rule-status">
+                            Pending
+                        </span>
+
+                    </label>
+
+
+                    <!-- Consumer Care -->
+
+                    <label class="rule-item">
+
+                        <input
+                            type="checkbox"
+                            class="rule-checkbox"
+                            data-rule="consumerCare">
+
+                        <span class="custom-checkbox">✓</span>
+
+                        <span class="rule-content">
+
+                            <strong>
+                                Consumer Care Details
+                            </strong>
+
+                            <small>
+                                Consumer complaint contact information
+                                is available.
+                            </small>
+
+                        </span>
+
+                        <span class="rule-status">
+                            Pending
+                        </span>
+
+                    </label>
+
+
+                    <!-- Address -->
+
+                    <label class="rule-item">
+
+                        <input
+                            type="checkbox"
+                            class="rule-checkbox"
+                            data-rule="address">
+
+                        <span class="custom-checkbox">✓</span>
+
+                        <span class="rule-content">
+
+                            <strong>
+                                Address Declaration
+                            </strong>
+
+                            <small>
+                                Relevant business / manufacturer address
+                                is declared.
+                            </small>
+
+                        </span>
+
+                        <span class="rule-status">
+                            Pending
+                        </span>
+
+                    </label>
+
+
+                    <!-- Additional -->
+
+                    <label class="rule-item">
+
+                        <input
+                            type="checkbox"
+                            class="rule-checkbox"
+                            data-rule="additional">
+
+                        <span class="custom-checkbox">✓</span>
+
+                        <span class="rule-content">
+
+                            <strong>
+                                Additional Mandatory Declarations
+                            </strong>
+
+                            <small>
+                                Other applicable declarations have been
+                                verified.
+                            </small>
+
+                        </span>
+
+                        <span class="rule-status">
+                            Pending
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             OFFICER OBSERVATION
+        ================================================== -->
+
+        <section class="observation-card">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        OFFICER REVIEW
+                    </span>
+
+                    <h2>Inspection Observation</h2>
+
+                </div>
+
+            </div>
+
+            <textarea
+                id="observation"
+                placeholder="Enter observations, discrepancies, or remarks regarding the product packaging..."
+            ></textarea>
+
+        </section>
+
+
+        <!-- =================================================
+             FINAL DECISION
+        ================================================== -->
+
+        <section class="decision-card">
+
+            <div class="decision-icon">
+                ⚖
+            </div>
+
+            <div class="decision-content">
+
+                <strong>Final Compliance Decision</strong>
+
+                <span id="decisionText">
+                    Verify all checklist items before proceeding to
+                    the final inspection result.
+                </span>
+
+            </div>
+
+            <div class="decision-actions">
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    id="backBtn">
+                    ← Back
+                </button>
+
+                <button
+                    type="button"
+                    class="primary-btn"
+                    id="generateBtn">
+                    Generate Result
+                    <span>→</span>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             NOTICE
+        ================================================== -->
+
+        <div class="compliance-notice">
+
+            <div class="notice-icon">
+                ℹ
+            </div>
+
+            <div>
+
+                <strong>
+                    Officer Verification Required
+                </strong>
+
+                <p>
+                    This system assists the inspecting officer by
+                    organizing declarations and compliance checks.
+                    Final enforcement decisions remain subject to
+                    verification by the authorized officer.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer class="compliance-footer">
+
+    <span>
+        © 2026 e-PARAKH · Legal Metrology Compliance System
+    </span>
+
+    <span>
+        Government Compliance Workflow
+    </span>
+
+</footer>
+
+
+<script src="../js/compliance.js"></script>
+
+</body>
+</html>

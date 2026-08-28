@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Inspection Result | e-PARAKH</title>
+
+    <link rel="stylesheet" href="../css/result.css">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         GOVERNMENT HEADER
+    ====================================================== -->
+
+    <header class="result-header">
+
+        <div class="brand">
+
+            <a href="../index.html" class="brand-mark">
+                ⚖
+            </a>
+
+            <div class="brand-text">
+                <strong>e-PARAKH</strong>
+                <span>Legal Metrology Compliance Platform</span>
+            </div>
+
+        </div>
+
+        <div class="header-right">
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+                System Operational
+            </div>
+
+            <div class="officer-profile">
+
+                <div class="officer-avatar" id="officerAvatar">
+                    IN
+                </div>
+
+                <div class="officer-details">
+                    <strong id="officerName">Inspector</strong>
+                    <span id="officerId">Officer ID</span>
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="logout-btn"
+                id="logoutBtn">
+                Logout
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="result-main">
+
+        <div class="page-container">
+
+            <!-- PAGE HEADING -->
+
+            <section class="page-heading">
+
+                <div>
+
+                    <span class="page-eyebrow">
+                        INSPECTION COMPLETE
+                    </span>
+
+                    <h1>
+                        Compliance Result
+                    </h1>
+
+                    <p>
+                        The product inspection and compliance assessment
+                        have been completed successfully.
+                    </p>
+
+                </div>
+
+                <div class="inspection-id">
+
+                    <span>
+                        INSPECTION ID
+                    </span>
+
+                    <strong id="inspectionId">
+                        EP-2026-000000
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 RESULT STATUS
+            ================================================== -->
+
+            <section class="result-status-card">
+
+                <div class="result-icon" id="resultIcon">
+                    ✓
+                </div>
+
+                <div class="result-status-content">
+
+                    <span class="result-label">
+                        FINAL ASSESSMENT
+                    </span>
+
+                    <h2 id="resultTitle">
+                        Product Compliant
+                    </h2>
+
+                    <p id="resultDescription">
+                        The declared product information has passed
+                        the applicable compliance checks.
+                    </p>
+
+                </div>
+
+                <div class="compliance-score">
+
+                    <span>
+                        COMPLIANCE SCORE
+                    </span>
+
+                    <strong id="complianceScore">
+                        100%
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SUMMARY
+            ================================================== -->
+
+            <section class="summary-grid">
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        PRODUCT
+                    </span>
+
+                    <strong id="productName">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        MANUFACTURER
+                    </span>
+
+                    <strong id="manufacturer">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        NET QUANTITY
+                    </span>
+
+                    <strong id="netQuantity">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        MRP
+                    </span>
+
+                    <strong id="mrp">
+                        —
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 COMPLIANCE CHECKS
+            ================================================== -->
+
+            <section class="result-card">
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="card-eyebrow">
+                            VERIFICATION
+                        </span>
+
+                        <h2>
+                            Compliance Checks
+                        </h2>
+                    </div>
+
+                    <span
+                        class="check-count"
+                        id="checkCount">
+                        0 / 0 Passed
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="checks-list"
+                    id="checksList">
+
+                    <!-- JS will populate -->
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 VIOLATIONS
+            ================================================== -->
+
+            <section
+                class="result-card"
+                id="violationsSection">
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="card-eyebrow violation-eyebrow">
+                            NON-COMPLIANCE
+                        </span>
+
+                        <h2>
+                            Violations & Observations
+                        </h2>
+                    </div>
+
+                </div>
+
+                <div
+                    class="violations-list"
+                    id="violationsList">
+
+                    <!-- JS will populate -->
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 INSPECTION DETAILS
+            ================================================== -->
+
+            <section class="result-card">
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="card-eyebrow">
+                            RECORD
+                        </span>
+
+                        <h2>
+                            Inspection Details
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                <div class="details-grid">
+
+                    <div class="detail-item">
+                        <span>Inspection Date</span>
+                        <strong id="inspectionDate">
+                            —
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Officer</span>
+                        <strong id="inspectionOfficer">
+                            —
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Packing Date</span>
+                        <strong id="packingDate">
+                            —
+                        </strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Consumer Care</span>
+                        <strong id="consumerCare">
+                            —
+                        </strong>
+                    </div>
+
+                    <div class="detail-item full-width">
+                        <span>Address</span>
+                        <strong id="address">
+                            —
+                        </strong>
+                    </div>
+
+                    <div class="detail-item full-width">
+                        <span>Additional Declarations</span>
+                        <strong id="additionalDeclarations">
+                            —
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 OFFICIAL NOTICE
+            ================================================== -->
+
+            <section class="official-notice">
+
+                <div class="notice-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <strong>
+                        Official Inspection Record
+                    </strong>
+
+                    <p>
+                        This assessment has been recorded by the
+                        e-PARAKH inspection system. The final compliance
+                        status is based on the declarations and checks
+                        performed during this inspection.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ACTIONS
+            ================================================== -->
+
+            <section class="result-actions">
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    id="newInspectionBtn">
+
+                    + New Inspection
+
+                </button>
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    id="dashboardBtn">
+
+                    Dashboard
+
+                </button>
+
+                <button
+                    type="button"
+                    class="primary-btn"
+                    id="reportBtn">
+
+                    <span>↓</span>
+                    Generate Report
+
+                </button>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="result-footer">
+
+        <span>
+            © 2026 e-PARAKH
+        </span>
+
+        <span>
+            Legal Metrology Compliance System
+        </span>
+
+        <span>
+            Government Inspection Platform
+        </span>
+
+    </footer>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="../js/result.js"></script>
+
+</body>
+
+</html>

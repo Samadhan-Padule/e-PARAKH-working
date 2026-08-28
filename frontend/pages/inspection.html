@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Product Inspection | e-PARAKH</title>
+
+    <link rel="stylesheet" href="../css/inspection.css">
+</head>
+
+<body>
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header class="inspection-header">
+
+    <div class="brand">
+
+        <a href="../index.html" class="brand-mark">
+            ⚖
+        </a>
+
+        <div class="brand-text">
+            <strong>e-PARAKH</strong>
+            <span>Legal Metrology Compliance System</span>
+        </div>
+
+    </div>
+
+    <div class="header-right">
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            System Online
+        </div>
+
+        <div class="officer-profile">
+
+            <div class="officer-avatar">
+                <span id="officerInitials">OF</span>
+            </div>
+
+            <div class="officer-details">
+                <strong id="officerName">Inspection Officer</strong>
+                <span id="officerId">Officer ID</span>
+            </div>
+
+        </div>
+
+        <button
+            type="button"
+            class="logout-btn"
+            id="logoutBtn">
+            Logout
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="inspection-main">
+
+    <div class="page-container">
+
+        <!-- PAGE HEADING -->
+
+        <section class="page-heading">
+
+            <div>
+
+                <span class="page-eyebrow">
+                    PRODUCT INSPECTION
+                </span>
+
+                <h1>
+                    Product Declaration Review
+                </h1>
+
+                <p>
+                    Review the product image and verify mandatory
+                    declarations under the Legal Metrology
+                    (Packaged Commodities) Rules, 2011.
+                </p>
+
+            </div>
+
+            <div class="inspection-id">
+
+                <span>
+                    INSPECTION ID
+                </span>
+
+                <strong id="inspectionId">
+                    EP-2026-000000
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PROGRESS
+        ====================================================== -->
+
+        <section class="progress-section">
+
+            <div class="progress-step completed">
+
+                <div class="step-number">
+                    1
+                </div>
+
+                <div>
+                    <strong>Scan Product</strong>
+                    <span>Image captured</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line active"></div>
+
+            <div class="progress-step active">
+
+                <div class="step-number">
+                    2
+                </div>
+
+                <div>
+                    <strong>Inspect</strong>
+                    <span>Verify declarations</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line"></div>
+
+            <div class="progress-step">
+
+                <div class="step-number">
+                    3
+                </div>
+
+                <div>
+                    <strong>Compliance</strong>
+                    <span>Rule verification</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line"></div>
+
+            <div class="progress-step">
+
+                <div class="step-number">
+                    4
+                </div>
+
+                <div>
+                    <strong>Report</strong>
+                    <span>Generate report</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             INSPECTION GRID
+        ====================================================== -->
+
+        <form id="inspectionForm">
+
+            <section class="inspection-grid">
+
+                <!-- =================================================
+                     PRODUCT IMAGE CARD
+                ================================================== -->
+
+                <article class="product-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <span class="card-eyebrow">
+                                EVIDENCE
+                            </span>
+
+                            <h2>
+                                Product Image
+                            </h2>
+                        </div>
+
+                        <span class="image-status">
+                            IMAGE READY
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-image-container">
+
+                        <img
+                            id="productImage"
+                            src=""
+                            alt="Scanned product image"
+                        >
+
+                        <div
+                            class="image-placeholder"
+                            id="imagePlaceholder">
+
+                            <div class="placeholder-icon">
+                                📦
+                            </div>
+
+                            <strong>
+                                No Product Image
+                            </strong>
+
+                            <span>
+                                Scan or upload a product image
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="image-actions">
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            id="retakeBtn">
+
+                            ↻ Retake / Scan Again
+
+                        </button>
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            id="zoomBtn">
+
+                            ⛶ View Full Image
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="evidence-note">
+
+                        <span>🔒</span>
+
+                        <p>
+                            Product images are treated as inspection
+                            evidence and should be retained with the
+                            inspection record.
+                        </p>
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     DECLARATION CARD
+                ================================================== -->
+
+                <article class="declaration-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-eyebrow">
+                                DECLARATION DETAILS
+                            </span>
+
+                            <h2>
+                                Product Information
+                            </h2>
+
+                        </div>
+
+                        <div class="extraction-status">
+
+                            <span></span>
+
+                            OCR Ready
+
+                        </div>
+
+                    </div>
+
+
+                    <p class="section-description">
+
+                        Enter or verify the declarations visible
+                        on the packaged commodity label.
+
+                    </p>
+
+
+                    <!-- MANUFACTURER -->
+
+                    <div class="form-group">
+
+                        <label for="manufacturer">
+                            Manufacturer / Packer / Importer
+                        </label>
+
+                        <div class="input-status-wrapper">
+
+                            <input
+                                type="text"
+                                id="manufacturer"
+                                name="manufacturer"
+                                placeholder="Enter manufacturer or packer name"
+                            >
+
+                            <span class="field-status">
+                                Verify
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PRODUCT NAME -->
+
+                    <div class="form-group">
+
+                        <label for="productName">
+                            Name / Description of Commodity
+                        </label>
+
+                        <input
+                            type="text"
+                            id="productName"
+                            name="productName"
+                            placeholder="Enter product name"
+                        >
+
+                    </div>
+
+
+                    <!-- QUANTITY + MRP -->
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="netQuantity">
+                                Net Quantity
+                            </label>
+
+                            <input
+                                type="text"
+                                id="netQuantity"
+                                name="netQuantity"
+                                placeholder="e.g. 500 g"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="mrp">
+                                MRP
+                            </label>
+
+                            <input
+                                type="text"
+                                id="mrp"
+                                name="mrp"
+                                placeholder="e.g. ₹99"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PACKING DATE + CONSUMER CARE -->
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="packingDate">
+                                Month / Year of Packing
+                            </label>
+
+                            <input
+                                type="text"
+                                id="packingDate"
+                                name="packingDate"
+                                placeholder="e.g. August 2026"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="consumerCare">
+                                Consumer Care Details
+                            </label>
+
+                            <input
+                                type="text"
+                                id="consumerCare"
+                                name="consumerCare"
+                                placeholder="Phone / Email"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ADDRESS -->
+
+                    <div class="form-group">
+
+                        <label for="address">
+                            Complete Address
+                        </label>
+
+                        <textarea
+                            id="address"
+                            name="address"
+                            placeholder="Enter declared address..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- ADDITIONAL DECLARATIONS -->
+
+                    <div class="form-group">
+
+                        <label for="additionalDeclarations">
+                            Additional Declarations / Remarks
+                        </label>
+
+                        <textarea
+                            id="additionalDeclarations"
+                            name="additionalDeclarations"
+                            placeholder="Enter any additional declaration or observation..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <!-- VERIFICATION -->
+
+                    <div class="verification-box">
+
+                        <div class="verification-icon">
+                            !
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Officer Verification Required
+                            </strong>
+
+                            <span>
+                                Please verify all extracted information
+                                against the physical product label before
+                                continuing to compliance assessment.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="form-actions">
+
+                        <button
+                            type="button"
+                            class="secondary-btn"
+                            id="saveDraftBtn">
+
+                            Save Draft
+
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="primary-btn"
+                            id="continueBtn">
+
+                            Continue to Compliance
+
+                            <span>→</span>
+
+                        </button>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+        </form>
+
+
+        <!-- =====================================================
+             CHECKLIST
+        ====================================================== -->
+
+        <section class="checklist-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        PRELIMINARY CHECK
+                    </span>
+
+                    <h2>
+                        Declaration Checklist
+                    </h2>
+
+                </div>
+
+                <span class="checklist-info">
+                    Manual verification
+                </span>
+
+            </div>
+
+
+            <div class="checklist-grid">
+
+                <div class="check-item">
+
+                    <div class="check-icon pending">
+                        ?
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Name of Commodity
+                        </strong>
+
+                        <span>
+                            Product name declaration
+                        </span>
+
+                    </div>
+
+                    <span class="check-status">
+                        Pending
+                    </span>
+
+                </div>
+
+
+                <div class="check-item">
+
+                    <div class="check-icon pending">
+                        ?
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Net Quantity
+                        </strong>
+
+                        <span>
+                            Standard quantity declaration
+                        </span>
+
+                    </div>
+
+                    <span class="check-status">
+                        Pending
+                    </span>
+
+                </div>
+
+
+                <div class="check-item">
+
+                    <div class="check-icon pending">
+                        ?
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            MRP Declaration
+                        </strong>
+
+                        <span>
+                            Maximum retail price
+                        </span>
+
+                    </div>
+
+                    <span class="check-status">
+                        Pending
+                    </span>
+
+                </div>
+
+
+                <div class="check-item">
+
+                    <div class="check-icon pending">
+                        ?
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Manufacturer Details
+                        </strong>
+
+                        <span>
+                            Name and complete address
+                        </span>
+
+                    </div>
+
+                    <span class="check-status">
+                        Pending
+                    </span>
+
+                </div>
+
+
+                <div class="check-item">
+
+                    <div class="check-icon pending">
+                        ?
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Packing Details
+                        </strong>
+
+                        <span>
+                            Month and year declaration
+                        </span>
+
+                    </div>
+
+                    <span class="check-status">
+                        Pending
+                    </span>
+
+                </div>
+
+
+                <div class="check-item">
+
+                    <div class="check-icon pending">
+                        ?
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Consumer Care
+                        </strong>
+
+                        <span>
+                            Contact information
+                        </span>
+
+                    </div>
+
+                    <span class="check-status">
+                        Pending
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             COMPLIANCE NOTICE
+        ====================================================== -->
+
+        <section class="compliance-notice">
+
+            <div class="notice-icon">
+                ⚖
+            </div>
+
+            <div>
+
+                <strong>
+                    Legal Metrology Verification
+                </strong>
+
+                <p>
+                    The information entered in this inspection
+                    workspace will be used for compliance assessment
+                    against applicable provisions of the Legal
+                    Metrology (Packaged Commodities) Rules, 2011.
+                    Final compliance status should be based on
+                    officer verification and applicable rules.
+                </p>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<!-- =========================================================
+     IMAGE MODAL
+========================================================= -->
+
+<div
+    class="image-modal"
+    id="imageModal"
+    hidden
+>
+
+    <button
+        type="button"
+        class="modal-close"
+        id="closeModal"
+        aria-label="Close image">
+        ×
+    </button>
+
+    <img
+        id="modalImage"
+        src=""
+        alt="Product image preview"
+    >
+
+</div>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer class="inspection-footer">
+
+    <span>
+        © 2026 e-PARAKH
+    </span>
+
+    <span>
+        Legal Metrology Compliance Platform
+    </span>
+
+    <span>
+        Government Compliance Workflow
+    </span>
+
+</footer>
+
+
+<script src="../js/inspection.js"></script>
+
+</body>
+</html>

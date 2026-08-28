@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Officer Login | e-PARAKH</title>
+
+    <meta
+        name="description"
+        content="Secure Officer Login for e-PARAKH Legal Metrology Compliance System."
+    >
+
+    <link rel="stylesheet" href="../css/auth.css">
+
+    <style>
+
+        /* =========================================================
+           RESET
+        ========================================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+
+            font-family:
+                Inter,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            color: #102a43;
+
+            background: #f4f8fc;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+
+        /* =========================================================
+           PAGE
+        ========================================================= */
+
+        .login-page {
+            min-height: 100vh;
+
+            display: flex;
+            flex-direction: column;
+
+            background:
+                radial-gradient(
+                    circle at 10% 20%,
+                    rgba(24, 103, 166, 0.07),
+                    transparent 25%
+                ),
+                radial-gradient(
+                    circle at 90% 70%,
+                    rgba(24, 103, 166, 0.06),
+                    transparent 30%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f8fbfe 0%,
+                    #eef5fb 100%
+                );
+        }
+
+
+        /* =========================================================
+           HEADER
+        ========================================================= */
+
+        .top-header {
+            width: 100%;
+
+            min-height: 86px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 15px 6%;
+
+            background: #ffffff;
+
+            border-bottom:
+                1px solid #dfe7ef;
+
+            box-shadow:
+                0 4px 20px rgba(20, 50, 80, 0.04);
+        }
+
+
+        /* BRAND */
+
+        .brand {
+            display: flex;
+            align-items: center;
+
+            gap: 13px;
+        }
+
+
+        .brand-logo {
+            width: 52px;
+            height: 52px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 11px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #0a3158,
+                    #145d93
+                );
+
+            color: #f3c85b;
+
+            font-size: 27px;
+
+            box-shadow:
+                0 8px 22px rgba(10, 49, 88, 0.20);
+        }
+
+
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .brand-info strong {
+            color: #0c2d50;
+
+            font-size: 19px;
+            font-weight: 900;
+
+            letter-spacing: -0.3px;
+        }
+
+
+        .brand-info span {
+            margin-top: 2px;
+
+            color: #718096;
+
+            font-size: 10px;
+        }
+
+
+        /* GOVERNMENT BADGE */
+
+        .government-badge {
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 10px 14px;
+
+            border:
+                1px solid #d8e4ef;
+
+            border-radius: 7px;
+
+            background: #f7fafc;
+
+            color: #164d79;
+
+            font-size: 9px;
+            font-weight: 800;
+
+            letter-spacing: 0.9px;
+        }
+
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #1a9b65;
+
+            box-shadow:
+                0 0 0 4px rgba(26, 155, 101, 0.10);
+        }
+
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .main-content {
+            flex: 1;
+
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 55px 20px;
+        }
+
+
+        /* =========================================================
+           LOGIN CARD
+        ========================================================= */
+
+        .login-card {
+            width: 100%;
+            max-width: 540px;
+
+            background: #ffffff;
+
+            border:
+                1px solid #dce5ee;
+
+            border-top:
+                4px solid #1765a0;
+
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 25px 70px rgba(15, 39, 65, 0.13);
+
+            animation:
+                cardEnter 0.5s ease both;
+        }
+
+
+        @keyframes cardEnter {
+
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+
+        /* =========================================================
+           CARD HEADER
+        ========================================================= */
+
+        .card-header {
+            padding: 38px 44px 26px;
+
+            text-align: center;
+        }
+
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+
+            display: grid;
+            place-items: center;
+
+            margin: 0 auto 18px;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #0b355d,
+                    #155e94
+                );
+
+            color: #f4ca5d;
+
+            font-size: 30px;
+
+            box-shadow:
+                0 10px 28px rgba(12, 54, 93, 0.20);
+        }
+
+
+        .card-label {
+            display: inline-block;
+
+            padding: 6px 10px;
+
+            margin-bottom: 12px;
+
+            border:
+                1px solid #d7e9f7;
+
+            border-radius: 4px;
+
+            background: #edf6fd;
+
+            color: #1764a0;
+
+            font-size: 9px;
+            font-weight: 900;
+
+            letter-spacing: 1.2px;
+        }
+
+
+        .card-header h1 {
+            color: #0b2542;
+
+            font-size: 29px;
+            line-height: 1.2;
+
+            letter-spacing: -0.7px;
+        }
+
+
+        .card-header p {
+            max-width: 390px;
+
+            margin: 10px auto 0;
+
+            color: #748398;
+
+            font-size: 11px;
+
+            line-height: 1.65;
+        }
+
+
+        /* =========================================================
+           FORM AREA
+        ========================================================= */
+
+        .form-area {
+            padding: 0 44px 38px;
+        }
+
+
+        .form-group {
+            width: 100%;
+
+            margin-bottom: 19px;
+        }
+
+
+        .form-label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #344054;
+
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+
+        .input-box {
+            position: relative;
+
+            width: 100%;
+        }
+
+
+        .input-icon {
+            position: absolute;
+
+            left: 14px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 20px;
+
+            color: #7b8b9d;
+
+            font-size: 13px;
+
+            pointer-events: none;
+        }
+
+
+        .form-input {
+            width: 100%;
+            height: 52px;
+
+            padding:
+                0 45px 0 43px;
+
+            border:
+                1px solid #d3dde7;
+
+            border-radius: 8px;
+
+            outline: none;
+
+            background: #ffffff;
+
+            color: #162f4d;
+
+            font-size: 12px;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+
+        .form-input::placeholder {
+            color: #a2adba;
+        }
+
+
+        .form-input:hover {
+            border-color: #b8c7d6;
+        }
+
+
+        .form-input:focus {
+            border-color: #1765a0;
+
+            box-shadow:
+                0 0 0 3px rgba(23, 101, 160, 0.10);
+        }
+
+
+        /* PASSWORD TOGGLE */
+
+        .password-toggle {
+            position: absolute;
+
+            right: 12px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            padding: 3px;
+
+            border: none;
+
+            background: transparent;
+
+            color: #1765a0;
+
+            font-size: 10px;
+            font-weight: 800;
+
+            cursor: pointer;
+        }
+
+
+        .password-toggle:hover {
+            color: #0b477a;
+        }
+
+
+        /* =========================================================
+           OPTIONS
+        ========================================================= */
+
+        .form-options {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            margin-top: 2px;
+            margin-bottom: 20px;
+        }
+
+
+        .remember {
+            display: flex;
+            align-items: center;
+
+            gap: 7px;
+
+            color: #667085;
+
+            font-size: 10px;
+
+            cursor: pointer;
+        }
+
+
+        .remember input {
+            width: 14px;
+            height: 14px;
+
+            accent-color: #1765a0;
+
+            cursor: pointer;
+        }
+
+
+        .forgot {
+            color: #1765a0;
+
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+
+        .forgot:hover {
+            text-decoration: underline;
+        }
+
+
+        /* =========================================================
+           MESSAGE
+        ========================================================= */
+
+        .message {
+            display: none;
+
+            padding: 11px 13px;
+
+            margin-bottom: 15px;
+
+            border-radius: 8px;
+
+            font-size: 10px;
+
+            line-height: 1.5;
+        }
+
+
+        .message.error {
+            display: block;
+
+            color: #b42318;
+
+            background: #fff1f0;
+
+            border:
+                1px solid #ffd4d0;
+        }
+
+
+        .message.success {
+            display: block;
+
+            color: #1765a0;
+
+            background: #edf7ff;
+
+            border:
+                1px solid #d5eafa;
+        }
+
+
+        /* =========================================================
+           SIGN IN BUTTON
+        ========================================================= */
+
+        .sign-in {
+            width: 100%;
+            height: 52px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 18px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #145f9e,
+                    #0b477a
+                );
+
+            color: #ffffff;
+
+            font-size: 12px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 9px 24px rgba(15, 79, 132, 0.22);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+
+        .sign-in:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 14px 30px rgba(15, 79, 132, 0.28);
+        }
+
+
+        .sign-in:active {
+            transform: translateY(0);
+        }
+
+
+        .sign-in-arrow {
+            font-size: 17px;
+        }
+
+
+        /* =========================================================
+           REGISTER
+        ========================================================= */
+
+        .register-section {
+            margin-top: 24px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid #edf0f3;
+
+            text-align: center;
+        }
+
+
+        .register-section p {
+            color: #7b8795;
+
+            font-size: 10px;
+        }
+
+
+        .register-section a {
+            display: inline-block;
+
+            margin-top: 6px;
+
+            color: #1765a0;
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+
+        .register-section a:hover {
+            text-decoration: underline;
+        }
+
+
+        /* =========================================================
+           SECURITY NOTICE
+        ========================================================= */
+
+        .security-box {
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            margin-top: 22px;
+
+            padding: 12px 13px;
+
+            border:
+                1px solid #dce9e1;
+
+            border-radius: 8px;
+
+            background: #f5faf7;
+        }
+
+
+        .security-icon {
+            width: 34px;
+            height: 34px;
+
+            flex: 0 0 34px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 7px;
+
+            background: #e5f3eb;
+
+            font-size: 15px;
+        }
+
+
+        .security-text strong {
+            display: block;
+
+            color: #16734e;
+
+            font-size: 9px;
+        }
+
+
+        .security-text span {
+            display: block;
+
+            margin-top: 3px;
+
+            color: #71827a;
+
+            font-size: 8px;
+
+            line-height: 1.4;
+        }
+
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        .footer {
+            min-height: 48px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 13px;
+
+            padding: 10px 20px;
+
+            background: #08213e;
+
+            color: #9eafc2;
+
+            font-size: 9px;
+
+            text-align: center;
+        }
+
+
+        .footer-divider {
+            width: 3px;
+            height: 3px;
+
+            border-radius: 50%;
+
+            background: #d1a33f;
+        }
+
+
+        /* =========================================================
+           TABLET
+        ========================================================= */
+
+        @media (max-width: 700px) {
+
+            .top-header {
+                padding: 13px 20px;
+            }
+
+            .brand-logo {
+                width: 46px;
+                height: 46px;
+
+                font-size: 23px;
+            }
+
+            .brand-info strong {
+                font-size: 16px;
+            }
+
+            .brand-info span {
+                font-size: 8px;
+            }
+
+            .government-badge {
+                display: none;
+            }
+
+            .main-content {
+                padding: 35px 15px;
+            }
+
+            .login-card {
+                max-width: 520px;
+            }
+
+            .card-header {
+                padding:
+                    32px 25px 23px;
+            }
+
+            .form-area {
+                padding:
+                    0 25px 30px;
+            }
+
+        }
+
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media (max-width: 480px) {
+
+            .top-header {
+                min-height: 72px;
+
+                padding:
+                    11px 15px;
+            }
+
+            .brand {
+                gap: 9px;
+            }
+
+            .brand-logo {
+                width: 42px;
+                height: 42px;
+
+                border-radius: 9px;
+
+                font-size: 21px;
+            }
+
+            .brand-info strong {
+                font-size: 15px;
+            }
+
+            .brand-info span {
+                font-size: 7px;
+            }
+
+            .main-content {
+                padding:
+                    25px 10px;
+            }
+
+            .login-card {
+                border-radius: 14px;
+            }
+
+            .card-header {
+                padding:
+                    28px 20px 20px;
+            }
+
+            .card-icon {
+                width: 56px;
+                height: 56px;
+
+                font-size: 26px;
+            }
+
+            .card-header h1 {
+                font-size: 24px;
+            }
+
+            .card-header p {
+                font-size: 10px;
+            }
+
+            .form-area {
+                padding:
+                    0 20px 27px;
+            }
+
+            .form-options {
+                align-items: flex-start;
+
+                gap: 10px;
+            }
+
+            .remember {
+                font-size: 9px;
+            }
+
+            .forgot {
+                font-size: 9px;
+            }
+
+            .footer {
+                flex-direction: column;
+
+                gap: 4px;
+
+                font-size: 8px;
+            }
+
+            .footer-divider {
+                display: none;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<div class="login-page">
+
+
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+
+    <header class="top-header">
+
+        <a href="../index.html" class="brand">
+
+            <div class="brand-logo">
+                ⚖
+            </div>
+
+            <div class="brand-info">
+
+                <strong>
+                    e-PARAKH
+                </strong>
+
+                <span>
+                    Legal Metrology Compliance System
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <div class="government-badge">
+
+            <span class="status-dot"></span>
+
+            GOVERNMENT ENFORCEMENT PORTAL
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================================================
+         MAIN
+    ========================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =====================================================
+             LOGIN CARD
+        ====================================================== -->
+
+        <section class="login-card">
+
+
+            <!-- CARD HEADER -->
+
+            <div class="card-header">
+
+                <div class="card-icon">
+                    ⚖
+                </div>
+
+
+                <span class="card-label">
+                    AUTHORIZED OFFICER ACCESS
+                </span>
+
+
+                <h1>
+                    Officer Login
+                </h1>
+
+
+                <p>
+                    Secure access to the e-PARAKH Legal Metrology
+                    Compliance and Enforcement System.
+                </p>
+
+            </div>
+
+
+
+            <!-- FORM AREA -->
+
+            <div class="form-area">
+
+
+                <form id="loginForm">
+
+
+                    <!-- OFFICER ID -->
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="officerId"
+                        >
+                            Officer / Employee ID
+                        </label>
+
+
+                        <div class="input-box">
+
+                            <span class="input-icon">
+                                #
+                            </span>
+
+
+                            <input
+                                class="form-input"
+                                type="text"
+                                id="officerId"
+                                name="officerId"
+                                placeholder="Enter official ID"
+                                autocomplete="username"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- PASSWORD -->
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="password"
+                        >
+                            Password
+                        </label>
+
+
+                        <div class="input-box">
+
+                            <span class="input-icon">
+                                🔒
+                            </span>
+
+
+                            <input
+                                class="form-input"
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="passwordToggle"
+                            >
+                                Show
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- OPTIONS -->
+
+                    <div class="form-options">
+
+                        <label class="remember">
+
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                            >
+
+                            <span>
+                                Remember this device
+                            </span>
+
+                        </label>
+
+
+                        <a
+                            href="#"
+                            class="forgot"
+                            id="forgotPassword"
+                        >
+                            Forgot password?
+                        </a>
+
+                    </div>
+
+
+
+                    <!-- MESSAGE -->
+
+                    <div
+                        id="loginMessage"
+                        class="message"
+                        aria-live="polite"
+                    ></div>
+
+
+
+                    <!-- BUTTON -->
+
+                    <button
+                        type="submit"
+                        class="sign-in"
+                    >
+
+                        <span>
+                            Sign In
+                        </span>
+
+                        <span class="sign-in-arrow">
+                            →
+                        </span>
+
+                    </button>
+
+                </form>
+
+
+
+                <!-- REGISTER -->
+
+                <div class="register-section">
+
+                    <p>
+                        New authorized officer?
+                    </p>
+
+
+                    <a href="register.html">
+                        Request Officer Registration →
+                    </a>
+
+                </div>
+
+
+
+                <!-- SECURITY -->
+
+                <div class="security-box">
+
+                    <div class="security-icon">
+                        🔐
+                    </div>
+
+
+                    <div class="security-text">
+
+                        <strong>
+                            Secure Government Portal
+                        </strong>
+
+                        <span>
+                            Authorized personnel only. All access
+                            activity may be monitored and verified.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =========================================================
+         FOOTER
+    ========================================================== -->
+
+    <footer class="footer">
+
+        <span>
+            © 2026 e-PARAKH
+        </span>
+
+        <i class="footer-divider"></i>
+
+        <span>
+            Legal Metrology Compliance System
+        </span>
+
+        <i class="footer-divider"></i>
+
+        <span>
+            Authorized Government Use Only
+        </span>
+
+    </footer>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script>
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const password =
+        document.getElementById("password");
+
+    const passwordToggle =
+        document.getElementById("passwordToggle");
+
+    const loginMessage =
+        document.getElementById("loginMessage");
+
+
+    /* =====================================================
+       SHOW / HIDE PASSWORD
+    ====================================================== */
+
+    passwordToggle.addEventListener(
+        "click",
+        function () {
+
+            const hidden =
+                password.type === "password";
+
+
+            password.type =
+                hidden
+                    ? "text"
+                    : "password";
+
+
+            passwordToggle.textContent =
+                hidden
+                    ? "Hide"
+                    : "Show";
+
+        }
+    );
+
+
+    /* =====================================================
+       LOGIN
+    ====================================================== */
+
+    loginForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const officerId =
+                document
+                    .getElementById("officerId")
+                    .value
+                    .trim();
+
+
+            const passwordValue =
+                password.value;
+
+
+            loginMessage.className =
+                "message";
+
+
+            loginMessage.textContent =
+                "";
+
+
+            if (
+                !officerId ||
+                !passwordValue
+            ) {
+
+                loginMessage.textContent =
+                    "Please enter your Officer ID and password.";
+
+                loginMessage.className =
+                    "message error";
+
+                return;
+
+            }
+
+
+            loginMessage.textContent = "Signing in...";
+            loginMessage.className = "message";
+
+            try {
+                const response = await fetch("http://localhost:5000/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ identifier: officerId, password: passwordValue })
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    loginMessage.textContent = result.message || "Login failed.";
+                    loginMessage.className = "message error";
+                    return;
+                }
+
+                if (result.success !== true) {
+                    loginMessage.textContent = result.message || "Login failed.";
+                    loginMessage.className = "message error";
+                    return;
+                }
+
+                if (!result.token) {
+                    loginMessage.textContent = "Login succeeded, but authentication token was not received.";
+                    loginMessage.className = "message error";
+                    return;
+                }
+
+                localStorage.setItem("eParakhToken", result.token);
+                localStorage.setItem("officerName", result.inspector.fullName);
+                localStorage.setItem("officerId", result.inspector.employeeId);
+
+                if (!localStorage.getItem("eParakhToken")) {
+                    throw new Error("JWT token was not saved to localStorage.");
+                }
+
+                loginMessage.textContent = "Login successful.";
+                loginMessage.className = "message success";
+                window.location.href = "../scan.html";
+            } catch (error) {
+                loginMessage.textContent =
+                    error.message === "JWT token was not saved to localStorage."
+                        ? error.message
+                        : "Cannot connect to the backend.";
+                loginMessage.className = "message error";
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       FORGOT PASSWORD
+    ====================================================== */
+
+    document
+        .getElementById("forgotPassword")
+        .addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+
+                loginMessage.textContent =
+                    "Password recovery will be available after backend authentication is connected.";
+
+                loginMessage.className =
+                    "message success";
+
+            }
+        );
+
+</script>
+
+
+</body>
+</html>

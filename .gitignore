@@ -1,0 +1,34 @@
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and runtime output
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Uploaded files and generated reports
+uploads/*
+reports/*
+!uploads/.gitkeep
+!reports/.gitkeep
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+# Python virtual environment
+ai-service/venv/
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Generated AI reports
+ai-service/reports/generated/

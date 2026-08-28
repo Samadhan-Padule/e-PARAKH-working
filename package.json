@@ -1,0 +1,25 @@
+{
+	"name": "legal-metrology-compliance",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Foundation for the Legal Metrology Compliance System",
+	"main": "backend/server.js",
+	"scripts": {
+		"start": "node backend/server.js",
+		"dev": "nodemon backend/server.js"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"dependencies": {
+		"bcryptjs": "^2.4.3",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.7",
+		"express": "^4.21.2",
+		"jsonwebtoken": "^9.0.2",
+		"mongoose": "^8.9.5"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.9"
+	}
+}
