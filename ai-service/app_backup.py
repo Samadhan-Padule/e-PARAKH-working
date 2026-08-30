@@ -23,12 +23,9 @@ ocr = PaddleOCR(
     use_doc_orientation_classify=False,
     use_doc_unwarping=False,
     use_textline_orientation=False,
-    text_det_limit_side_len=960,
-    text_det_limit_type="max",
-    text_det_thresh=0.3,
-    text_det_box_thresh=0.5,
-    text_rec_score_thresh=0.5
+    enable_mkldnn=False
 )
+
 
 # ============================================================
 # OCR HELPERS

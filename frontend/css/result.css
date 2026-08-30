@@ -1,6 +1,7 @@
 /* =========================================================
-   e-PARAKH — FINAL INSPECTION RESULT
+   e-PARAKH — INSPECTION RESULT
    Professional Government Compliance UI
+   SCREEN + A4 PRINT/PDF OPTIMIZED
 ========================================================= */
 
 * {
@@ -23,10 +24,8 @@ body {
 
     background: #f4f7fb;
     color: #102a43;
-
     line-height: 1.5;
 }
-
 
 /* =========================================================
    HEADER
@@ -42,7 +41,6 @@ body {
     padding: 0 48px;
 
     background: #08294b;
-
     border-bottom: 3px solid #e5b93f;
 
     color: #ffffff;
@@ -51,7 +49,6 @@ body {
 .brand {
     display: flex;
     align-items: center;
-
     gap: 14px;
 }
 
@@ -65,11 +62,9 @@ body {
     border-radius: 10px;
 
     background: rgba(255,255,255,.08);
-
     border: 1px solid rgba(255,255,255,.18);
 
     color: #f4c542;
-
     font-size: 24px;
 
     text-decoration: none;
@@ -82,9 +77,7 @@ body {
 
 .brand-text strong {
     color: #ffffff;
-
     font-size: 18px;
-
     font-weight: 800;
 }
 
@@ -92,10 +85,8 @@ body {
     margin-top: 2px;
 
     color: #b9cce0;
-
     font-size: 11px;
 }
-
 
 /* =========================================================
    HEADER RIGHT
@@ -104,14 +95,12 @@ body {
 .header-right {
     display: flex;
     align-items: center;
-
     gap: 22px;
 }
 
 .system-status {
     display: flex;
     align-items: center;
-
     gap: 7px;
 
     padding-right: 20px;
@@ -119,7 +108,6 @@ body {
     border-right: 1px solid rgba(255,255,255,.15);
 
     color: #d8e6f3;
-
     font-size: 11px;
 }
 
@@ -138,7 +126,6 @@ body {
 .officer-profile {
     display: flex;
     align-items: center;
-
     gap: 10px;
 }
 
@@ -152,11 +139,9 @@ body {
     border-radius: 50%;
 
     background: #edf5fc;
-
     color: #0a3c67;
 
     font-size: 13px;
-
     font-weight: 800;
 }
 
@@ -167,13 +152,11 @@ body {
 
 .officer-details strong {
     color: #ffffff;
-
     font-size: 11px;
 }
 
 .officer-details span {
     color: #a9bfd4;
-
     font-size: 9px;
 }
 
@@ -183,17 +166,13 @@ body {
     padding: 0 17px;
 
     border: 1px solid rgba(255,255,255,.22);
-
     border-radius: 8px;
 
     background: transparent;
-
     color: #ffffff;
 
     font-family: inherit;
-
     font-size: 10px;
-
     font-weight: 700;
 
     cursor: pointer;
@@ -204,7 +183,6 @@ body {
 .logout-btn:hover {
     background: rgba(255,255,255,.1);
 }
-
 
 /* =========================================================
    MAIN
@@ -226,10 +204,8 @@ body {
 
 .page-container {
     width: min(1180px, 100%);
-
     margin: auto;
 }
-
 
 /* =========================================================
    PAGE HEADING
@@ -241,7 +217,6 @@ body {
     justify-content: space-between;
 
     gap: 30px;
-
     margin-bottom: 32px;
 }
 
@@ -253,9 +228,7 @@ body {
     color: #1769aa;
 
     font-size: 10px;
-
     font-weight: 800;
-
     letter-spacing: 1.5px;
 }
 
@@ -265,9 +238,7 @@ body {
     color: #092c4c;
 
     font-size: 34px;
-
     line-height: 1.15;
-
     letter-spacing: -.7px;
 }
 
@@ -277,7 +248,6 @@ body {
     color: #718096;
 
     font-size: 13px;
-
     line-height: 1.7;
 }
 
@@ -289,7 +259,6 @@ body {
     background: #ffffff;
 
     border: 1px solid #e1e8f0;
-
     border-radius: 10px;
 
     text-align: right;
@@ -304,9 +273,7 @@ body {
     color: #8795a5;
 
     font-size: 9px;
-
     font-weight: 700;
-
     letter-spacing: 1px;
 }
 
@@ -320,7 +287,6 @@ body {
     font-size: 13px;
 }
 
-
 /* =========================================================
    RESULT STATUS
 ========================================================= */
@@ -332,13 +298,11 @@ body {
     gap: 20px;
 
     margin-bottom: 20px;
-
     padding: 25px;
 
     background: #ffffff;
 
     border: 1px solid #d9e8e0;
-
     border-radius: 14px;
 
     box-shadow:
@@ -357,11 +321,9 @@ body {
     border-radius: 50%;
 
     background: #e9f8f1;
-
     color: #16845b;
 
     font-size: 30px;
-
     font-weight: 800;
 }
 
@@ -377,15 +339,12 @@ body {
     color: #17845c;
 
     font-size: 9px;
-
     font-weight: 800;
-
     letter-spacing: 1.2px;
 }
 
 .result-status-content h2 {
     color: #123653;
-
     font-size: 24px;
 }
 
@@ -393,7 +352,6 @@ body {
     margin-top: 4px;
 
     color: #718096;
-
     font-size: 11px;
 }
 
@@ -413,9 +371,7 @@ body {
     color: #8795a5;
 
     font-size: 8px;
-
     font-weight: 800;
-
     letter-spacing: 1px;
 }
 
@@ -428,7 +384,6 @@ body {
 
     font-size: 27px;
 }
-
 
 /* =========================================================
    SUMMARY
@@ -453,7 +408,6 @@ body {
     background: #ffffff;
 
     border: 1px solid #e0e7ef;
-
     border-radius: 11px;
 
     box-shadow:
@@ -468,9 +422,7 @@ body {
     color: #8795a5;
 
     font-size: 8px;
-
     font-weight: 800;
-
     letter-spacing: 1px;
 }
 
@@ -484,7 +436,6 @@ body {
     word-break: break-word;
 }
 
-
 /* =========================================================
    RESULT CARD
 ========================================================= */
@@ -497,7 +448,6 @@ body {
     background: #ffffff;
 
     border: 1px solid #e0e7ef;
-
     border-radius: 14px;
 
     box-shadow:
@@ -522,15 +472,12 @@ body {
     color: #1769aa;
 
     font-size: 9px;
-
     font-weight: 800;
-
     letter-spacing: 1.2px;
 }
 
 .section-heading h2 {
     color: #123653;
-
     font-size: 19px;
 }
 
@@ -540,14 +487,11 @@ body {
     border-radius: 20px;
 
     background: #edf8f3;
-
     color: #17845c;
 
     font-size: 8px;
-
     font-weight: 800;
 }
-
 
 /* =========================================================
    CHECKS
@@ -573,7 +517,6 @@ body {
     padding: 12px 14px;
 
     border: 1px solid #e4eaf0;
-
     border-radius: 9px;
 
     background: #fbfcfd;
@@ -591,19 +534,16 @@ body {
     border-radius: 50%;
 
     font-size: 12px;
-
     font-weight: 800;
 }
 
 .check-icon.pass {
     background: #e8f8f1;
-
     color: #16845b;
 }
 
 .check-icon.fail {
     background: #fdecec;
-
     color: #c53d3d;
 }
 
@@ -631,7 +571,6 @@ body {
 
 .check-status {
     font-size: 8px;
-
     font-weight: 800;
 }
 
@@ -642,7 +581,6 @@ body {
 .check-status.fail {
     color: #c53d3d;
 }
-
 
 /* =========================================================
    VIOLATIONS
@@ -663,7 +601,6 @@ body {
     margin-bottom: 10px;
 
     border: 1px solid #f0d5d5;
-
     border-radius: 9px;
 
     background: #fff8f8;
@@ -685,12 +622,14 @@ body {
     border-radius: 50%;
 
     background: #fde8e8;
-
     color: #c53d3d;
 
     font-size: 12px;
-
     font-weight: 800;
+}
+
+.violation-content {
+    flex: 1;
 }
 
 .violation-content strong {
@@ -707,7 +646,6 @@ body {
     color: #8c6262;
 
     font-size: 9px;
-
     line-height: 1.5;
 }
 
@@ -717,16 +655,13 @@ body {
     border-radius: 9px;
 
     background: #f2faf6;
-
     color: #237653;
 
     text-align: center;
 
     font-size: 10px;
-
     font-weight: 700;
 }
-
 
 /* =========================================================
    DETAILS
@@ -755,9 +690,7 @@ body {
     color: #8795a5;
 
     font-size: 8px;
-
     font-weight: 700;
-
     letter-spacing: .5px;
 }
 
@@ -775,7 +708,6 @@ body {
     grid-column: 1 / -1;
 }
 
-
 /* =========================================================
    OFFICIAL NOTICE
 ========================================================= */
@@ -787,11 +719,9 @@ body {
     gap: 13px;
 
     margin-top: 25px;
-
     padding: 18px;
 
     border: 1px solid #d5e5f2;
-
     border-radius: 11px;
 
     background: #eef7fd;
@@ -809,7 +739,6 @@ body {
     border-radius: 9px;
 
     background: #d9ebf8;
-
     color: #1769aa;
 
     font-size: 17px;
@@ -829,10 +758,8 @@ body {
     color: #607d94;
 
     font-size: 9px;
-
     line-height: 1.6;
 }
-
 
 /* =========================================================
    ACTIONS
@@ -845,7 +772,6 @@ body {
     gap: 10px;
 
     margin-top: 25px;
-
     padding-top: 20px;
 
     border-top: 1px solid #e1e8ef;
@@ -862,7 +788,6 @@ body {
     font-family: inherit;
 
     font-size: 10px;
-
     font-weight: 800;
 
     cursor: pointer;
@@ -874,18 +799,17 @@ body {
     border: 1px solid #d4dde7;
 
     background: #ffffff;
-
     color: #34536f;
 }
 
 .secondary-btn:hover {
     background: #f3f7fb;
-
     border-color: #b9c9d8;
 }
 
 .primary-btn {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
@@ -917,7 +841,6 @@ body {
     font-size: 14px;
 }
 
-
 /* =========================================================
    FOOTER
 ========================================================= */
@@ -940,38 +863,502 @@ body {
     font-size: 9px;
 }
 
-
 /* =========================================================
-   PRINT
+   PRINT / PDF
+   IMPORTANT
 ========================================================= */
 
 @media print {
 
+    /* -----------------------------------------------------
+       A4 PAGE
+    ----------------------------------------------------- */
+
+    @page {
+        size: A4;
+        margin: 10mm 11mm;
+    }
+
+    /* -----------------------------------------------------
+       RESET PAGE DIMENSIONS
+       Prevents blank first page
+    ----------------------------------------------------- */
+
+    html,
+    body {
+        width: 100% !important;
+        height: auto !important;
+
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        overflow: visible !important;
+
+        background: #ffffff !important;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* -----------------------------------------------------
+       HIDE SCREEN-ONLY ELEMENTS
+    ----------------------------------------------------- */
+
     .result-header,
     .result-footer,
-    .result-actions {
+    .result-actions,
+    button,
+    nav,
+    .no-print {
         display: none !important;
     }
 
+    /* -----------------------------------------------------
+       MAIN
+    ----------------------------------------------------- */
+
     .result-main {
-        padding: 20px;
+        display: block !important;
 
-        background: #ffffff;
+        width: 100% !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        background: #ffffff !important;
     }
 
-    .result-card,
-    .summary-card,
+    .page-container {
+        width: 100% !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* -----------------------------------------------------
+       FIRST PAGE HEADING
+       Must not be pushed to page 2
+    ----------------------------------------------------- */
+
+    .page-heading {
+        display: flex !important;
+
+        margin-top: 0 !important;
+        margin-bottom: 14px !important;
+
+        padding-top: 0 !important;
+
+        break-before: auto !important;
+        page-break-before: auto !important;
+
+        break-after: auto !important;
+        page-break-after: auto !important;
+    }
+
+    .page-heading h1 {
+        font-size: 24px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .page-heading p {
+        font-size: 9px !important;
+        line-height: 1.4 !important;
+    }
+
+    .page-eyebrow {
+        font-size: 7px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .inspection-id {
+        min-width: 160px !important;
+
+        padding: 9px 12px !important;
+
+        box-shadow: none !important;
+    }
+
+    .inspection-id span {
+        font-size: 7px !important;
+    }
+
+    .inspection-id strong {
+        font-size: 10px !important;
+    }
+
+    /* -----------------------------------------------------
+       RESULT STATUS
+    ----------------------------------------------------- */
+
     .result-status-card {
-        box-shadow: none;
+        margin-bottom: 12px !important;
 
-        break-inside: avoid;
+        padding: 13px !important;
+
+        border-radius: 8px !important;
+
+        box-shadow: none !important;
+
+        break-before: auto !important;
+        page-break-before: auto !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
     }
 
+    .result-icon {
+        width: 42px !important;
+        height: 42px !important;
+
+        flex-basis: 42px !important;
+
+        font-size: 20px !important;
+    }
+
+    .result-label {
+        font-size: 7px !important;
+    }
+
+    .result-status-content h2 {
+        font-size: 16px !important;
+    }
+
+    .result-status-content p {
+        font-size: 8px !important;
+    }
+
+    .compliance-score {
+        min-width: 95px !important;
+        padding-left: 12px !important;
+    }
+
+    .compliance-score span {
+        font-size: 6px !important;
+    }
+
+    .compliance-score strong {
+        font-size: 20px !important;
+    }
+
+    /* -----------------------------------------------------
+       SUMMARY
+    ----------------------------------------------------- */
+
+    .summary-grid {
+        grid-template-columns:
+            repeat(4, 1fr) !important;
+
+        gap: 7px !important;
+
+        margin-bottom: 12px !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .summary-card {
+        min-height: 58px !important;
+
+        padding: 10px !important;
+
+        border-radius: 7px !important;
+
+        box-shadow: none !important;
+    }
+
+    .summary-label {
+        font-size: 6px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .summary-card strong {
+        font-size: 8px !important;
+    }
+
+    /* -----------------------------------------------------
+       ALL RESULT CARDS
+    ----------------------------------------------------- */
+
+    .result-card {
+        margin-bottom: 12px !important;
+
+        padding: 15px !important;
+
+        border-radius: 8px !important;
+
+        box-shadow: none !important;
+
+        break-before: auto !important;
+        page-break-before: auto !important;
+
+        break-after: auto !important;
+        page-break-after: auto !important;
+    }
+
+    .section-heading {
+        margin-bottom: 11px !important;
+    }
+
+    .card-eyebrow {
+        font-size: 6px !important;
+        margin-bottom: 3px !important;
+    }
+
+    .section-heading h2 {
+        font-size: 14px !important;
+    }
+
+    .check-count {
+        font-size: 6px !important;
+        padding: 5px 8px !important;
+    }
+
+    /* -----------------------------------------------------
+       COMPLIANCE CHECKS
+    ----------------------------------------------------- */
+
+    .checks-list {
+        grid-template-columns:
+            repeat(2, 1fr) !important;
+
+        gap: 6px !important;
+    }
+
+    .check-item {
+        min-height: 48px !important;
+
+        padding: 7px 8px !important;
+
+        gap: 7px !important;
+
+        border-radius: 6px !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .check-icon {
+        width: 22px !important;
+        height: 22px !important;
+
+        flex-basis: 22px !important;
+
+        font-size: 9px !important;
+    }
+
+    .check-content strong {
+        font-size: 7px !important;
+    }
+
+    .check-content span {
+        font-size: 6px !important;
+    }
+
+    .check-status {
+        font-size: 6px !important;
+    }
+
+    /* -----------------------------------------------------
+       VIOLATIONS
+    ----------------------------------------------------- */
+
+    .violation-item {
+        padding: 8px !important;
+        margin-bottom: 6px !important;
+
+        gap: 8px !important;
+
+        border-radius: 6px !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .violation-icon {
+        width: 22px !important;
+        height: 22px !important;
+
+        flex-basis: 22px !important;
+
+        font-size: 9px !important;
+    }
+
+    .violation-content strong {
+        font-size: 7px !important;
+    }
+
+    .violation-content p {
+        font-size: 6px !important;
+        margin-top: 2px !important;
+    }
+
+    /* -----------------------------------------------------
+       DETAILS
+    ----------------------------------------------------- */
+
+    .details-grid {
+        grid-template-columns:
+            repeat(2, 1fr) !important;
+
+        gap: 10px !important;
+    }
+
+    .detail-item {
+        padding-bottom: 8px !important;
+    }
+
+    .detail-item span {
+        font-size: 6px !important;
+        margin-bottom: 3px !important;
+    }
+
+    .detail-item strong {
+        font-size: 7px !important;
+        line-height: 1.4 !important;
+    }
+
+    /* -----------------------------------------------------
+       OFFICIAL NOTICE
+    ----------------------------------------------------- */
+
+    .official-notice {
+        margin-top: 12px !important;
+
+        padding: 10px !important;
+
+        gap: 8px !important;
+
+        border-radius: 7px !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .notice-icon {
+        width: 25px !important;
+        height: 25px !important;
+
+        flex-basis: 25px !important;
+
+        font-size: 11px !important;
+    }
+
+    .official-notice strong {
+        font-size: 8px !important;
+    }
+
+    .official-notice p {
+        font-size: 6px !important;
+        line-height: 1.45 !important;
+    }
+
+    /* -----------------------------------------------------
+       GENERAL PAGE-BREAK CONTROL
+    ----------------------------------------------------- */
+
+    section {
+        break-before: auto !important;
+        page-break-before: auto !important;
+    }
+
+    .summary-grid,
+    .result-status-card,
+    .result-card,
+    .official-notice {
+        break-before: auto !important;
+        page-break-before: auto !important;
+    }
+
+    /* Don't force every card to remain on one page.
+       That can itself create blank pages. */
+
+    .result-card {
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+
+    /* Small individual blocks stay together */
+
+    .check-item,
+    .violation-item,
+    .detail-item,
+    .summary-card {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* -----------------------------------------------------
+       IMAGE / EVIDENCE SUPPORT
+       Works if result.js adds evidence image.
+    ----------------------------------------------------- */
+
+    .evidence-section,
+    .evidence-card,
+    .evidence-image,
+    .product-evidence,
+    .inspection-evidence {
+        width: 100% !important;
+
+        height: auto !important;
+        min-height: 0 !important;
+
+        overflow: visible !important;
+
+        break-before: auto !important;
+        page-break-before: auto !important;
+    }
+
+    .evidence-card {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .evidence-image img,
+    .evidence-card img,
+    .product-evidence img,
+    .inspection-evidence img {
+        display: block !important;
+
+        width: auto !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+        max-height: 220mm !important;
+
+        margin: 8px auto !important;
+
+        object-fit: contain !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* -----------------------------------------------------
+       REMOVE POSSIBLE EMPTY FLEX/GRID SPACE
+    ----------------------------------------------------- */
+
+    .page-container > *:empty {
+        display: none !important;
+    }
+
+    /* -----------------------------------------------------
+       LINKS
+    ----------------------------------------------------- */
+
+    a {
+        color: inherit !important;
+        text-decoration: none !important;
+    }
 }
 
-
 /* =========================================================
-   RESPONSIVE
+   RESPONSIVE — TABLET
 ========================================================= */
 
 @media (max-width: 1000px) {
@@ -988,8 +1375,11 @@ body {
     .checks-list {
         grid-template-columns: 1fr;
     }
-
 }
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+========================================================= */
 
 @media (max-width: 700px) {
 
@@ -1012,7 +1402,6 @@ body {
 
     .page-heading {
         flex-direction: column;
-
         align-items: flex-start;
     }
 
@@ -1022,13 +1411,11 @@ body {
 
     .inspection-id {
         width: 100%;
-
         text-align: left;
     }
 
     .result-status-card {
         align-items: flex-start;
-
         flex-wrap: wrap;
     }
 
@@ -1069,8 +1456,11 @@ body {
 
         text-align: center;
     }
-
 }
+
+/* =========================================================
+   RESPONSIVE — SMALL MOBILE
+========================================================= */
 
 @media (max-width: 450px) {
 
@@ -1097,5 +1487,4 @@ body {
     .result-status-card {
         padding: 20px;
     }
-
 }

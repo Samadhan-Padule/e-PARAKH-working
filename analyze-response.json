@@ -1,0 +1,446 @@
+{
+  "compliance_result": {
+    "checks": [
+      {
+        "confidence": null,
+        "field": "declarations",
+        "message": "Extracted declaration data is available for review.",
+        "requires_human_verification": true,
+        "rule_id": "PC-001",
+        "rule_name": "Mandatory declaration presence",
+        "severity": "MEDIUM",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before deployment",
+        "status": "PASS",
+        "value": "declarations detected"
+      },
+      {
+        "confidence": null,
+        "field": "mrp",
+        "message": "The value was not detected; do not treat missing OCR data as proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-002",
+        "rule_name": "MRP-related check",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before deployment",
+        "status": "REVIEW_REQUIRED",
+        "value": null
+      },
+      {
+        "confidence": null,
+        "field": "net_quantity",
+        "message": "A value was detected; prescribed content, format, and applicability require human verification.",
+        "requires_human_verification": true,
+        "rule_id": "PC-003",
+        "rule_name": "Net quantity check",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before deployment",
+        "status": "PASS",
+        "value": "250 g"
+      },
+      {
+        "confidence": null,
+        "field": "manufacturer",
+        "message": "A value was detected; prescribed content, format, and applicability require human verification.",
+        "requires_human_verification": true,
+        "rule_id": "PC-004",
+        "rule_name": "Manufacturer, packer, or importer information",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before deployment",
+        "status": "PASS",
+        "value": "CHITALE BANDHU MITHAIWALE"
+      },
+      {
+        "confidence": null,
+        "field": "customer_care",
+        "message": "A value was detected; prescribed content, format, and applicability require human verification.",
+        "requires_human_verification": true,
+        "rule_id": "PC-005",
+        "rule_name": "Consumer care information",
+        "severity": "MEDIUM",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before deployment",
+        "status": "PASS",
+        "value": "Phone: +91 99229 44482; Email: customercare@chitalebandhu.in; Website: www.chitalebandhu.in"
+      }
+    ],
+    "overall_status": "REVIEW_REQUIRED",
+    "ruleset_version": "0.1.0",
+    "score": 90
+  },
+  "evidence": [
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "brand_name",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": [
+        37.0,
+        586.0,
+        414.0,
+        609.0
+      ],
+      "confidence": 0.9972,
+      "field": "manufacturer_address",
+      "reason": "Declaration label detected but value is missing or OCR confidence is limited.",
+      "status": "REVIEW_REQUIRED"
+    },
+    {
+      "bbox": [
+        52.0,
+        800.0,
+        114.0,
+        827.0
+      ],
+      "confidence": 0.9994,
+      "field": "mrp",
+      "reason": "Declaration label detected but value is missing or OCR confidence is limited.",
+      "status": "REVIEW_REQUIRED"
+    },
+    {
+      "bbox": [
+        53.0,
+        873.0,
+        137.0,
+        898.0
+      ],
+      "confidence": 1.0,
+      "field": "batch_number",
+      "reason": "Declaration label detected but value is missing or OCR confidence is limited.",
+      "status": "REVIEW_REQUIRED"
+    },
+    {
+      "bbox": [
+        53.0,
+        899.0,
+        224.0,
+        923.0
+      ],
+      "confidence": 1.0,
+      "field": "date_of_manufacture",
+      "reason": "Declaration label detected but value is missing or OCR confidence is limited.",
+      "status": "REVIEW_REQUIRED"
+    },
+    {
+      "bbox": [
+        48.0,
+        919.0,
+        118.0,
+        955.0
+      ],
+      "confidence": 0.9921,
+      "field": "use_by",
+      "reason": "Declaration label detected but value is missing or OCR confidence is limited.",
+      "status": "REVIEW_REQUIRED"
+    }
+  ],
+  "extracted_data": {
+    "batch_number": null,
+    "brand_name": null,
+    "brand_owner": "CHITALE BANDHU MITHAIWALE",
+    "country_of_origin": "INDIA",
+    "customer_care": "Phone: +91 99229 44482; Email: customercare@chitalebandhu.in; Website: www.chitalebandhu.in",
+    "date_of_manufacture": null,
+    "epr_registration": "B0-11-000-08-AAAFC5288N-22",
+    "fssai_license": "10012022000059",
+    "ingredients": "Cashewnuts (46.5%), Refined Sugar, Khoya, Cardamom Powder, Preservative (INS 202), Silver Leaf.",
+    "manufacturer": "CHITALE BANDHU MITHAIWALE",
+    "manufacturer_address": null,
+    "mrp": null,
+    "net_quantity": "250 g",
+    "product_name": "in clean condition, then 15.00/- per kg will be refunded.",
+    "use_by": null
+  },
+  "filename": "product.jpg.jpeg",
+  "product": {
+    "batch_number": null,
+    "brand_name": null,
+    "brand_owner": "CHITALE BANDHU MITHAIWALE",
+    "country_of_origin": "INDIA",
+    "customer_care": "Phone: +91 99229 44482; Email: customercare@chitalebandhu.in; Website: www.chitalebandhu.in",
+    "date_of_manufacture": null,
+    "epr_registration": "B0-11-000-08-AAAFC5288N-22",
+    "fssai_license": "10012022000059",
+    "ingredients": "Cashewnuts (46.5%), Refined Sugar, Khoya, Cardamom Powder, Preservative (INS 202), Silver Leaf.",
+    "manufacturer": "CHITALE BANDHU MITHAIWALE",
+    "manufacturer_address": null,
+    "mrp": null,
+    "net_quantity": "250 g",
+    "product_name": "in clean condition, then 15.00/- per kg will be refunded.",
+    "use_by": null
+  },
+  "raw_ocr_text": "aaag\nKaju Katli (Classic)\nIngredients: Cashewnuts (46.5%), Refined Sugar, Khoya, Cardamom Powder, Preservative (INS 202), Silver Leaf.\nAllergen Advice: Contains Treenuts and Milk. May contain Wheat, Peanuts and Soy.\nStorage Condition: Store in a cool and dry place, away from direct sunlight. Do not buy if pack is open or puffed.\nInstructions for Use: Remove the seal carefully and consume the product immediately after opening.\nWarning: Remove Oxygen Absorber pouch before consumption of the product from the pack.\nMANUFACTURED BY:\nNutritional Information\nCHITALE BANDHU MITHAIWALE\nGat No. 107, At Post Ranje, Kondhanpur Road,\nAbout 12 servings per pack\n21 g (2 Piece)\nTal.- Bhor, Dist.- Pune - 412206, Maharashtra, India.\nServing Size\n*Per 100 g\n%RDA**\nEnergy\n480 kcal\n5%\nfssa\u00ed\nTotal Fat\n23 g\n7%\nSaturated Fat\n6g\nLic. No. 10012022000059\n6%\n846203000757\nMonounsaturated Fatty Acid\n12g\nPolyunsaturated Fatty Acid\n4g\nNet Weight\n250 g\nTrans Fat\n0g\n0%\nMRP\nCholesterol\n7mg\n(Incl. Of All Taxes)\nUnit Sale Price Per g\nCarbohydrates\n58 g\nBatch No.\nDietary Fiber\n1g\nDate of Manufacture\nTotal Sugar\n49 g\nUse By\n- Incl. of Added Sugar\n49 g\n21%\nProtein\n10 g\n4%\nNOT TO BE SOLD WITHOUT OUTER BOX.\nSodium\n20 mg\n0.21%\nCustomer Care Representative:\n(*Approximate Value) (Per Serve**)\nPhone: +91 99229 44482\n\"An average active adult requires 2,000 kcal\nenergy per day, however, calorie needs may vary.\"\nEmail: customercare@chitalebandhu.in\nWebsite: www.chitalebandhu.in\nRelish the Legacy of Chitale Products!\nFor consumer complaints / feedback, retain the package and contact\ncustomer care representative at above address / phone no. / email.\nEPR: If you return this empty pack to the manufacturer of this packed\nproduct in clean condition, then 15.00/- per kg will be refunded.\nOTHER\nBrand Owner: CHITALE BANDHU MITHAIWALE\nScan the QR code\nEPR Reg. No. B0-11-000-08-AAAFC5288N-22\nFollow us on\nPRODUCT OF INDIA\nto order online",
+  "report": {
+    "generated_at": "2026-08-28T15:04:56.211269+00:00",
+    "html_path": "reports\\generated\\461b0ae6-e521-4060-96b7-7beb80da9ab8.html",
+    "pdf_path": "reports\\generated\\461b0ae6-e521-4060-96b7-7beb80da9ab8.pdf",
+    "report_id": "461b0ae6-e521-4060-96b7-7beb80da9ab8"
+  },
+  "status": "success",
+  "vision_analysis": {
+    "font_size": {
+      "comparison_reference": "Median OCR text-region height: 26.0 pixels; relative only, not a physical font measurement.",
+      "confidence": 0.95,
+      "estimated_relative_size": "medium",
+      "requires_human_verification": true,
+      "status": "REVIEW_REQUIRED"
+    },
+    "image_quality": {
+      "blur_estimate": 1027.61,
+      "brightness": 221.05,
+      "confidence": 0.9,
+      "contrast": 44.39,
+      "height": 1516,
+      "reason": "Resolution, sharpness, brightness, and contrast are within heuristic ranges.",
+      "requires_human_verification": true,
+      "status": "PASS",
+      "width": 1080
+    },
+    "ocr_confidence": {
+      "average_confidence": 0.9898,
+      "detection_count": 81,
+      "low_confidence_detections": [],
+      "reason": "OCR confidence is adequate for preliminary machine assistance; human verification remains required.",
+      "requires_human_verification": true,
+      "status": "PASS"
+    },
+    "placement": {
+      "placements": [
+        {
+          "bbox": [
+            35.0,
+            455.0,
+            902.0,
+            483.0
+          ],
+          "confidence": 0.9955,
+          "detected": true,
+          "field": "product_name",
+          "location": "top-center",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            38.0,
+            535.0,
+            221.0,
+            556.0
+          ],
+          "confidence": 0.9999,
+          "detected": true,
+          "field": "manufacturer",
+          "location": "middle-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            37.0,
+            586.0,
+            414.0,
+            609.0
+          ],
+          "confidence": 0.9972,
+          "detected": false,
+          "field": "manufacturer_address",
+          "location": "middle-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            51.0,
+            773.0,
+            158.0,
+            804.0
+          ],
+          "confidence": 1.0,
+          "detected": true,
+          "field": "net_quantity",
+          "location": "middle-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            52.0,
+            800.0,
+            114.0,
+            827.0
+          ],
+          "confidence": 0.9994,
+          "detected": false,
+          "field": "mrp",
+          "location": "middle-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            53.0,
+            873.0,
+            137.0,
+            898.0
+          ],
+          "confidence": 1.0,
+          "detected": false,
+          "field": "batch_number",
+          "location": "middle-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            53.0,
+            899.0,
+            224.0,
+            923.0
+          ],
+          "confidence": 1.0,
+          "detected": false,
+          "field": "date_of_manufacture",
+          "location": "middle-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            48.0,
+            919.0,
+            118.0,
+            955.0
+          ],
+          "confidence": 0.9921,
+          "detected": false,
+          "field": "use_by",
+          "location": "middle-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            37.0,
+            355.0,
+            984.0,
+            382.0
+          ],
+          "confidence": 0.9993,
+          "detected": true,
+          "field": "ingredients",
+          "location": "top-center",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            60.0,
+            709.0,
+            246.0,
+            733.0
+          ],
+          "confidence": 0.9941,
+          "detected": true,
+          "field": "fssai_license",
+          "location": "middle-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            729.0,
+            1280.0,
+            885.0,
+            1304.0
+          ],
+          "confidence": 0.9818,
+          "detected": true,
+          "field": "country_of_origin",
+          "location": "bottom-right",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            37.0,
+            1019.0,
+            325.0,
+            1043.0
+          ],
+          "confidence": 1.0,
+          "detected": true,
+          "field": "customer_care",
+          "location": "bottom-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            37.0,
+            1255.0,
+            427.0,
+            1278.0
+          ],
+          "confidence": 0.9793,
+          "detected": true,
+          "field": "brand_owner",
+          "location": "bottom-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            37.0,
+            1192.0,
+            624.0,
+            1217.0
+          ],
+          "confidence": 0.9993,
+          "detected": true,
+          "field": "epr_registration",
+          "location": "bottom-left",
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        }
+      ],
+      "requires_human_verification": true,
+      "status": "REVIEW_REQUIRED"
+    },
+    "readability": {
+      "confidence": 0.9898,
+      "reason": "Text regions appear readable from available signals.",
+      "requires_human_verification": true,
+      "status": "PASS",
+      "text_regions": 81
+    }
+  }
+}

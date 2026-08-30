@@ -1,6 +1,6 @@
 /* =========================================================
    e-PARAKH — FINAL INSPECTION RESULT JS
-   STEP 04 — FINAL RESULT & REPORT
+   STEP 04 — FINAL RESULT + EVIDENCE
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -80,11 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "violationsList"
         );
 
-    const violationsSection =
-        document.getElementById(
-            "violationsSection"
-        );
-
     const reportBtn =
         document.getElementById("reportBtn");
 
@@ -121,30 +116,50 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
 
             element.textContent =
-                value;
+                String(value).trim();
 
         } else {
 
             element.textContent =
                 fallback;
+
         }
+
+    }
+
+
+    function safeParse(value) {
+
+        if (!value) return {};
+
+        try {
+
+            return JSON.parse(value);
+
+        } catch (error) {
+
+            console.error(
+                "JSON parse error:",
+                error
+            );
+
+            return {};
+
+        }
+
     }
 
 
     /* =====================================================
-       OFFICER DATA
+       OFFICER
     ===================================================== */
 
     const savedOfficerName =
-        localStorage.getItem(
-            "officerName"
-        ) ||
+        localStorage.getItem("officerName") ||
         "Authorized Officer";
 
     const savedOfficerId =
-        localStorage.getItem(
-            "officerId"
-        ) ||
+        localStorage.getItem("officerId") ||
         "Officer ID";
 
 
@@ -165,11 +180,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const initials =
             savedOfficerName
+                .trim()
                 .split(/\s+/)
                 .filter(Boolean)
-                .map(
-                    word =>
-                        word.charAt(0)
+                .map(word =>
+                    word.charAt(0)
                 )
                 .join("")
                 .substring(0, 2)
@@ -177,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         officerAvatarEl.textContent =
             initials || "AO";
+
     }
 
 
@@ -184,113 +200,294 @@ document.addEventListener("DOMContentLoaded", () => {
        LOAD INSPECTION
     ===================================================== */
 
-    let inspectionData = {};
-
-    const storedInspection =
-        localStorage.getItem(
-            "currentInspection"
+    const inspectionData =
+        safeParse(
+            localStorage.getItem(
+                "currentInspection"
+            )
         );
-
-    if (storedInspection) {
-
-        try {
-
-            inspectionData =
-                JSON.parse(
-                    storedInspection
-                );
-
-        } catch (error) {
-
-            console.error(
-                "Unable to load inspection:",
-                error
-            );
-        }
-    }
 
 
     /* =====================================================
-       LOAD COMPLIANCE RESULT
+       LOAD AI DATA
     ===================================================== */
 
-    let complianceData = {};
-
-    const storedCompliance =
-        localStorage.getItem(
-            "complianceResult"
+    const aiAnalysis =
+        safeParse(
+            localStorage.getItem(
+                "aiAnalysisResult"
+            )
         );
 
-    if (storedCompliance) {
 
-        try {
-
-            complianceData =
-                JSON.parse(
-                    storedCompliance
-                );
-
-        } catch (error) {
-
-            console.error(
-                "Unable to load compliance result:",
-                error
-            );
-        }
-    }
+    const aiData =
+        aiAnalysis.extracted_data ||
+        aiAnalysis.extractedData ||
+        aiAnalysis.product ||
+        aiAnalysis.data ||
+        aiAnalysis ||
+        {};
 
 
     /* =====================================================
-       FALLBACK — COMPLIANCE ASSESSMENT
+       LOAD COMPLIANCE
     ===================================================== */
+
+    let complianceData =
+        safeParse(
+            localStorage.getItem(
+                "complianceResult"
+            )
+        );
+
 
     if (
         !complianceData ||
         Object.keys(complianceData).length === 0
     ) {
 
-        const savedAssessment =
-            localStorage.getItem(
-                "complianceAssessment"
+        complianceData =
+            safeParse(
+                localStorage.getItem(
+                    "complianceAssessment"
+                )
             );
 
-        if (savedAssessment) {
-
-            try {
-
-                complianceData =
-                    JSON.parse(
-                        savedAssessment
-                    );
-
-            } catch (error) {
-
-                console.error(
-                    "Unable to load assessment:",
-                    error
-                );
-            }
-        }
     }
+
+
+    /* =====================================================
+       PRODUCT DATA NORMALIZATION
+    ===================================================== */
+
+    /*
+     * Priority:
+     *
+     * currentInspection
+     * ↓
+     * complianceResult.product
+     * ↓
+     * AI extracted data
+     */
+
+    const savedProduct =
+        complianceData.product ||
+        {};
+
+
+    function firstValue(...values) {
+
+        for (const value of values) {
+
+            if (
+                value !== undefined &&
+                value !== null &&
+                String(value).trim() !== ""
+            ) {
+
+                return String(value).trim();
+
+            }
+
+        }
+
+        return "";
+
+    }
+
+
+    /* =====================================================
+       INVALID OCR PRODUCT NAME DETECTION
+    ===================================================== */
+
+    function looksLikeWrongProductName(value) {
+
+        if (!value) return true;
+
+        const text =
+            String(value)
+                .trim()
+                .toLowerCase();
+
+
+        const suspiciousWords = [
+
+            "refund",
+            "returned",
+            "return",
+            "condition",
+            "customer",
+            "please",
+            "keep",
+            "store",
+            "storage",
+            "instruction",
+            "instructions",
+            "consume",
+            "best before",
+            "manufactured by",
+            "packed by",
+            "ingredients",
+            "per kg",
+            "per kilogram"
+
+        ];
+
+
+        const hasSuspiciousWord =
+            suspiciousWords.some(
+                word =>
+                    text.includes(word)
+            );
+
+
+        const looksLikeSentence =
+            text.length > 70 ||
+            text.split(" ").length > 12;
+
+
+        return (
+            hasSuspiciousWord ||
+            looksLikeSentence
+        );
+
+    }
+
+
+    let productName =
+        firstValue(
+            inspectionData.productName,
+            savedProduct.productName,
+            aiData.product_name,
+            aiData.productName,
+            aiData.name
+        );
+
+
+    /*
+     * Prevent OCR sentence from appearing
+     * as product name.
+     */
+
+    if (
+        looksLikeWrongProductName(
+            productName
+        )
+    ) {
+
+        const alternative =
+            firstValue(
+                savedProduct.name,
+                aiData.commodity_name,
+                aiData.commodityName,
+                aiData.product
+            );
+
+
+        if (
+            alternative &&
+            !looksLikeWrongProductName(
+                alternative
+            )
+        ) {
+
+            productName =
+                alternative;
+
+        } else {
+
+            productName = "";
+
+        }
+
+    }
+
+
+    const productData = {
+
+        productName,
+
+        manufacturer:
+            firstValue(
+                inspectionData.manufacturer,
+                savedProduct.manufacturer,
+                aiData.manufacturer,
+                aiData.manufacturer_name,
+                aiData.packer,
+                aiData.importer
+            ),
+
+        netQuantity:
+            firstValue(
+                inspectionData.netQuantity,
+                savedProduct.netQuantity,
+                aiData.net_quantity,
+                aiData.netQuantity,
+                aiData.quantity
+            ),
+
+        mrp:
+            firstValue(
+                inspectionData.mrp,
+                savedProduct.mrp,
+                aiData.mrp,
+                aiData.maximum_retail_price
+            ),
+
+        packingDate:
+            firstValue(
+                inspectionData.packingDate,
+                savedProduct.packingDate,
+                aiData.packing_date,
+                aiData.date_of_manufacture,
+                aiData.dateOfManufacture,
+                aiData.month_year
+            ),
+
+        consumerCare:
+            firstValue(
+                inspectionData.consumerCare,
+                savedProduct.consumerCare,
+                aiData.customer_care,
+                aiData.consumer_care,
+                aiData.consumerCare
+            ),
+
+        address:
+            firstValue(
+                inspectionData.address,
+                savedProduct.address,
+                aiData.manufacturer_address,
+                aiData.manufacturerAddress,
+                aiData.address,
+                aiData.complete_address
+            ),
+
+        additionalDeclarations:
+            firstValue(
+                inspectionData.additionalDeclarations,
+                savedProduct.additionalDeclarations,
+                aiData.additional_declarations,
+                aiData.additionalDeclarations,
+                aiData.remarks
+            )
+
+    };
 
 
     /* =====================================================
        INSPECTION ID
     ===================================================== */
 
-    let inspectionId =
-        inspectionData.inspectionId ||
-        complianceData.inspectionId;
-
-
-    if (!inspectionId) {
-
-        inspectionId =
-            "EP-" +
-            new Date().getFullYear() +
-            "-" +
-            String(Date.now()).slice(-6);
-    }
+    const inspectionId =
+        firstValue(
+            inspectionData.inspectionId,
+            complianceData.inspectionId,
+            localStorage.getItem(
+                "currentInspectionId"
+            )
+        ) ||
+        `EP-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
 
 
     setText(
@@ -301,47 +498,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       PRODUCT DATA
+       DISPLAY PRODUCT
     ===================================================== */
 
     setText(
         productNameEl,
-        inspectionData.productName
+        productData.productName
     );
 
     setText(
         manufacturerEl,
-        inspectionData.manufacturer
+        productData.manufacturer
     );
 
     setText(
         netQuantityEl,
-        inspectionData.netQuantity
+        productData.netQuantity
     );
 
     setText(
         mrpEl,
-        inspectionData.mrp
+        productData.mrp
     );
 
     setText(
         packingDateEl,
-        inspectionData.packingDate
+        productData.packingDate
     );
 
     setText(
         consumerCareEl,
-        inspectionData.consumerCare
+        productData.consumerCare
     );
 
     setText(
         addressEl,
-        inspectionData.address
+        productData.address
     );
 
     setText(
         additionalDeclarationsEl,
-        inspectionData.additionalDeclarations,
+        productData.additionalDeclarations,
         "None"
     );
 
@@ -352,14 +549,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dateSource =
         complianceData.assessedAt ||
+        complianceData.finalizedAt ||
         inspectionData.savedAt ||
+        complianceData.generatedAt ||
         new Date().toISOString();
+
 
     const inspectionDate =
         new Date(dateSource);
 
+
     let formattedDate =
         "Not available";
+
 
     if (
         !isNaN(
@@ -376,6 +578,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     year: "numeric"
                 }
             );
+
     }
 
 
@@ -383,6 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
         inspectionDateEl,
         formattedDate
     );
+
 
     setText(
         inspectionOfficerEl,
@@ -392,7 +596,237 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       CHECK DATA
+       IMAGE EVIDENCE
+    ===================================================== */
+
+    function getEvidenceImage() {
+
+        const candidates = [
+
+            sessionStorage.getItem(
+                "eParakhCapturedImage"
+            ),
+
+            localStorage.getItem(
+                "scannedProductImage"
+            ),
+
+            localStorage.getItem(
+                "productImage"
+            ),
+
+            inspectionData.image,
+
+            inspectionData.imageData,
+
+            inspectionData.productImage,
+
+            inspectionData.evidenceImage,
+
+            complianceData.image,
+
+            complianceData.imageData,
+
+            complianceData.evidenceImage,
+
+            complianceData.productImage
+
+        ];
+
+
+        for (const image of candidates) {
+
+            if (
+                image &&
+                String(image).trim() !== ""
+            ) {
+
+                return String(image).trim();
+
+            }
+
+        }
+
+
+        return "";
+
+    }
+
+
+    function renderEvidenceImage() {
+
+        const imageSource =
+            getEvidenceImage();
+
+
+        if (!imageSource) {
+
+            console.warn(
+                "No inspection evidence image found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Existing evidence container?
+         */
+
+        let evidenceSection =
+            document.getElementById(
+                "evidenceSection"
+            );
+
+
+        /*
+         * If HTML doesn't contain one,
+         * create it automatically.
+         */
+
+        if (!evidenceSection) {
+
+            evidenceSection =
+                document.createElement(
+                    "section"
+                );
+
+            evidenceSection.id =
+                "evidenceSection";
+
+            evidenceSection.className =
+                "inspection-evidence";
+
+
+            const heading =
+                document.createElement(
+                    "h2"
+                );
+
+            heading.textContent =
+                "Inspection Evidence";
+
+
+            const subtitle =
+                document.createElement(
+                    "p"
+                );
+
+            subtitle.textContent =
+                "Product image captured during inspection";
+
+
+            const imageWrapper =
+                document.createElement(
+                    "div"
+                );
+
+            imageWrapper.className =
+                "evidence-image-wrapper";
+
+
+            const image =
+                document.createElement(
+                    "img"
+                );
+
+            image.id =
+                "evidenceImage";
+
+            image.className =
+                "evidence-image";
+
+            image.alt =
+                "Scanned product evidence";
+
+
+            imageWrapper.appendChild(
+                image
+            );
+
+
+            evidenceSection.appendChild(
+                heading
+            );
+
+            evidenceSection.appendChild(
+                subtitle
+            );
+
+            evidenceSection.appendChild(
+                imageWrapper
+            );
+
+
+            /*
+             * Insert before Verification section
+             */
+
+            const verificationHeading =
+                document.querySelector(
+                    "#checksList"
+                );
+
+
+            if (
+                verificationHeading &&
+                verificationHeading.parentElement
+            ) {
+
+                verificationHeading
+                    .parentElement
+                    .before(
+                        evidenceSection
+                    );
+
+            } else {
+
+                document.body.appendChild(
+                    evidenceSection
+                );
+
+            }
+
+        }
+
+
+        const image =
+            document.getElementById(
+                "evidenceImage"
+            );
+
+
+        if (image) {
+
+            image.src =
+                imageSource;
+
+            image.style.display =
+                "block";
+
+            image.onerror =
+                () => {
+
+                    console.error(
+                        "Unable to display evidence image."
+                    );
+
+                    image.style.display =
+                        "none";
+
+                };
+
+        }
+
+    }
+
+
+    renderEvidenceImage();
+
+
+    /* =====================================================
+       CHECKS
     ===================================================== */
 
     let checks = [];
@@ -407,72 +841,45 @@ document.addEventListener("DOMContentLoaded", () => {
         checks =
             complianceData.checks;
 
-    } else if (
-        complianceData.checklist
-    ) {
-
-        const ruleNames = {
-
-            manufacturer:
-                "Manufacturer / Packer / Importer",
-
-            productName:
-                "Common / Generic Product Name",
-
-            quantity:
-                "Net Quantity",
-
-            mrp:
-                "Maximum Retail Price",
-
-            date:
-                "Date of Manufacture / Packing",
-
-            consumerCare:
-                "Consumer Care Details",
-
-            address:
-                "Address Declaration",
-
-            additional:
-                "Additional Mandatory Declarations"
-        };
-
-
-        checks =
-            Object.keys(
-                complianceData.checklist
-            ).map(rule => {
-
-                const passed =
-                    complianceData
-                        .checklist[rule] === true;
-
-                return {
-
-                    rule,
-
-                    name:
-                        ruleNames[rule] ||
-                        "Compliance Requirement",
-
-                    status:
-                        passed
-                            ? "pass"
-                            : "fail",
-
-                    description:
-                        passed
-                            ? "Requirement verified by the inspecting officer."
-                            : "Requirement requires attention or was not verified."
-                };
-
-            });
     }
 
 
+    /*
+     * Normalize every status.
+     *
+     * verified/pass = PASSED
+     * everything else = FAILED
+     */
+
+    checks =
+        checks.map(check => {
+
+            const status =
+                String(
+                    check.status || ""
+                ).toLowerCase();
+
+
+            return {
+
+                ...check,
+
+                status:
+                    (
+                        status === "pass" ||
+                        status === "passed" ||
+                        status === "verified"
+                    )
+                        ? "pass"
+                        : "fail"
+
+            };
+
+        });
+
+
     /* =====================================================
-       SAFETY FALLBACK
+       FALLBACK CHECKS
     ===================================================== */
 
     if (!checks.length) {
@@ -482,88 +889,102 @@ document.addEventListener("DOMContentLoaded", () => {
             {
                 name:
                     "Manufacturer / Packer / Importer",
+
                 description:
-                    "Manufacturer or packer details are declared.",
-                status: "fail"
+                    "Name and identification details are clearly declared.",
+
+                status:
+                    "fail"
+
             },
 
             {
                 name:
                     "Common / Generic Product Name",
+
                 description:
-                    "Product identity is clearly declared.",
-                status: "fail"
+                    "Product identity is clearly mentioned.",
+
+                status:
+                    "fail"
+
             },
 
             {
                 name:
                     "Net Quantity",
+
                 description:
-                    "Net quantity is declared.",
-                status: "fail"
+                    "Quantity is expressed in the prescribed unit and format.",
+
+                status:
+                    "fail"
+
             },
 
             {
                 name:
                     "Maximum Retail Price",
+
                 description:
-                    "MRP declaration is present.",
-                status: "fail"
+                    "MRP is declared with applicable taxes / wording.",
+
+                status:
+                    "fail"
+
             },
 
             {
                 name:
                     "Date of Manufacture / Packing",
+
                 description:
-                    "Applicable date declaration is present.",
-                status: "fail"
+                    "Applicable date declaration is present and readable.",
+
+                status:
+                    "fail"
+
             },
 
             {
                 name:
                     "Consumer Care Details",
+
                 description:
-                    "Consumer care information is declared.",
-                status: "fail"
+                    "Consumer complaint contact information is available.",
+
+                status:
+                    "fail"
+
             },
 
             {
                 name:
                     "Address Declaration",
+
                 description:
-                    "Relevant address is declared.",
-                status: "fail"
+                    "Relevant business / manufacturer address is declared.",
+
+                status:
+                    "fail"
+
             },
 
             {
                 name:
                     "Additional Mandatory Declarations",
+
                 description:
-                    "Other applicable declarations are verified.",
-                status: "fail"
+                    "Other applicable declarations have been verified.",
+
+                status:
+                    "fail"
+
             }
 
         ];
+
     }
-
-
-    /* =====================================================
-       NORMALIZE CHECK STATUS
-    ===================================================== */
-
-    checks =
-        checks.map(check => {
-
-            return {
-
-                ...check,
-
-                status:
-                    check.status === "pass"
-                        ? "pass"
-                        : "fail"
-            };
-        });
 
 
     /* =====================================================
@@ -573,60 +994,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalChecks =
         checks.length;
 
+
     const passedChecks =
         checks.filter(
             check =>
                 check.status === "pass"
         ).length;
 
+
     const failedChecks =
         totalChecks -
         passedChecks;
 
 
-    let score =
+    /*
+     * IMPORTANT:
+     *
+     * Score is calculated from ACTUAL checks.
+     *
+     * Never allow a stored 100% score
+     * to override 5/8 etc.
+     */
+
+    const score =
         totalChecks > 0
             ? Math.round(
-                (passedChecks /
-                    totalChecks) *
-                100
+                (
+                    passedChecks /
+                    totalChecks
+                ) * 100
             )
             : 0;
 
-
-    if (
-        typeof complianceData.score ===
-        "number"
-    ) {
-
-        score =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    complianceData.score
-                )
-            );
-    }
-
-
-    /* =====================================================
-       STATUS
-    ===================================================== */
-
-    const isCompliant =
-        complianceData.status ===
-        "compliant"
-            ? true
-            : complianceData.status ===
-              "non-compliant"
-                ? false
-                : failedChecks === 0;
-
-
-    /* =====================================================
-       DISPLAY SCORE
-    ===================================================== */
 
     setText(
         complianceScore,
@@ -639,7 +1038,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         checkCount.textContent =
             `${passedChecks} / ${totalChecks} Passed`;
+
     }
+
+
+    /* =====================================================
+       FINAL STATUS
+    ===================================================== */
+
+    const isCompliant =
+        totalChecks > 0 &&
+        failedChecks === 0 &&
+        score === 100;
 
 
     /* =====================================================
@@ -658,24 +1068,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
             resultIcon.style.color =
                 "#16845b";
+
         }
+
 
         if (resultTitle) {
 
             resultTitle.textContent =
                 "Product Compliant";
+
         }
+
 
         if (resultDescription) {
 
             resultDescription.textContent =
                 "The declared product information has passed the applicable compliance checks.";
+
         }
+
 
         if (complianceScore) {
 
             complianceScore.style.color =
                 "#16845b";
+
         }
 
     } else {
@@ -690,25 +1107,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
             resultIcon.style.color =
                 "#c53d3d";
+
         }
+
 
         if (resultTitle) {
 
             resultTitle.textContent =
                 "Product Non-Compliant";
+
         }
+
 
         if (resultDescription) {
 
             resultDescription.textContent =
                 `${failedChecks} compliance requirement${failedChecks === 1 ? "" : "s"} require attention before the product can be considered compliant.`;
+
         }
+
 
         if (complianceScore) {
 
             complianceScore.style.color =
                 "#c53d3d";
+
         }
+
     }
 
 
@@ -716,30 +1141,30 @@ document.addEventListener("DOMContentLoaded", () => {
        RENDER CHECKS
     ===================================================== */
 
-    renderChecks(checks);
-
-
-    function renderChecks(checkItems) {
-
-        if (!checksList) return;
+    if (checksList) {
 
         checksList.innerHTML = "";
 
 
-        checkItems.forEach(check => {
+        checks.forEach(check => {
 
             const passed =
                 check.status === "pass";
 
+
             const item =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             item.className =
                 "check-item";
 
 
             const icon =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             icon.className =
                 `check-icon ${
@@ -755,14 +1180,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             const content =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             content.className =
                 "check-content";
 
 
             const title =
-                document.createElement("strong");
+                document.createElement(
+                    "strong"
+                );
 
             title.textContent =
                 check.name ||
@@ -770,19 +1199,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             const description =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
             description.textContent =
                 check.description ||
                 "Verification completed.";
 
 
-            content.appendChild(title);
-            content.appendChild(description);
+            content.appendChild(
+                title
+            );
+
+            content.appendChild(
+                description
+            );
 
 
             const status =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
             status.className =
                 `check-status ${
@@ -801,8 +1239,13 @@ document.addEventListener("DOMContentLoaded", () => {
             item.appendChild(content);
             item.appendChild(status);
 
-            checksList.appendChild(item);
+
+            checksList.appendChild(
+                item
+            );
+
         });
+
     }
 
 
@@ -810,41 +1253,27 @@ document.addEventListener("DOMContentLoaded", () => {
        VIOLATIONS
     ===================================================== */
 
-    let violations = [];
+    let violations =
+        checks
+            .filter(
+                check =>
+                    check.status === "fail"
+            )
+            .map(check => ({
+
+                title:
+                    check.name,
+
+                description:
+                    check.description ||
+                    "Requirement not satisfied."
+
+            }));
 
 
-    if (
-        Array.isArray(
-            complianceData.violations
-        )
-    ) {
-
-        violations =
-            complianceData.violations;
-
-    } else {
-
-        violations =
-            checks
-                .filter(
-                    check =>
-                        check.status === "fail"
-                )
-                .map(check => ({
-
-                    title:
-                        check.name,
-
-                    description:
-                        check.description ||
-                        "Requirement not satisfied."
-                }));
-    }
-
-
-    /* =====================================================
-       ADD OFFICER OBSERVATION
-    ===================================================== */
+    /*
+     * Officer observation
+     */
 
     if (
         complianceData.observation &&
@@ -860,25 +1289,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
             description:
                 complianceData.observation
+
         });
+
     }
 
 
-    renderViolations(
-        violations
-    );
+    /* =====================================================
+       RENDER VIOLATIONS
+    ===================================================== */
 
-
-    function renderViolations(
-        items
-    ) {
-
-        if (!violationsList) return;
+    if (violationsList) {
 
         violationsList.innerHTML = "";
 
 
-        if (!items.length) {
+        if (!violations.length) {
 
             violationsList.innerHTML = `
                 <div class="no-violations">
@@ -886,75 +1312,83 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
 
-            return;
+        } else {
+
+            violations.forEach(
+                violation => {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+                    item.className =
+                        "violation-item";
+
+
+                    const icon =
+                        document.createElement(
+                            "div"
+                        );
+
+                    icon.className =
+                        "violation-icon";
+
+                    icon.textContent =
+                        "!";
+
+
+                    const content =
+                        document.createElement(
+                            "div"
+                        );
+
+                    content.className =
+                        "violation-content";
+
+
+                    const title =
+                        document.createElement(
+                            "strong"
+                        );
+
+                    title.textContent =
+                        violation.title ||
+                        "Compliance Violation";
+
+
+                    const description =
+                        document.createElement(
+                            "p"
+                        );
+
+                    description.textContent =
+                        violation.description ||
+                        "Requirement not satisfied.";
+
+
+                    content.appendChild(
+                        title
+                    );
+
+                    content.appendChild(
+                        description
+                    );
+
+
+                    item.appendChild(icon);
+                    item.appendChild(content);
+
+
+                    violationsList.appendChild(
+                        item
+                    );
+
+                }
+            );
+
         }
 
-
-        items.forEach(
-            violation => {
-
-                const item =
-                    document.createElement(
-                        "div"
-                    );
-
-                item.className =
-                    "violation-item";
-
-
-                const icon =
-                    document.createElement(
-                        "div"
-                    );
-
-                icon.className =
-                    "violation-icon";
-
-                icon.textContent =
-                    "!";
-
-
-                const content =
-                    document.createElement(
-                        "div"
-                    );
-
-                content.className =
-                    "violation-content";
-
-
-                const title =
-                    document.createElement(
-                        "strong"
-                    );
-
-                title.textContent =
-                    violation.title ||
-                    "Compliance Violation";
-
-
-                const description =
-                    document.createElement(
-                        "p"
-                    );
-
-                description.textContent =
-                    violation.description ||
-                    "Requirement not satisfied.";
-
-
-                content.appendChild(title);
-                content.appendChild(description);
-
-
-                item.appendChild(icon);
-                item.appendChild(content);
-
-                violationsList.appendChild(
-                    item
-                );
-            }
-        );
     }
 
 
@@ -986,7 +1420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         violations,
 
         product:
-            inspectionData,
+            productData,
 
         officerName:
             savedOfficerName,
@@ -994,8 +1428,12 @@ document.addEventListener("DOMContentLoaded", () => {
         officerId:
             savedOfficerId,
 
+        evidenceImage:
+            getEvidenceImage(),
+
         finalizedAt:
             new Date().toISOString()
+
     };
 
 
@@ -1008,7 +1446,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       GENERATE REPORT
+       REPORT / PRINT
     ===================================================== */
 
     if (reportBtn) {
@@ -1018,8 +1456,10 @@ document.addEventListener("DOMContentLoaded", () => {
             () => {
 
                 window.print();
+
             }
         );
+
     }
 
 
@@ -1037,6 +1477,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     confirm(
                         "Start a new product inspection?"
                     );
+
 
                 if (!confirmed)
                     return;
@@ -1062,6 +1503,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     "scannedProductImage"
                 );
 
+                localStorage.removeItem(
+                    "productImage"
+                );
+
                 sessionStorage.removeItem(
                     "eParakhCapturedImage"
                 );
@@ -1069,8 +1514,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 window.location.href =
                     "inspection.html";
+
             }
         );
+
     }
 
 
@@ -1086,8 +1533,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 window.location.href =
                     "../index.html";
+
             }
         );
+
     }
 
 
@@ -1105,6 +1554,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     confirm(
                         "Are you sure you want to logout?"
                     );
+
 
                 if (!confirmed)
                     return;
@@ -1138,6 +1588,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     "scannedProductImage"
                 );
 
+                localStorage.removeItem(
+                    "productImage"
+                );
+
                 sessionStorage.removeItem(
                     "eParakhCapturedImage"
                 );
@@ -1145,13 +1599,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 window.location.href =
                     "login.html";
+
             }
         );
+
     }
 
 
     /* =====================================================
-       PRINT SUPPORT
+       PRINT
     ===================================================== */
 
     window.addEventListener(
@@ -1160,6 +1616,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             document.title =
                 `e-PARAKH Inspection Report - ${inspectionId}`;
+
         }
     );
 
@@ -1169,10 +1626,14 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             inspectionId,
             score,
+            passedChecks,
+            failedChecks,
             status:
                 isCompliant
                     ? "COMPLIANT"
-                    : "NON-COMPLIANT"
+                    : "NON-COMPLIANT",
+            evidence:
+                !!getEvidenceImage()
         }
     );
 

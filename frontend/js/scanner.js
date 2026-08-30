@@ -258,66 +258,151 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function analyzeProduct() {
-        if (!selectedImage) {
-            alert("Please scan or upload a product image first.");
-            return;
-        }
 
-        continueBtn.disabled = true;
-        const originalText = continueBtn.innerHTML;
-        continueBtn.innerHTML = `
-            <span>Navigating to Inspection...</span>
-            <span class="loading-spinner"></span>
-        `;
+    console.log("=================================");
+    console.log("CONTINUE TO INSPECTION");
+    console.log("Selected image:", selectedImage);
+    console.log("=================================");
 
-        // 1. Convert Image to Base64 for local storage
-        const reader = new FileReader();
-        reader.onload = async () => {
-            // Save Image base64 for Inspection Page Preview & Analysis
-            localStorage.setItem("scannedProductImage", reader.result);
-            sessionStorage.setItem("inspectionStarted", "true");
+    if (!selectedImage) {
 
-            // Update local inspection counter
-            let count = parseInt(sessionStorage.getItem("inspectionCount") || "0", 10);
-            count += 1;
-            sessionStorage.setItem("inspectionCount", count.toString());
+        alert("Please scan or upload a product image first.");
 
-            // 2. Try Calling AI Service (Optional step on Scan screen)
-            try {
-                const formData = new FormData();
-                formData.append("image", selectedImage, selectedImage.name || "product.jpg");
-
-                const response = await fetch(`${AI_SERVICE_URL}/analyze`, {
-                    method: "POST",
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.status === "success") {
-                        sessionStorage.setItem("analysisResult", JSON.stringify(result));
-                        sessionStorage.setItem("lastInspection", JSON.stringify({
-                            filename: result.filename,
-                            status: result.compliance_result?.overall_status,
-                            score: result.compliance_result?.score,
-                            analyzedAt: new Date().toISOString()
-                        }));
-                    }
-                }
-            } catch (err) {
-                console.warn("AI Backend service unreachable at scan stage. Inspection page will handle analysis execution.", err);
-            }
-
-            // 3. Navigation Fix: Use path relative to current folder location
-            // 3. Navigation Fix: Navigate to inspection page
-
-window.location.href = "pages/inspection.html";
-        };
-
-        reader.readAsDataURL(selectedImage);
+        return;
     }
 
+    /*
+     * Disable button temporarily
+     */
+    continueBtn.disabled = true;
 
+    continueBtn.innerHTML = `
+        <span>Opening Inspection...</span>
+        <span class="loading-spinner"></span>
+    `;
+
+
+    /*
+     * Convert image to Base64
+     */
+    const reader = new FileReader();
+
+
+    reader.onload = function (event) {
+
+        const imageData = event.target.result;
+
+
+        console.log(
+            "Image converted to Base64."
+        );
+
+        console.log(
+            "Image size:",
+            imageData.length
+        );
+
+
+        /*
+         * IMPORTANT
+         *
+         * inspection.js expects:
+         * eParakhCapturedImage
+         *
+         * Therefore save using SAME key.
+         */
+
+        sessionStorage.setItem(
+            "eParakhCapturedImage",
+            imageData
+        );
+
+
+        /*
+         * Also keep the old localStorage
+         * key for backward compatibility.
+         */
+
+        localStorage.setItem(
+            "scannedProductImage",
+            imageData
+        );
+
+
+        /*
+         * Mark inspection started
+         */
+
+        sessionStorage.setItem(
+            "inspectionStarted",
+            "true"
+        );
+
+
+        /*
+         * Update inspection counter
+         */
+
+        let count = parseInt(
+            sessionStorage.getItem(
+                "inspectionCount"
+            ) || "0",
+            10
+        );
+
+        count += 1;
+
+        sessionStorage.setItem(
+            "inspectionCount",
+            count.toString()
+        );
+
+
+        console.log(
+            "Image saved successfully."
+        );
+
+        console.log(
+            "Opening inspection page..."
+        );
+
+
+        /*
+         * IMPORTANT:
+         *
+         * DO NOT call AI here.
+         *
+         * inspection.js will handle AI OCR.
+         */
+
+        window.location.href =
+            "pages/inspection.html";
+    };
+
+
+    reader.onerror = function () {
+
+        console.error(
+            "Failed to convert image to Base64."
+        );
+
+
+        continueBtn.disabled = false;
+
+        continueBtn.innerHTML = `
+            Continue to Inspection
+            <span>→</span>
+        `;
+
+
+        alert(
+            "Unable to process the selected image. Please try again."
+        );
+    };
+
+
+    reader.readAsDataURL(selectedImage);
+}
     /* =====================================================
         LOGOUT
     ===================================================== */

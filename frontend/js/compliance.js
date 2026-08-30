@@ -1,8 +1,3 @@
-/* =========================================================
-   e-PARAKH — COMPLIANCE VERIFICATION JS
-   Final Compliance Assessment Controller
-========================================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
@@ -74,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       LOAD OFFICER DATA
+       OFFICER DATA
     ===================================================== */
 
     const savedOfficerName =
@@ -125,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     words[0][0] +
                     words[words.length - 1][0]
                 ).toUpperCase();
+
         }
 
         officerAvatar.textContent =
@@ -162,6 +158,205 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
+       LOAD AI ANALYSIS
+    ===================================================== */
+
+    let aiAnalysis = {};
+
+    const savedAI =
+        localStorage.getItem("aiAnalysisResult");
+
+
+    if (savedAI) {
+
+        try {
+
+            aiAnalysis =
+                JSON.parse(savedAI);
+
+        } catch (error) {
+
+            console.error(
+                "Unable to parse AI analysis:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       NORMALIZE AI DATA
+    ===================================================== */
+
+    const aiData =
+        aiAnalysis.extracted_data ||
+        aiAnalysis.extractedData ||
+        aiAnalysis.product ||
+        aiAnalysis.data ||
+        aiAnalysis ||
+        {};
+
+
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+
+    function valueExists(value) {
+
+        if (
+            value === undefined ||
+            value === null
+        ) {
+            return false;
+        }
+
+        return String(value).trim() !== "";
+    }
+
+
+    function cleanValue(value) {
+
+        if (
+            value === undefined ||
+            value === null
+        ) {
+            return "";
+        }
+
+        return String(value).trim();
+    }
+
+
+    /* =====================================================
+       NORMALIZE INSPECTION DATA
+    ===================================================== */
+
+    const productData = {
+
+        manufacturer:
+            cleanValue(
+                inspectionData.manufacturer ||
+                aiData.manufacturer ||
+                ""
+            ),
+
+        productName:
+            cleanValue(
+                inspectionData.productName ||
+                aiData.product_name ||
+                ""
+            ),
+
+        netQuantity:
+            cleanValue(
+                inspectionData.netQuantity ||
+                aiData.net_quantity ||
+                ""
+            ),
+
+        mrp:
+            cleanValue(
+                inspectionData.mrp ||
+                aiData.mrp ||
+                ""
+            ),
+
+        packingDate:
+            cleanValue(
+                inspectionData.packingDate ||
+                aiData.date_of_manufacture ||
+                aiData.packing_date ||
+                aiData.date_of_packing ||
+                ""
+            ),
+
+        consumerCare:
+            cleanValue(
+                inspectionData.consumerCare ||
+                aiData.customer_care ||
+                ""
+            ),
+
+        address:
+            cleanValue(
+                inspectionData.address ||
+                aiData.manufacturer_address ||
+                aiData.address ||
+                ""
+            ),
+
+        additionalDeclarations:
+            cleanValue(
+                inspectionData.additionalDeclarations ||
+                buildAdditionalDeclarations(aiData)
+            )
+
+    };
+
+
+    /* =====================================================
+       BUILD ADDITIONAL DECLARATIONS
+    ===================================================== */
+
+    function buildAdditionalDeclarations(data) {
+
+        const additional = [];
+
+        if (valueExists(data.brand_name)) {
+            additional.push(
+                `Brand: ${data.brand_name}`
+            );
+        }
+
+        if (valueExists(data.brand_owner)) {
+            additional.push(
+                `Brand Owner: ${data.brand_owner}`
+            );
+        }
+
+        if (valueExists(data.country_of_origin)) {
+            additional.push(
+                `Country of Origin: ${data.country_of_origin}`
+            );
+        }
+
+        if (valueExists(data.fssai_license)) {
+            additional.push(
+                `FSSAI License: ${data.fssai_license}`
+            );
+        }
+
+        if (valueExists(data.epr_registration)) {
+            additional.push(
+                `EPR Registration: ${data.epr_registration}`
+            );
+        }
+
+        if (valueExists(data.batch_number)) {
+            additional.push(
+                `Batch No.: ${data.batch_number}`
+            );
+        }
+
+        if (valueExists(data.use_by)) {
+            additional.push(
+                `Use By: ${data.use_by}`
+            );
+        }
+
+        if (valueExists(data.ingredients)) {
+            additional.push(
+                `Ingredients: ${data.ingredients}`
+            );
+        }
+
+        return additional.join("\n");
+    }
+
+
+    /* =====================================================
        INSPECTION ID
     ===================================================== */
 
@@ -194,42 +389,41 @@ document.addEventListener("DOMContentLoaded", () => {
             String(Date.now()).slice(-6);
 
         return `EP-${year}-${random}`;
-
     }
 
 
     /* =====================================================
-       LOAD PRODUCT INFORMATION
+       DISPLAY PRODUCT INFORMATION
     ===================================================== */
 
     setText(
         summaryManufacturer,
-        inspectionData.manufacturer
+        productData.manufacturer
     );
 
     setText(
         summaryProductName,
-        inspectionData.productName
+        productData.productName
     );
 
     setText(
         summaryQuantity,
-        inspectionData.netQuantity
+        productData.netQuantity
     );
 
     setText(
         summaryMrp,
-        inspectionData.mrp
+        productData.mrp
     );
 
     setText(
         summaryPackingDate,
-        inspectionData.packingDate
+        productData.packingDate
     );
 
     setText(
         summaryConsumerCare,
-        inspectionData.consumerCare
+        productData.consumerCare
     );
 
 
@@ -238,22 +432,16 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     const hasInspectionData =
-        Object.keys(inspectionData).length > 0;
+        Object.keys(inspectionData).length > 0 ||
+        Object.keys(aiData).length > 0;
 
 
     if (summaryStatus) {
 
-        if (hasInspectionData) {
-
-            summaryStatus.textContent =
-                "DATA LOADED";
-
-        } else {
-
-            summaryStatus.textContent =
-                "NO DATA";
-
-        }
+        summaryStatus.textContent =
+            hasInspectionData
+                ? "DATA LOADED"
+                : "NO DATA";
 
     }
 
@@ -268,15 +456,142 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-    /*
-       Store verification state.
+    /* =====================================================
+       RULE DETECTION
+    ===================================================== */
 
-       false = not verified
-       true  = verified
-    */
+    function isRuleDetected(rule) {
 
-    const verificationState = {};
+        switch (rule) {
 
+            case "manufacturer":
+                return valueExists(
+                    productData.manufacturer
+                );
+
+            case "productName":
+                return valueExists(
+                    productData.productName
+                );
+
+            case "quantity":
+                return valueExists(
+                    productData.netQuantity
+                );
+
+            case "mrp":
+                return valueExists(
+                    productData.mrp
+                );
+
+            case "date":
+                return valueExists(
+                    productData.packingDate
+                );
+
+            case "consumerCare":
+                return valueExists(
+                    productData.consumerCare
+                );
+
+            case "address":
+                return valueExists(
+                    productData.address
+                );
+
+            case "additional":
+                return valueExists(
+                    productData.additionalDeclarations
+                );
+
+            default:
+                return false;
+        }
+    }
+
+
+    /* =====================================================
+       RULE VALUE
+    ===================================================== */
+
+    function getDetectedValue(rule) {
+
+        switch (rule) {
+
+            case "manufacturer":
+                return productData.manufacturer;
+
+            case "productName":
+                return productData.productName;
+
+            case "quantity":
+                return productData.netQuantity;
+
+            case "mrp":
+                return productData.mrp;
+
+            case "date":
+                return productData.packingDate;
+
+            case "consumerCare":
+                return productData.consumerCare;
+
+            case "address":
+                return productData.address;
+
+            case "additional":
+                return productData.additionalDeclarations;
+
+            default:
+                return "";
+        }
+    }
+
+
+    /* =====================================================
+       RULE DEFINITIONS
+    ===================================================== */
+
+    const RULE_DEFINITIONS = {
+
+        manufacturer: {
+            required: true
+        },
+
+        productName: {
+            required: true
+        },
+
+        quantity: {
+            required: true
+        },
+
+        mrp: {
+            required: true
+        },
+
+        date: {
+            required: true
+        },
+
+        consumerCare: {
+            required: true
+        },
+
+        address: {
+            required: true
+        },
+
+        additional: {
+            required: false
+        }
+
+    };
+
+
+    /* =====================================================
+       INITIALIZE CHECKLIST
+    ===================================================== */
 
     ruleCheckboxes.forEach(
         checkbox => {
@@ -284,19 +599,43 @@ document.addEventListener("DOMContentLoaded", () => {
             const rule =
                 checkbox.dataset.rule;
 
-            verificationState[rule] =
-                false;
+            const detected =
+                isRuleDetected(rule);
+
+
+            /*
+             * IMPORTANT:
+             *
+             * Missing declaration cannot be
+             * marked as verified.
+             */
+
+            if (!detected) {
+
+                checkbox.checked = false;
+
+                checkbox.disabled = true;
+
+            } else {
+
+                checkbox.disabled = false;
+
+            }
+
+
+            updateRuleVisualState(
+                checkbox,
+                detected
+            );
 
 
             checkbox.addEventListener(
                 "change",
                 () => {
 
-                    verificationState[rule] =
-                        checkbox.checked;
-
                     updateRuleVisualState(
-                        checkbox
+                        checkbox,
+                        isRuleDetected(rule)
                     );
 
                     calculateCompliance();
@@ -313,11 +652,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function updateRuleVisualState(
-        checkbox
+        checkbox,
+        detected
     ) {
 
         const ruleItem =
-            checkbox.closest(".rule-item");
+            checkbox.closest(
+                ".rule-item"
+            );
 
         if (!ruleItem) return;
 
@@ -326,6 +668,31 @@ document.addEventListener("DOMContentLoaded", () => {
             ruleItem.querySelector(
                 ".rule-status"
             );
+
+
+        ruleItem.classList.remove(
+            "verified",
+            "missing",
+            "pending"
+        );
+
+
+        if (!detected) {
+
+            ruleItem.classList.add(
+                "missing"
+            );
+
+
+            if (status) {
+
+                status.textContent =
+                    "Missing";
+
+            }
+
+            return;
+        }
 
 
         if (checkbox.checked) {
@@ -344,15 +711,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } else {
 
-            ruleItem.classList.remove(
-                "verified"
+            ruleItem.classList.add(
+                "pending"
             );
 
 
             if (status) {
 
                 status.textContent =
-                    "Pending";
+                    "Detected";
 
             }
 
@@ -362,10 +729,106 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       INITIAL CALCULATION
+       BUILD CHECKS
     ===================================================== */
 
-    calculateCompliance();
+    function buildChecks() {
+
+        return Array.from(
+            ruleCheckboxes
+        ).map(checkbox => {
+
+            const rule =
+                checkbox.dataset.rule;
+
+            const ruleItem =
+                checkbox.closest(
+                    ".rule-item"
+                );
+
+
+            const name =
+                ruleItem
+                    ?.querySelector(
+                        ".rule-content strong"
+                    )
+                    ?.textContent
+                    .trim() ||
+                rule;
+
+
+            const description =
+                ruleItem
+                    ?.querySelector(
+                        ".rule-content small"
+                    )
+                    ?.textContent
+                    .trim() ||
+                "";
+
+
+            const detected =
+                isRuleDetected(rule);
+
+
+            let status;
+
+
+            /*
+             * Missing = automatic failure.
+             */
+
+            if (!detected) {
+
+                status = "fail";
+
+            }
+
+            /*
+             * Detected + officer checked = pass.
+             */
+
+            else if (checkbox.checked) {
+
+                status = "pass";
+
+            }
+
+            /*
+             * Detected but officer has
+             * not verified yet.
+             */
+
+            else {
+
+                status = "pending";
+
+            }
+
+
+            return {
+
+                rule,
+
+                name,
+
+                description,
+
+                detected,
+
+                extractedValue:
+                    getDetectedValue(rule),
+
+                officerVerified:
+                    checkbox.checked,
+
+                status
+
+            };
+
+        });
+
+    }
 
 
     /* =====================================================
@@ -374,17 +837,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function calculateCompliance() {
 
+        const checks =
+            buildChecks();
+
+
         const total =
-            ruleCheckboxes.length;
+            checks.length;
 
-        const verified =
-            Array.from(ruleCheckboxes)
-                .filter(
-                    checkbox =>
-                        checkbox.checked
-                )
-                .length;
 
+        const passed =
+            checks.filter(
+                check =>
+                    check.status === "pass"
+            ).length;
+
+
+        const failed =
+            checks.filter(
+                check =>
+                    check.status === "fail"
+            ).length;
+
+
+        const pending =
+            checks.filter(
+                check =>
+                    check.status === "pending"
+            ).length;
+
+
+        /*
+         * Score is based on actual
+         * passed mandatory checks.
+         */
 
         let score = 0;
 
@@ -393,27 +878,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
             score =
                 Math.round(
-                    (verified / total) * 100
+                    (passed / total) * 100
                 );
 
         }
 
 
-        /* -----------------------------------------------
+        /* =================================================
            COUNT
-        ----------------------------------------------- */
+        ================================================= */
 
         if (verificationCount) {
 
             verificationCount.textContent =
-                `${verified} / ${total} VERIFIED`;
+                `${passed} / ${total} PASSED`;
 
         }
 
 
-        /* -----------------------------------------------
+        /* =================================================
            SCORE
-        ----------------------------------------------- */
+        ================================================= */
 
         if (complianceScore) {
 
@@ -423,9 +908,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /* -----------------------------------------------
+        /* =================================================
            SCORE CIRCLE
-        ----------------------------------------------- */
+        ================================================= */
 
         if (scoreCircle) {
 
@@ -437,37 +922,50 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /* -----------------------------------------------
+        /* =================================================
            STATUS
-        ----------------------------------------------- */
+        ================================================= */
 
-        if (verified === 0) {
+        if (pending > 0) {
 
-            setPendingState();
+            setPendingState(
+                passed,
+                failed,
+                pending,
+                total
+            );
 
-        } else if (verified < total) {
+        } else if (failed > 0) {
 
-            setPartialState(
+            setNonCompliantState(
                 score,
-                verified,
+                passed,
+                failed,
                 total
             );
 
         } else {
 
-            setCompleteState();
+            setCompleteState(
+                score,
+                passed,
+                total
+            );
 
         }
 
 
-        /* -----------------------------------------------
-           SAVE CURRENT STATE
-        ----------------------------------------------- */
+        /* =================================================
+           SAVE DRAFT
+        ================================================= */
 
         saveComplianceDraft(
             score,
-            verified,
-            total
+            passed,
+            failed,
+            pending,
+            total,
+            checks
         );
 
     }
@@ -477,44 +975,10 @@ document.addEventListener("DOMContentLoaded", () => {
        PENDING STATE
     ===================================================== */
 
-    function setPendingState() {
-
-        if (scoreBadge) {
-
-            scoreBadge.textContent =
-                "PENDING";
-
-            scoreBadge.className =
-                "score-badge pending";
-
-        }
-
-
-        if (scoreMessage) {
-
-            scoreMessage.textContent =
-                "Complete the verification checklist to calculate the compliance score.";
-
-        }
-
-
-        if (decisionText) {
-
-            decisionText.textContent =
-                "Verify all checklist items before proceeding to the final inspection result.";
-
-        }
-
-    }
-
-
-    /* =====================================================
-       PARTIAL STATE
-    ===================================================== */
-
-    function setPartialState(
-        score,
-        verified,
+    function setPendingState(
+        passed,
+        failed,
+        pending,
         total
     ) {
 
@@ -532,7 +996,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (scoreMessage) {
 
             scoreMessage.textContent =
-                `${verified} of ${total} declarations have been verified.`;
+                `${passed} passed, ${failed} failed, ${pending} awaiting officer verification.`;
 
         }
 
@@ -540,7 +1004,47 @@ document.addEventListener("DOMContentLoaded", () => {
         if (decisionText) {
 
             decisionText.textContent =
-                "Some declarations are still pending verification.";
+                "Complete officer verification for all detected declarations before generating the final result.";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       NON-COMPLIANT STATE
+    ===================================================== */
+
+    function setNonCompliantState(
+        score,
+        passed,
+        failed,
+        total
+    ) {
+
+        if (scoreBadge) {
+
+            scoreBadge.textContent =
+                "NON-COMPLIANT";
+
+            scoreBadge.className =
+                "score-badge non-compliant";
+
+        }
+
+
+        if (scoreMessage) {
+
+            scoreMessage.textContent =
+                `${failed} mandatory requirement(s) failed. Compliance score: ${score}%.`;
+
+        }
+
+
+        if (decisionText) {
+
+            decisionText.textContent =
+                "One or more mandatory declarations are missing or non-compliant. A non-compliance result can be generated.";
 
         }
 
@@ -551,12 +1055,16 @@ document.addEventListener("DOMContentLoaded", () => {
        COMPLETE STATE
     ===================================================== */
 
-    function setCompleteState() {
+    function setCompleteState(
+        score,
+        passed,
+        total
+    ) {
 
         if (scoreBadge) {
 
             scoreBadge.textContent =
-                "VERIFIED";
+                "COMPLIANT";
 
             scoreBadge.className =
                 "score-badge compliant";
@@ -567,7 +1075,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (scoreMessage) {
 
             scoreMessage.textContent =
-                "All mandatory declaration checks have been verified by the officer.";
+                `All ${total} mandatory checklist items have been verified successfully.`;
 
         }
 
@@ -575,7 +1083,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (decisionText) {
 
             decisionText.textContent =
-                "All mandatory checklist items have been verified. The inspection result can now be generated.";
+                "All mandatory declarations have been detected and verified by the officer. The inspection result can now be generated.";
 
         }
 
@@ -588,59 +1096,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function saveComplianceDraft(
         score,
-        verified,
-        total
+        passed,
+        failed,
+        pending,
+        total,
+        checks
     ) {
-
-        const checks =
-            Array.from(ruleCheckboxes)
-                .map(checkbox => {
-
-                    const rule =
-                        checkbox.dataset.rule;
-
-                    const ruleItem =
-                        checkbox.closest(
-                            ".rule-item"
-                        );
-
-                    const title =
-                        ruleItem
-                            ?.querySelector(
-                                ".rule-content strong"
-                            )
-                            ?.textContent
-                            .trim() ||
-                        rule;
-
-
-                    const description =
-                        ruleItem
-                            ?.querySelector(
-                                ".rule-content small"
-                            )
-                            ?.textContent
-                            .trim() ||
-                        "";
-
-
-                    return {
-
-                        rule,
-
-                        name: title,
-
-                        description,
-
-                        status:
-                            checkbox.checked
-                                ? "pass"
-                                : "fail"
-
-                    };
-
-                });
-
 
         const violations =
             checks
@@ -656,17 +1117,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         description:
                             check.description ||
-                            "Requirement has not been verified."
+                            "Mandatory declaration was not detected.",
+
+                        extractedValue:
+                            check.extractedValue || ""
 
                     })
                 );
 
 
-        const status =
-            verified === total &&
+        let status = "pending";
+
+
+        if (
+            pending === 0 &&
+            failed === 0 &&
             total > 0
-                ? "compliant"
-                : "non-compliant";
+        ) {
+
+            status = "compliant";
+
+        } else if (
+            pending === 0 &&
+            failed > 0
+        ) {
+
+            status = "non-compliant";
+
+        }
 
 
         const complianceResult = {
@@ -675,15 +1153,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
             score,
 
-            verified,
-
             total,
+
+            passed,
+
+            failed,
+
+            pending,
 
             status,
 
             checks,
 
             violations,
+
+            product:
+                productData,
+
+            officer: {
+
+                name:
+                    savedOfficerName,
+
+                id:
+                    savedOfficerId
+
+            },
 
             observation:
                 observation
@@ -729,8 +1224,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     const data =
                         JSON.parse(saved);
 
+
                     data.observation =
                         observation.value.trim();
+
 
                     localStorage.setItem(
                         "complianceResult",
@@ -762,31 +1259,45 @@ document.addEventListener("DOMContentLoaded", () => {
             "click",
             () => {
 
-                const total =
-                    ruleCheckboxes.length;
+                const checks =
+                    buildChecks();
 
-                const verified =
-                    Array.from(
-                        ruleCheckboxes
-                    )
-                    .filter(
-                        checkbox =>
-                            checkbox.checked
-                    )
-                    .length;
+
+                const total =
+                    checks.length;
+
+
+                const passed =
+                    checks.filter(
+                        check =>
+                            check.status === "pass"
+                    ).length;
+
+
+                const failed =
+                    checks.filter(
+                        check =>
+                            check.status === "fail"
+                    ).length;
+
+
+                const pending =
+                    checks.filter(
+                        check =>
+                            check.status === "pending"
+                    ).length;
 
 
                 /*
-                   Require all checklist items.
-                */
+                 * Do not allow final result
+                 * while officer verification
+                 * is incomplete.
+                 */
 
-                if (
-                    total === 0 ||
-                    verified !== total
-                ) {
+                if (pending > 0) {
 
                     alert(
-                        "Please verify all mandatory compliance checklist items before generating the result."
+                        `Please verify all detected declarations before generating the result.\n\nPending verification: ${pending}`
                     );
 
                     return;
@@ -795,106 +1306,90 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                   Get final score
-                */
+                 * Calculate actual score.
+                 */
 
                 const score =
-                    Math.round(
-                        (verified / total) * 100
-                    );
+                    total > 0
+                        ? Math.round(
+                            (passed / total) * 100
+                        )
+                        : 0;
 
 
                 /*
-                   Collect checks
-                */
+                 * Missing declarations
+                 * become violations.
+                 */
 
-                const checks =
-                    Array.from(
-                        ruleCheckboxes
-                    )
-                    .map(checkbox => {
+                const violations =
+                    checks
+                        .filter(
+                            check =>
+                                check.status ===
+                                "fail"
+                        )
+                        .map(
+                            check => ({
 
-                        const rule =
-                            checkbox.dataset.rule;
+                                title:
+                                    check.name,
 
-                        const ruleItem =
-                            checkbox.closest(
-                                ".rule-item"
-                            );
+                                description:
+                                    check.description ||
+                                    "Mandatory declaration was not detected.",
 
-                        const name =
-                            ruleItem
-                                ?.querySelector(
-                                    ".rule-content strong"
-                                )
-                                ?.textContent
-                                .trim() ||
-                            rule;
+                                extractedValue:
+                                    check.extractedValue || ""
 
-
-                        const description =
-                            ruleItem
-                                ?.querySelector(
-                                    ".rule-content small"
-                                )
-                                ?.textContent
-                                .trim() ||
-                            "";
-
-
-                        return {
-
-                            rule,
-
-                            name,
-
-                            description,
-
-                            status:
-                                checkbox.checked
-                                    ? "pass"
-                                    : "fail"
-
-                        };
-
-                    });
+                            })
+                        );
 
 
                 /*
-                   Save final result
-                */
+                 * Final compliance status.
+                 */
+
+                const status =
+                    failed === 0 &&
+                    passed === total &&
+                    total > 0
+                        ? "compliant"
+                        : "non-compliant";
+
 
                 const finalResult = {
 
                     inspectionId,
 
-                    status:
-                        score === 100
-                            ? "compliant"
-                            : "non-compliant",
+                    status,
 
                     score,
 
+                    total,
+
+                    passed,
+
+                    failed,
+
+                    pending,
+
                     checks,
 
-                    violations:
-                        checks
-                            .filter(
-                                check =>
-                                    check.status ===
-                                    "fail"
-                            )
-                            .map(
-                                check => ({
+                    violations,
 
-                                    title:
-                                        check.name,
+                    product:
+                        productData,
 
-                                    description:
-                                        check.description
+                    officer: {
 
-                                })
-                            ),
+                        name:
+                            savedOfficerName,
+
+                        id:
+                            savedOfficerId
+
+                    },
 
                     observation:
                         observation
@@ -916,8 +1411,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 /*
-                   Go to final result page
-                */
+                 * Go to result page.
+                 */
 
                 window.location.href =
                     "result.html";
@@ -990,6 +1485,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     "aiAnalysisResult"
                 );
 
+                localStorage.removeItem(
+                    "currentInspectionId"
+                );
+
                 sessionStorage.removeItem(
                     "eParakhCapturedImage"
                 );
@@ -1034,5 +1533,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
     }
+
+
+    /* =====================================================
+       INITIAL CALCULATION
+    ===================================================== */
+
+    calculateCompliance();
 
 });
