@@ -1,0 +1,834 @@
+{
+  "compliance_result": {
+    "checks": [
+      {
+        "applicability": "Packaged commodities; exact applicable declarations must be confirmed for the commodity.",
+        "confidence": null,
+        "evidence": [],
+        "field": "declarations",
+        "message": "Structured declaration information was extracted from the package image.",
+        "requires_human_verification": true,
+        "rule_id": "PC-001",
+        "rule_name": "Mandatory declaration information",
+        "ruleset_version": "0.2.0",
+        "severity": "MEDIUM",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "PASS",
+        "validation_type": "presence",
+        "value": "5 declaration fields detected"
+      },
+      {
+        "applicability": "Packaged commodities; exact prescribed declaration and presentation require human verification.",
+        "confidence": null,
+        "evidence": [],
+        "field": "product_name",
+        "message": "Product Name was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+        "requires_human_verification": true,
+        "rule_id": "PC-002",
+        "rule_name": "Product name / commodity identification",
+        "ruleset_version": "0.2.0",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "PASS",
+        "validation_type": "presence",
+        "value": "DRUMS Food Consumer Care"
+      },
+      {
+        "applicability": "Packaged commodities; responsible-party category and prescribed wording require human verification.",
+        "confidence": null,
+        "evidence": [],
+        "field": "manufacturer",
+        "message": "Manufacturer was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+        "requires_human_verification": true,
+        "rule_id": "PC-003",
+        "rule_name": "Manufacturer / packer / importer information",
+        "ruleset_version": "0.2.0",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "PASS",
+        "validation_type": "presence",
+        "value": "T , N.2 (U30)"
+      },
+      {
+        "applicability": "Where applicable under the packaged commodity requirements.",
+        "confidence": null,
+        "evidence": [],
+        "field": "manufacturer_address",
+        "message": "Manufacturer Address was not detected by OCR. This is not by itself proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-004",
+        "rule_name": "Manufacturer address",
+        "ruleset_version": "0.2.0",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "presence",
+        "value": null
+      },
+      {
+        "applicability": "Where net quantity declaration applies.",
+        "confidence": null,
+        "evidence": [],
+        "field": "net_quantity",
+        "message": "Net Quantity was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+        "requires_human_verification": true,
+        "rule_id": "PC-005",
+        "rule_name": "Net quantity declaration",
+        "ruleset_version": "0.2.0",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "PASS",
+        "validation_type": "presence_and_format",
+        "value": "85 g"
+      },
+      {
+        "applicability": "Where MRP declaration applies.",
+        "confidence": null,
+        "evidence": [],
+        "field": "mrp",
+        "message": "Mrp was not detected by OCR. This is not by itself proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-006",
+        "rule_name": "Maximum Retail Price (MRP)",
+        "ruleset_version": "0.2.0",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "presence_and_format",
+        "value": null
+      },
+      {
+        "applicability": "Where applicable to the commodity.",
+        "confidence": null,
+        "evidence": [],
+        "field": "batch_number",
+        "message": "Batch Number was not detected by OCR. This is not by itself proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-007",
+        "rule_name": "Batch / lot identification",
+        "ruleset_version": "0.2.0",
+        "severity": "MEDIUM",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "presence",
+        "value": null
+      },
+      {
+        "applicability": "Where applicable; exact declaration format requires human verification.",
+        "confidence": null,
+        "evidence": [],
+        "field": "date_of_manufacture",
+        "message": "Date Of Manufacture was not detected by OCR. This is not by itself proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-008",
+        "rule_name": "Date of manufacture / packing",
+        "ruleset_version": "0.2.0",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "presence_and_format",
+        "value": null
+      },
+      {
+        "applicability": "Where applicable to the commodity.",
+        "confidence": null,
+        "evidence": [],
+        "field": "use_by",
+        "message": "Use By was not detected by OCR. This is not by itself proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-009",
+        "rule_name": "Use-by / best-before declaration",
+        "ruleset_version": "0.2.0",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "presence_and_format",
+        "value": null
+      },
+      {
+        "applicability": "Where consumer care declaration applies.",
+        "confidence": null,
+        "evidence": [],
+        "field": "customer_care",
+        "message": "Customer Care was not detected by OCR. This is not by itself proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-010",
+        "rule_name": "Consumer care information",
+        "ruleset_version": "0.2.0",
+        "severity": "MEDIUM",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "presence",
+        "value": null
+      },
+      {
+        "applicability": "Where applicable, including applicable imported or relevant commodities.",
+        "confidence": null,
+        "evidence": [],
+        "field": "country_of_origin",
+        "message": "Country Of Origin was not detected by OCR. This is not by itself proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-011",
+        "rule_name": "Country of origin",
+        "ruleset_version": "0.2.0",
+        "severity": "MEDIUM",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "presence",
+        "value": null
+      },
+      {
+        "applicability": "Where applicable to the declaration context.",
+        "confidence": null,
+        "evidence": [],
+        "field": "brand_owner",
+        "message": "Brand Owner was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+        "requires_human_verification": true,
+        "rule_id": "PC-012",
+        "rule_name": "Brand owner information",
+        "ruleset_version": "0.2.0",
+        "severity": "MEDIUM",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "PASS",
+        "validation_type": "presence",
+        "value": "& Marketed by"
+      },
+      {
+        "applicability": "Relevant to food products where applicable; this is not itself a Legal Metrology determination.",
+        "confidence": null,
+        "evidence": [],
+        "field": "fssai_license",
+        "message": "Fssai License was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+        "requires_human_verification": true,
+        "rule_id": "PC-013",
+        "rule_name": "FSSAI license information",
+        "ruleset_version": "0.2.0",
+        "severity": "MEDIUM",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "PASS",
+        "validation_type": "format",
+        "value": "10019022008962"
+      },
+      {
+        "applicability": "Where applicable under the relevant environmental regulatory framework; not itself a Legal Metrology determination.",
+        "confidence": null,
+        "evidence": [],
+        "field": "epr_registration",
+        "message": "Epr Registration was not detected by OCR. This is not by itself proof of non-compliance.",
+        "requires_human_verification": true,
+        "rule_id": "PC-014",
+        "rule_name": "EPR registration information",
+        "ruleset_version": "0.2.0",
+        "severity": "LOW",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "format",
+        "value": null
+      },
+      {
+        "applicability": "Declaration presentation, prominence, readability and placement require package-context verification.",
+        "confidence": null,
+        "evidence": [],
+        "field": "placement",
+        "message": "Placement evidence was not supplied by the vision analysis pipeline.",
+        "requires_human_verification": true,
+        "rule_id": "PC-015",
+        "rule_name": "Declaration readability and placement",
+        "ruleset_version": "0.2.0",
+        "severity": "HIGH",
+        "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+        "status": "NOT_DETECTABLE",
+        "validation_type": "evidence_review",
+        "value": null
+      }
+    ],
+    "field_summary": {
+      "detected_fields": 5,
+      "fields": {
+        "batch_number": {
+          "detected": false,
+          "value": null
+        },
+        "brand_name": {
+          "detected": false,
+          "value": null
+        },
+        "brand_owner": {
+          "detected": true,
+          "value": "& Marketed by"
+        },
+        "country_of_origin": {
+          "detected": false,
+          "value": null
+        },
+        "customer_care": {
+          "detected": false,
+          "value": null
+        },
+        "date_of_manufacture": {
+          "detected": false,
+          "value": null
+        },
+        "epr_registration": {
+          "detected": false,
+          "value": null
+        },
+        "fssai_license": {
+          "detected": true,
+          "value": "10019022008962"
+        },
+        "ingredients": {
+          "detected": false,
+          "value": null
+        },
+        "manufacturer": {
+          "detected": true,
+          "value": "T , N.2 (U30)"
+        },
+        "manufacturer_address": {
+          "detected": false,
+          "value": null
+        },
+        "mrp": {
+          "detected": false,
+          "value": null
+        },
+        "net_quantity": {
+          "detected": true,
+          "value": "85 g"
+        },
+        "product_name": {
+          "detected": true,
+          "value": "DRUMS Food Consumer Care"
+        },
+        "use_by": {
+          "detected": false,
+          "value": null
+        }
+      },
+      "missing_fields": 10,
+      "total_fields": 15
+    },
+    "human_verification_required": true,
+    "machine_assessment": "This result is an automated evidence assessment based on OCR and image-derived information. It is not a final legal determination.",
+    "overall_status": "REVIEW_REQUIRED",
+    "recommended_action": "Review the package image, extracted declarations, supporting evidence and applicable rules before taking enforcement or regulatory action.",
+    "regulatory_action_allowed": false,
+    "ruleset_effective_date": "2026-08-30",
+    "ruleset_version": "0.2.0",
+    "score": 70,
+    "score_type": "MACHINE_EVIDENCE_SCORE",
+    "severity_summary": {
+      "HIGH": 5,
+      "LOW": 1,
+      "MEDIUM": 3
+    },
+    "source_reference": "Legal Metrology (Packaged Commodities) Rules, 2011 and applicable amendments; official verification required before regulatory action.",
+    "total_rules": 15,
+    "violation_summary": {
+      "not_detectable": [
+        {
+          "field": "manufacturer_address",
+          "message": "Manufacturer Address was not detected by OCR. This is not by itself proof of non-compliance.",
+          "rule_id": "PC-004",
+          "rule_name": "Manufacturer address",
+          "severity": "HIGH",
+          "value": null
+        },
+        {
+          "field": "mrp",
+          "message": "Mrp was not detected by OCR. This is not by itself proof of non-compliance.",
+          "rule_id": "PC-006",
+          "rule_name": "Maximum Retail Price (MRP)",
+          "severity": "HIGH",
+          "value": null
+        },
+        {
+          "field": "batch_number",
+          "message": "Batch Number was not detected by OCR. This is not by itself proof of non-compliance.",
+          "rule_id": "PC-007",
+          "rule_name": "Batch / lot identification",
+          "severity": "MEDIUM",
+          "value": null
+        },
+        {
+          "field": "date_of_manufacture",
+          "message": "Date Of Manufacture was not detected by OCR. This is not by itself proof of non-compliance.",
+          "rule_id": "PC-008",
+          "rule_name": "Date of manufacture / packing",
+          "severity": "HIGH",
+          "value": null
+        },
+        {
+          "field": "use_by",
+          "message": "Use By was not detected by OCR. This is not by itself proof of non-compliance.",
+          "rule_id": "PC-009",
+          "rule_name": "Use-by / best-before declaration",
+          "severity": "HIGH",
+          "value": null
+        },
+        {
+          "field": "customer_care",
+          "message": "Customer Care was not detected by OCR. This is not by itself proof of non-compliance.",
+          "rule_id": "PC-010",
+          "rule_name": "Consumer care information",
+          "severity": "MEDIUM",
+          "value": null
+        },
+        {
+          "field": "country_of_origin",
+          "message": "Country Of Origin was not detected by OCR. This is not by itself proof of non-compliance.",
+          "rule_id": "PC-011",
+          "rule_name": "Country of origin",
+          "severity": "MEDIUM",
+          "value": null
+        },
+        {
+          "field": "epr_registration",
+          "message": "Epr Registration was not detected by OCR. This is not by itself proof of non-compliance.",
+          "rule_id": "PC-014",
+          "rule_name": "EPR registration information",
+          "severity": "LOW",
+          "value": null
+        },
+        {
+          "field": "placement",
+          "message": "Placement evidence was not supplied by the vision analysis pipeline.",
+          "rule_id": "PC-015",
+          "rule_name": "Declaration readability and placement",
+          "severity": "HIGH",
+          "value": null
+        }
+      ],
+      "not_detectable_count": 9,
+      "passed": [
+        {
+          "field": "declarations",
+          "message": "Structured declaration information was extracted from the package image.",
+          "rule_id": "PC-001",
+          "rule_name": "Mandatory declaration information",
+          "severity": "MEDIUM",
+          "value": "5 declaration fields detected"
+        },
+        {
+          "field": "product_name",
+          "message": "Product Name was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+          "rule_id": "PC-002",
+          "rule_name": "Product name / commodity identification",
+          "severity": "HIGH",
+          "value": "DRUMS Food Consumer Care"
+        },
+        {
+          "field": "manufacturer",
+          "message": "Manufacturer was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+          "rule_id": "PC-003",
+          "rule_name": "Manufacturer / packer / importer information",
+          "severity": "HIGH",
+          "value": "T , N.2 (U30)"
+        },
+        {
+          "field": "net_quantity",
+          "message": "Net Quantity was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+          "rule_id": "PC-005",
+          "rule_name": "Net quantity declaration",
+          "severity": "HIGH",
+          "value": "85 g"
+        },
+        {
+          "field": "brand_owner",
+          "message": "Brand Owner was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+          "rule_id": "PC-012",
+          "rule_name": "Brand owner information",
+          "severity": "MEDIUM",
+          "value": "& Marketed by"
+        },
+        {
+          "field": "fssai_license",
+          "message": "Fssai License was detected and passed the basic machine-format check. Legal applicability and prescribed presentation require human verification.",
+          "rule_id": "PC-013",
+          "rule_name": "FSSAI license information",
+          "severity": "MEDIUM",
+          "value": "10019022008962"
+        }
+      ],
+      "passed_count": 6,
+      "potential_non_compliance": [],
+      "potential_non_compliance_count": 0,
+      "review_required": [],
+      "review_required_count": 0
+    }
+  },
+  "evidence": [
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "brand_name",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "manufacturer_address",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "mrp",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "batch_number",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "date_of_manufacture",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "use_by",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "ingredients",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": null,
+      "confidence": null,
+      "field": "country_of_origin",
+      "reason": "No declaration label or value bounding box was detected; image review is required.",
+      "status": "NOT_DETECTABLE"
+    },
+    {
+      "bbox": [
+        248.0,
+        452.0,
+        527.0,
+        510.0
+      ],
+      "confidence": 0.9712,
+      "field": "customer_care",
+      "reason": "Declaration label detected but value is missing or OCR confidence is limited.",
+      "status": "REVIEW_REQUIRED"
+    },
+    {
+      "bbox": [
+        271.0,
+        800.0,
+        477.0,
+        845.0
+      ],
+      "confidence": 0.9846,
+      "field": "epr_registration",
+      "reason": "Declaration label detected but value is missing or OCR confidence is limited.",
+      "status": "REVIEW_REQUIRED"
+    }
+  ],
+  "extracted_data": {
+    "batch_number": null,
+    "brand_name": null,
+    "brand_owner": "& Marketed by",
+    "country_of_origin": null,
+    "customer_care": null,
+    "date_of_manufacture": null,
+    "epr_registration": null,
+    "fssai_license": "10019022008962",
+    "ingredients": null,
+    "manufacturer": "T , N.2 (U30)",
+    "manufacturer_address": null,
+    "mrp": null,
+    "net_quantity": "85 g",
+    "product_name": "DRUMS Food Consumer Care",
+    "use_by": null
+  },
+  "filename": "curd.jpeg",
+  "product": {
+    "batch_number": null,
+    "brand_name": null,
+    "brand_owner": "& Marketed by",
+    "country_of_origin": null,
+    "customer_care": null,
+    "date_of_manufacture": null,
+    "epr_registration": null,
+    "fssai_license": "10019022008962",
+    "ingredients": null,
+    "manufacturer": "T , N.2 (U30)",
+    "manufacturer_address": null,
+    "mrp": null,
+    "net_quantity": "85 g",
+    "product_name": "DRUMS Food Consumer Care",
+    "use_by": null
+  },
+  "raw_ocr_text": "DRUMS Food Consumer Care:\n+91 80-47192272\nOur food has zero preservatives. So be sure\nnot to purchase if puffed or leaking and\nASamamare\nkeep refrigerated at 4C or below. Do reach\nou i you feel ihas been compromised!\nEmail:hello@epigamia.com\nVisitusawww.epigamia.com\n@epigamia\n@epigamia.official\nwww.facebook.com/Epigamia\n8\"\n906059\n635007\nBrand Owner & Marketed by:\nDRUMS Food International Pvt.Ld.\nManufactured by:\nT , N.2 (U30)\nrgu\nMaety, LBS Marg, Kurla (West),Mumbai-400070\nlukaWadaDaMara\nfssai\nLic No. 10019022008962\nLic No. 10019022010155\n() Apha FdP LPAAC\nSeaAHaP\nEPR No. 20220630062225\nLic No. 10016051001899\n(J)FarmgaAgroMPLSey 2\nDaUDat\nPalmaeA\nLic No. 10018044001443\nNet Quantity:\n85 g\n(E) Fde F Pa N482-49-\nVa-\nLic No. 10021013000125",
+  "report": {
+    "generated_at": "2026-08-31T19:17:11.082562+00:00",
+    "html_path": "reports\\generated\\a3f5e602-c056-43cc-9fa4-3b938887376a.html",
+    "pdf_path": "reports\\generated\\a3f5e602-c056-43cc-9fa4-3b938887376a.pdf",
+    "report_id": "a3f5e602-c056-43cc-9fa4-3b938887376a"
+  },
+  "status": "success",
+  "vision_analysis": {
+    "font_size": {
+      "comparison_reference": "Median OCR text-region height: 40.5 pixels; relative only, not a physical font measurement.",
+      "confidence": 0.95,
+      "estimated_relative_size": "large",
+      "requires_human_verification": true,
+      "status": "REVIEW_REQUIRED"
+    },
+    "image_quality": {
+      "blur_estimate": null,
+      "brightness": null,
+      "confidence": null,
+      "contrast": null,
+      "height": null,
+      "reason": "The image could not be decoded.",
+      "requires_human_verification": true,
+      "status": "NOT_DETECTABLE",
+      "width": null
+    },
+    "ocr_confidence": {
+      "average_confidence": 0.8473,
+      "detection_count": 38,
+      "low_confidence_detections": [
+        {
+          "bbox": [
+            250.0,
+            515.0,
+            509.0,
+            574.0
+          ],
+          "confidence": 0.5771,
+          "text": "ASamamare"
+        },
+        {
+          "bbox": [
+            543.0,
+            523.0,
+            791.0,
+            559.0
+          ],
+          "confidence": 0.679,
+          "text": "ou i you feel ihas been compromised!"
+        },
+        {
+          "bbox": [
+            265.0,
+            714.0,
+            485.0,
+            754.0
+          ],
+          "confidence": 0.5959,
+          "text": "T , N.2 (U30)"
+        },
+        {
+          "bbox": [
+            537.0,
+            717.0,
+            770.0,
+            753.0
+          ],
+          "confidence": 0.5599,
+          "text": "lukaWadaDaMara"
+        },
+        {
+          "bbox": [
+            537.0,
+            755.0,
+            781.0,
+            795.0
+          ],
+          "confidence": 0.5898,
+          "text": "() Apha FdP LPAAC"
+        },
+        {
+          "bbox": [
+            537.0,
+            771.0,
+            783.0,
+            811.0
+          ],
+          "confidence": 0.5077,
+          "text": "SeaAHaP"
+        },
+        {
+          "bbox": [
+            538.0,
+            808.0,
+            795.0,
+            852.0
+          ],
+          "confidence": 0.5702,
+          "text": "(J)FarmgaAgroMPLSey 2"
+        },
+        {
+          "bbox": [
+            273.0,
+            841.0,
+            522.0,
+            886.0
+          ],
+          "confidence": 0.5766,
+          "text": "DaUDat"
+        },
+        {
+          "bbox": [
+            540.0,
+            841.0,
+            767.0,
+            879.0
+          ],
+          "confidence": 0.5601,
+          "text": "PalmaeA"
+        },
+        {
+          "bbox": [
+            541.0,
+            878.0,
+            762.0,
+            917.0
+          ],
+          "confidence": 0.5789,
+          "text": "(E) Fde F Pa N482-49-"
+        },
+        {
+          "bbox": [
+            541.0,
+            891.0,
+            768.0,
+            932.0
+          ],
+          "confidence": 0.5761,
+          "text": "Va-"
+        }
+      ],
+      "reason": "OCR confidence is adequate for preliminary machine assistance; human verification remains required.",
+      "requires_human_verification": true,
+      "status": "PASS"
+    },
+    "placement": {
+      "placements": [
+        {
+          "bbox": [
+            261.0,
+            681.0,
+            457.0,
+            720.0
+          ],
+          "confidence": 0.9999,
+          "detected": true,
+          "field": "manufacturer",
+          "location": null,
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            274.0,
+            891.0,
+            390.0,
+            940.0
+          ],
+          "confidence": 1.0,
+          "detected": true,
+          "field": "net_quantity",
+          "location": null,
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            336.0,
+            754.0,
+            400.0,
+            796.0
+          ],
+          "confidence": 0.918,
+          "detected": true,
+          "field": "fssai_license",
+          "location": null,
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            248.0,
+            452.0,
+            527.0,
+            510.0
+          ],
+          "confidence": 0.9712,
+          "detected": false,
+          "field": "customer_care",
+          "location": null,
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            261.0,
+            681.0,
+            457.0,
+            720.0
+          ],
+          "confidence": 0.9999,
+          "detected": true,
+          "field": "brand_owner",
+          "location": null,
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        },
+        {
+          "bbox": [
+            271.0,
+            800.0,
+            477.0,
+            845.0
+          ],
+          "confidence": 0.9846,
+          "detected": false,
+          "field": "epr_registration",
+          "location": null,
+          "machine_evaluable": false,
+          "reason": "A related OCR label was located, but legal placement requires package-context and human verification.",
+          "requires_human_verification": true,
+          "status": "REVIEW_REQUIRED"
+        }
+      ],
+      "requires_human_verification": true,
+      "status": "REVIEW_REQUIRED"
+    },
+    "readability": {
+      "confidence": 0.8473,
+      "reason": "Overall image quality is not confidently sufficient. Low sharpness may reduce text readability. Low contrast may reduce text readability.",
+      "requires_human_verification": true,
+      "status": "REVIEW_REQUIRED",
+      "text_regions": 38
+    }
+  }
+}

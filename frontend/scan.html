@@ -1,5 +1,7 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +10,9 @@
 
     <link rel="stylesheet" href="css/scanner.css">
 </head>
+
+<body>
+
     <!-- =====================================================
          HEADER
     ====================================================== -->
@@ -26,7 +31,6 @@
             </div>
 
         </div>
-
 
         <div class="header-right">
 
@@ -90,7 +94,6 @@
 
                 </div>
 
-
                 <div class="inspection-counter">
 
                     <span>Today's Inspections</span>
@@ -143,6 +146,75 @@
                     </div>
 
 
+                    <!-- PANEL SELECTOR -->
+
+                    <div class="panel-selector">
+
+                        <div class="panel-selector-label">
+                            Select Package Panel:
+                        </div>
+
+                        <div class="panel-buttons">
+
+                            <button
+                                type="button"
+                                class="panel-btn active"
+                                data-panel="FRONT"
+                                title="Front (Required)"
+                            >
+                                📸 Front<span class="required-badge">*</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="panel-btn"
+                                data-panel="BACK"
+                                title="Back (Optional)"
+                            >
+                                📸 Back
+                            </button>
+
+                            <button
+                                type="button"
+                                class="panel-btn"
+                                data-panel="SIDE"
+                                title="Side (Optional)"
+                            >
+                                📸 Side
+                            </button>
+
+                            <button
+                                type="button"
+                                class="panel-btn"
+                                data-panel="MRP_PANEL"
+                                title="MRP Panel (Optional)"
+                            >
+                                💰 MRP
+                            </button>
+
+                            <button
+                                type="button"
+                                class="panel-btn"
+                                data-panel="TOP"
+                                title="Top (Optional)"
+                            >
+                                📸 Top
+                            </button>
+
+                            <button
+                                type="button"
+                                class="panel-btn"
+                                data-panel="BOTTOM"
+                                title="Bottom (Optional)"
+                            >
+                                📸 Bottom
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
                     <!-- CAMERA AREA -->
 
                     <div
@@ -173,6 +245,41 @@
                                 Start Camera
                                 <span>→</span>
                             </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CAMERA STATUS -->
+
+                    <div
+                        class="camera-status"
+                        id="cameraStatus"
+                        hidden
+                    >
+
+                        <div class="status-checks">
+
+                            <div
+                                class="status-check"
+                                id="blurCheck"
+                            >
+                                <span class="check-icon">⏳</span>
+                                <span class="check-text">
+                                    Checking image clarity...
+                                </span>
+                            </div>
+
+                            <div
+                                class="status-check"
+                                id="lightingCheck"
+                            >
+                                <span class="check-icon">⏳</span>
+                                <span class="check-text">
+                                    Checking lighting...
+                                </span>
+                            </div>
 
                         </div>
 
@@ -215,10 +322,14 @@
 
                     </label>
 
+
+                    <!-- N-IMAGE UPLOAD -->
+
                     <input
                         type="file"
                         id="productImage"
                         accept="image/jpeg,image/png,image/webp"
+                        multiple
                         hidden
                     >
 
@@ -234,30 +345,134 @@
                         <div class="preview-header">
 
                             <div>
+
                                 <strong>
-                                    Selected Image
+                                    <span id="currentPanelLabel">
+                                        Front
+                                    </span>
+                                    Panel Images
                                 </strong>
 
                                 <span id="fileName">
                                     -
                                 </span>
+
                             </div>
 
-                            <button
-                                type="button"
-                                id="removeImageBtn"
-                                class="remove-btn"
-                            >
-                                Remove
-                            </button>
+                            <div class="preview-actions">
+
+                                <button
+                                    type="button"
+                                    id="retakeBtn"
+                                    class="retake-btn"
+                                    title="Retake this panel"
+                                >
+                                    🔄 Retake
+                                </button>
+
+                                <button
+                                    type="button"
+                                    id="removeImageBtn"
+                                    class="remove-btn"
+                                >
+                                    Remove
+                                </button>
+
+                            </div>
 
                         </div>
+
 
                         <img
                             id="imagePreview"
                             src=""
                             alt="Product label preview"
                         >
+
+
+                        <!-- Panel Status Grid -->
+
+                        <div class="panel-status-grid">
+
+                            <div
+                                class="panel-status-item"
+                                data-panel="FRONT"
+                            >
+                                <span class="panel-status-badge">
+                                    Front
+                                </span>
+
+                                <span class="panel-status-indicator">
+                                    ✓
+                                </span>
+                            </div>
+
+                            <div
+                                class="panel-status-item"
+                                data-panel="BACK"
+                            >
+                                <span class="panel-status-badge">
+                                    Back
+                                </span>
+
+                                <span class="panel-status-indicator">
+                                    -
+                                </span>
+                            </div>
+
+                            <div
+                                class="panel-status-item"
+                                data-panel="SIDE"
+                            >
+                                <span class="panel-status-badge">
+                                    Side
+                                </span>
+
+                                <span class="panel-status-indicator">
+                                    -
+                                </span>
+                            </div>
+
+                            <div
+                                class="panel-status-item"
+                                data-panel="MRP_PANEL"
+                            >
+                                <span class="panel-status-badge">
+                                    MRP
+                                </span>
+
+                                <span class="panel-status-indicator">
+                                    -
+                                </span>
+                            </div>
+
+                            <div
+                                class="panel-status-item"
+                                data-panel="TOP"
+                            >
+                                <span class="panel-status-badge">
+                                    Top
+                                </span>
+
+                                <span class="panel-status-indicator">
+                                    -
+                                </span>
+                            </div>
+
+                            <div
+                                class="panel-status-item"
+                                data-panel="BOTTOM"
+                            >
+                                <span class="panel-status-badge">
+                                    Bottom
+                                </span>
+
+                                <span class="panel-status-indicator">
+                                    -
+                                </span>
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -301,7 +516,6 @@
 
 
                     <div class="process-list">
-
 
                         <div class="process-item active">
 
@@ -434,7 +648,10 @@
                  RECENT INSPECTIONS
             ================================================== -->
 
-            <section class="recent-section" id="recent-section">
+            <section
+                class="recent-section"
+                id="recent-section"
+            >
 
                 <div class="section-heading">
 
@@ -516,3 +733,4 @@
 
 </body>
 </html>
+

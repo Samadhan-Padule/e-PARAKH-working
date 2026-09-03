@@ -1,10 +1,34 @@
-
 /* =========================================================
    e-PARAKH — PRODUCT INSPECTION JS
-   AI OCR + Inspection Workflow Controller
+   MASTER CORRECTED VERSION
+
+   FEATURES:
+   - Multi-panel image support
+   - FRONT / BACK / SIDE / TOP / BOTTOM / MRP / OTHER
+   - IndexedDB panel image loading
+   - Multi-panel AI OCR
+   - Combined OCR result
+   - Combined extracted declarations
+   - FRONT result used as primary compliance result
+   - AI request timeout
+   - Prevents duplicate AI requests
+   - Safe Base64 image handling
+   - AI result stored safely
+   - Handles Flask 200/500 responses
+   - Handles invalid JSON
+   - Handles network/CORS errors
+   - Manual verification remains possible
+   - Draft save/load
+   - Compliance navigation
+   - Logout
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
+
+    console.log("=================================");
+    console.log("e-PARAKH Inspection JS loaded");
+    console.log("=================================");
+
 
     /* =====================================================
        ELEMENTS
@@ -58,7 +82,43 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     const AI_SERVICE_URL =
-        "http://localhost:8000/analyze";
+        "http://127.0.0.1:8000/analyze";
+
+    const AI_TIMEOUT_MS =
+        180000;
+
+
+    /* =====================================================
+       STORAGE KEYS
+    ===================================================== */
+
+    const IMAGE_STORAGE_KEY =
+        "eParakhCapturedImage";
+
+    const CURRENT_INSPECTION_KEY =
+        "currentInspection";
+
+    const DRAFT_KEY =
+        "inspectionDraft";
+
+    const AI_RESULT_KEY =
+        "aiAnalysisResult";
+
+    const INSPECTION_ID_KEY =
+        "currentInspectionId";
+
+
+    /* =====================================================
+       INDEXEDDB — MULTI-PANEL STORAGE
+    ===================================================== */
+
+    const PANEL_DB_NAME =
+        "eParakhScannerDB";
+
+    const PANEL_DB_VERSION = 3;
+
+    const PANEL_STORE_NAME =
+        "panelImages";
 
 
     /* =====================================================
@@ -66,24 +126,24 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     const savedOfficerName =
-        localStorage.getItem("officerName");
+        localStorage.getItem("officerName") || "";
 
     const savedOfficerId =
-        localStorage.getItem("officerId");
+        localStorage.getItem("officerId") || "";
 
 
-    if (savedOfficerName && officerName) {
+    if (officerName) {
 
         officerName.textContent =
-            savedOfficerName;
+            savedOfficerName || "Authorized Officer";
 
     }
 
 
-    if (savedOfficerId && officerId) {
+    if (officerId) {
 
         officerId.textContent =
-            savedOfficerId;
+            savedOfficerId || "Officer";
 
     }
 
@@ -92,34 +152,44 @@ document.addEventListener("DOMContentLoaded", () => {
        OFFICER INITIALS
     ===================================================== */
 
-    if (savedOfficerName && officerInitials) {
+    if (officerInitials) {
 
-        const words =
-            savedOfficerName
-                .trim()
-                .split(/\s+/);
+        const name =
+            savedOfficerName.trim();
 
-        let initials = "";
+        if (name) {
 
-        if (words.length === 1) {
+            const words =
+                name.split(/\s+/);
 
-            initials =
-                words[0]
-                    .substring(0, 2)
-                    .toUpperCase();
+            let initials = "";
+
+            if (words.length === 1) {
+
+                initials =
+                    words[0]
+                        .substring(0, 2)
+                        .toUpperCase();
+
+            } else {
+
+                initials =
+                    (
+                        words[0][0] +
+                        words[words.length - 1][0]
+                    ).toUpperCase();
+
+            }
+
+            officerInitials.textContent =
+                initials;
 
         } else {
 
-            initials =
-                (
-                    words[0][0] +
-                    words[words.length - 1][0]
-                ).toUpperCase();
+            officerInitials.textContent =
+                "AO";
 
         }
-
-        officerInitials.textContent =
-            initials;
 
     }
 
@@ -129,7 +199,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     let inspectionId =
-        localStorage.getItem("currentInspectionId");
+        localStorage.getItem(
+            INSPECTION_ID_KEY
+        );
 
 
     if (!inspectionId) {
@@ -137,10 +209,21 @@ document.addEventListener("DOMContentLoaded", () => {
         inspectionId =
             generateInspectionId();
 
-        localStorage.setItem(
-            "currentInspectionId",
-            inspectionId
-        );
+        try {
+
+            localStorage.setItem(
+                INSPECTION_ID_KEY,
+                inspectionId
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Inspection ID could not be stored:",
+                error
+            );
+
+        }
 
     }
 
@@ -159,7 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
             new Date().getFullYear();
 
         const randomNumber =
-            String(Date.now()).slice(-6);
+            String(
+                Date.now()
+            ).slice(-6);
 
         return `EP-${year}-${randomNumber}`;
 
@@ -167,24 +252,419 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       LOAD SCANNED IMAGE
+       AI REQUEST CONTROL
     ===================================================== */
 
-    const savedImage =
-        sessionStorage.getItem(
-            "eParakhCapturedImage"
-        );
+    let aiRequestRunning =
+        false;
+
+    let aiCompleted =
+        false;
 
 
-    if (savedImage) {
+    /* =====================================================
+       LOAD MULTI-PANEL IMAGES FROM INDEXEDDB
+    ===================================================== */
 
-        showProductImage(savedImage);
+    async function loadPanelImagesFromDB() {
 
-        analyzeProductWithAI(savedImage);
+    return new Promise((resolve, reject) => {
 
-    } else {
+        if (!window.indexedDB) {
+            resolve([]);
+            return;
+        }
 
-        showPlaceholder();
+        /*
+         * =====================================================
+         * CURRENT CAMERA STORAGE
+         * =====================================================
+         *
+         * DB:
+         * eParakhEvidenceDB
+         *
+         * Store:
+         * inspectionEvidence
+         *
+         * Values are DataURL strings.
+         *
+         * Keys:
+         * front, back, side, batch
+         */
+
+        const DB_NAME = "eParakhEvidenceDB";
+        const STORE_NAME = "inspectionEvidence";
+
+        const request = indexedDB.open(DB_NAME);
+
+        request.onerror = () => {
+
+            console.error(
+                "Unable to open evidence IndexedDB:",
+                request.error
+            );
+
+            resolve([]);
+        };
+
+        request.onsuccess = () => {
+
+            const db = request.result;
+
+            try {
+
+                if (
+                    !db.objectStoreNames.contains(
+                        STORE_NAME
+                    )
+                ) {
+
+                    console.warn(
+                        "Evidence store not found:",
+                        STORE_NAME
+                    );
+
+                    db.close();
+
+                    resolve([]);
+
+                    return;
+                }
+
+                const transaction =
+                    db.transaction(
+                        STORE_NAME,
+                        "readonly"
+                    );
+
+                const store =
+                    transaction.objectStore(
+                        STORE_NAME
+                    );
+
+                const getAllKeysRequest =
+                    store.getAllKeys();
+
+                const getAllValuesRequest =
+                    store.getAll();
+
+                getAllKeysRequest.onerror = () => {
+
+                    console.error(
+                        "Unable to read evidence keys:",
+                        getAllKeysRequest.error
+                    );
+
+                    db.close();
+
+                    resolve([]);
+                };
+
+                getAllValuesRequest.onerror = () => {
+
+                    console.error(
+                        "Unable to read evidence images:",
+                        getAllValuesRequest.error
+                    );
+
+                    db.close();
+
+                    resolve([]);
+                };
+
+                /*
+                 * Wait for both keys and values.
+                 */
+
+                let keys = null;
+                let values = null;
+
+                function finishIfReady() {
+
+                    if (
+                        !keys ||
+                        !values
+                    ) {
+                        return;
+                    }
+
+                    const images = [];
+
+                    for (
+                        let i = 0;
+                        i < keys.length;
+                        i++
+                    ) {
+
+                        const key =
+                            String(
+                                keys[i]
+                            ).toLowerCase();
+
+                        const dataUrl =
+                            values[i];
+
+                        if (
+                            typeof dataUrl === "string" &&
+                            dataUrl.startsWith("data:image/")
+                        ) {
+
+                            images.push({
+                                panel:
+                                    key.toUpperCase(),
+
+                                dataUrl:
+                                    dataUrl
+                            });
+                        }
+                    }
+
+                    /*
+                     * Keep a predictable order.
+                     */
+
+                    const order = [
+                        "FRONT",
+                        "BACK",
+                        "SIDE",
+                        "BATCH"
+                    ];
+
+                    images.sort(
+                        (a, b) =>
+                            order.indexOf(a.panel) -
+                            order.indexOf(b.panel)
+                    );
+
+                    console.log(
+                        "Evidence images loaded:",
+                        images.length
+                    );
+
+                    console.log(
+                        "Evidence panels:",
+                        images.map(
+                            image =>
+                                image.panel
+                        )
+                    );
+
+                    db.close();
+
+                    resolve(images);
+                }
+
+                getAllKeysRequest.onsuccess = () => {
+
+                    keys =
+                        getAllKeysRequest.result || [];
+
+                    finishIfReady();
+                };
+
+                getAllValuesRequest.onsuccess = () => {
+
+                    values =
+                        getAllValuesRequest.result || [];
+
+                    finishIfReady();
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Evidence IndexedDB transaction error:",
+                    error
+                );
+
+                db.close();
+
+                resolve([]);
+            }
+        };
+    });
+}
+    /* =====================================================
+       INITIALIZE INSPECTION IMAGES
+    ===================================================== */
+
+    async function initializeInspectionImages() {
+
+        try {
+
+            const panelImages =
+                await loadPanelImagesFromDB();
+
+
+            console.log(
+                "Panel images found:",
+                panelImages.length
+            );
+
+
+            console.log(
+                "Panels:",
+                panelImages.map(
+                    image => image.panel
+                )
+            );
+
+
+            /* ==========================================
+               MULTI-PANEL FLOW
+            ========================================== */
+
+            if (
+                panelImages.length > 0
+            ) {
+
+                const frontImage =
+                    panelImages.find(
+                        image =>
+                            image.panel === "FRONT"
+                    );
+
+
+                /*
+                 * Show FRONT as main preview.
+                 */
+
+                if (frontImage) {
+
+                    showProductImage(
+                        frontImage.dataUrl
+                    );
+
+
+                    /*
+                     * Backward compatibility.
+                     */
+
+                    try {
+
+                        sessionStorage.setItem(
+                            IMAGE_STORAGE_KEY,
+                            frontImage.dataUrl
+                        );
+
+                    } catch (storageError) {
+
+                        console.warn(
+                            "Unable to save FRONT image:",
+                            storageError
+                        );
+
+                    }
+
+                } else {
+
+                    /*
+                     * No FRONT image.
+                     * Show first available panel.
+                     */
+
+                    showProductImage(
+                        panelImages[0].dataUrl
+                    );
+
+                }
+
+
+                /*
+                 * Start multi-panel AI.
+                 */
+
+                await analyzeProductWithAI(
+                    panelImages
+                );
+
+
+                return;
+
+            }
+
+
+            /* ==========================================
+               LEGACY SINGLE IMAGE FALLBACK
+            ========================================== */
+
+            const savedImage =
+                sessionStorage.getItem(
+                    IMAGE_STORAGE_KEY
+                );
+
+
+            console.log(
+                "Legacy image available:",
+                !!savedImage
+            );
+
+
+            if (savedImage) {
+
+                showProductImage(
+                    savedImage
+                );
+
+
+                await analyzeProductWithAI(
+                    savedImage
+                );
+
+            } else {
+
+                showPlaceholder();
+
+
+                showAIStatus(
+                    "No product image found. Please scan or upload a product image.",
+                    "error"
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Unable to initialize inspection images:",
+                error
+            );
+
+
+            /*
+             * Fallback to legacy image.
+             */
+
+            const savedImage =
+                sessionStorage.getItem(
+                    IMAGE_STORAGE_KEY
+                );
+
+
+            if (savedImage) {
+
+                showProductImage(
+                    savedImage
+                );
+
+
+                await analyzeProductWithAI(
+                    savedImage
+                );
+
+            } else {
+
+                showPlaceholder();
+
+
+                showAIStatus(
+                    "Unable to load product images. You may continue with manual verification.",
+                    "error"
+                );
+
+            }
+
+        }
 
     }
 
@@ -193,9 +673,20 @@ document.addEventListener("DOMContentLoaded", () => {
        SHOW PRODUCT IMAGE
     ===================================================== */
 
-    function showProductImage(imageSource) {
+    function showProductImage(
+        imageSource
+    ) {
 
-        if (!productImage) return;
+        if (!productImage) {
+
+            console.warn(
+                "productImage element not found."
+            );
+
+            return;
+
+        }
+
 
         productImage.src =
             imageSource;
@@ -251,254 +742,1050 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-   AI OCR ANALYSIS
-===================================================== */
+       AI OCR ANALYSIS
+    ===================================================== */
 
-async function analyzeProductWithAI(imageData) {
+    async function analyzeProductWithAI(
+        imageData
+    ) {
 
-    showAIStatus(
-        "Analyzing product label with AI OCR...",
-        "loading"
-    );
+        /*
+         * Prevent duplicate requests.
+         */
 
-    try {
+        if (aiRequestRunning) {
 
-        console.log("AI ANALYSIS STARTED");
-        console.log("Image exists:", !!imageData);
-        console.log("Image length:", imageData ? imageData.length : 0);
-        console.log("AI URL:", AI_SERVICE_URL);
-
-        /* Convert captured Base64 image to Blob */
-
-        const response = await fetch(imageData);
-
-        if (!response.ok) {
-            throw new Error(
-                "Unable to read captured product image."
+            console.warn(
+                "AI request already running."
             );
+
+            return;
+
         }
 
-        const blob = await response.blob();
+
+        if (aiCompleted) {
+
+            console.log(
+                "AI analysis already completed."
+            );
+
+            return;
+
+        }
+
+
+        if (!imageData) {
+
+            showAIStatus(
+                "Product image is missing.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        aiRequestRunning =
+            true;
+
+
+        showAIStatus(
+            "Analyzing product label with AI OCR...",
+            "loading"
+        );
+
+
+        console.log("=================================");
+        console.log("AI OCR START");
+
 
         console.log(
-            "Image converted:",
-            blob.type,
-            blob.size
+            "AI Service:",
+            AI_SERVICE_URL
         );
 
-        /* Create multipart form */
 
-        const formData = new FormData();
-
-        formData.append(
-            "image",
-            blob,
-            "scanned-product.jpg"
+        console.log(
+            "AI Timeout:",
+            AI_TIMEOUT_MS / 1000,
+            "seconds"
         );
 
-        console.log("Sending image to AI service...");
 
-        /* Send image to Flask AI service */
+        console.log("=================================");
 
-        const aiResponse = await fetch(
-            AI_SERVICE_URL,
-            {
-                method: "POST",
-                body: formData
+
+        try {
+
+            /* =================================================
+               STEP 1 — PREPARE MULTI-PANEL IMAGES
+            ================================================= */
+
+            showAIStatus(
+                "Preparing product images for AI OCR...",
+                "loading"
+            );
+
+
+            let imagesToAnalyze =
+                [];
+
+
+            /*
+             * Multi-panel input.
+             */
+
+            if (
+                Array.isArray(imageData)
+            ) {
+
+                imagesToAnalyze =
+                    imageData;
+
             }
-        );
 
-        console.log(
-            "AI HTTP response:",
-            aiResponse.status
-        );
 
-        if (!aiResponse.ok) {
+            /*
+             * Legacy single image.
+             */
 
-            throw new Error(
-                `AI service returned HTTP ${aiResponse.status}`
+            else if (
+                imageData
+            ) {
+
+                imagesToAnalyze = [
+
+                    {
+                        panel:
+                            "FRONT",
+
+                        dataUrl:
+                            imageData,
+
+                        name:
+                            "scanned-product.jpg",
+
+                        type:
+                            "image/jpeg"
+
+                    }
+
+                ];
+
+            }
+
+
+            if (
+                !imagesToAnalyze.length
+            ) {
+
+                throw new Error(
+                    "No product images available for OCR."
+                );
+
+            }
+
+
+            console.log(
+                "Images to analyze:",
+                imagesToAnalyze.length
             );
+
+
+            console.log(
+                "Panels:",
+                imagesToAnalyze.map(
+                    image =>
+                        image.panel
+                )
+            );
+
+
+            /* =================================================
+               STEP 2 — ANALYZE EACH PANEL
+            ================================================= */
+
+            const analysisResults =
+                [];
+
+
+            for (
+                let i = 0;
+                i < imagesToAnalyze.length;
+                i++
+            ) {
+
+                const panelImage =
+                    imagesToAnalyze[i];
+
+
+                const panelName =
+                    panelImage.panel ||
+                    "OTHER";
+
+
+                showAIStatus(
+                    `Analyzing ${panelName} panel (${i + 1}/${imagesToAnalyze.length})...`,
+                    "loading"
+                );
+
+
+                console.log(
+                    `OCR ${i + 1}/${imagesToAnalyze.length}:`,
+                    panelName
+                );
+
+
+                if (
+                    !panelImage.dataUrl
+                ) {
+
+                    console.warn(
+                        `${panelName} image has no data URL. Skipping.`
+                    );
+
+                    continue;
+
+                }
+
+
+                let imageResponse;
+
+
+                try {
+
+                    /*
+                     * Convert Data URL into Blob.
+                     */
+
+                    imageResponse =
+                        await fetch(
+                            panelImage.dataUrl
+                        );
+
+                } catch (imageError) {
+
+                    console.warn(
+                        `Unable to read ${panelName} image:`,
+                        imageError
+                    );
+
+                    continue;
+
+                }
+
+
+                if (
+                    !imageResponse.ok
+                ) {
+
+                    console.warn(
+                        `Unable to read ${panelName} image. HTTP ${imageResponse.status}`
+                    );
+
+                    continue;
+
+                }
+
+
+                const blob =
+                    await imageResponse.blob();
+
+
+                if (
+                    !blob ||
+                    !blob.size
+                ) {
+
+                    console.warn(
+                        `Empty image for ${panelName}. Skipping.`
+                    );
+
+                    continue;
+
+                }
+
+
+                const formData =
+                    new FormData();
+
+
+                formData.append(
+                    "image",
+                    blob,
+                    panelImage.name ||
+                    `${panelName}-panel.jpg`
+                );
+
+
+                console.log(
+                    `Sending ${panelName} → POST /analyze`
+                );
+
+
+                const panelController =
+                    new AbortController();
+
+
+                const panelTimeout =
+                    setTimeout(
+                        () => {
+
+                            console.warn(
+                                `${panelName} OCR timeout reached.`
+                            );
+
+                            panelController.abort();
+
+                        },
+                        AI_TIMEOUT_MS
+                    );
+
+
+                try {
+
+                    /*
+                     * IMPORTANT:
+                     *
+                     * AI_SERVICE_URL already contains:
+                     * http://127.0.0.1:8000/analyze
+                     *
+                     * Therefore DO NOT add /analyze again.
+                     */
+
+                    const panelResponse =
+                        await fetch(
+                            AI_SERVICE_URL,
+                            {
+                                method:
+                                    "POST",
+
+                                body:
+                                    formData,
+
+                                signal:
+                                    panelController.signal
+                            }
+                        );
+
+
+                    clearTimeout(
+                        panelTimeout
+                    );
+
+
+                    console.log(
+                        `${panelName} HTTP status:`,
+                        panelResponse.status
+                    );
+
+
+                    if (
+                        !panelResponse.ok
+                    ) {
+
+                        const errorText =
+                            await panelResponse.text();
+
+
+                        console.warn(
+                            `${panelName} OCR failed: HTTP ${panelResponse.status}`,
+                            errorText.substring(
+                                0,
+                                300
+                            )
+                        );
+
+
+                        continue;
+
+                    }
+
+
+                    const responseText =
+                        await panelResponse.text();
+
+
+                    if (
+                        !responseText
+                    ) {
+
+                        console.warn(
+                            `${panelName} OCR returned empty response.`
+                        );
+
+                        continue;
+
+                    }
+
+
+                    let panelResult;
+
+
+                    try {
+
+                        panelResult =
+                            JSON.parse(
+                                responseText
+                            );
+
+                    } catch (jsonError) {
+
+                        console.warn(
+                            `${panelName} returned invalid JSON:`,
+                            jsonError
+                        );
+
+                        continue;
+
+                    }
+
+
+                    if (
+                        !panelResult ||
+                        typeof panelResult !==
+                            "object"
+                    ) {
+
+                        console.warn(
+                            `${panelName} returned invalid AI data.`
+                        );
+
+                        continue;
+
+                    }
+
+
+                    /*
+                     * Some Flask implementations
+                     * may not include status.
+                     *
+                     * Treat HTTP 200 JSON as success
+                     * unless explicitly marked as error.
+                     */
+
+                    if (
+                        panelResult.status ===
+                        "error"
+                    ) {
+
+                        console.warn(
+                            `${panelName} OCR returned an error:`,
+                            panelResult.message
+                        );
+
+                        continue;
+
+                    }
+
+
+                    analysisResults.push({
+
+                        panel:
+                            panelName,
+
+                        result:
+                            panelResult
+
+                    });
+
+
+                    console.log(
+                        `${panelName} OCR completed successfully.`
+                    );
+
+                } catch (panelError) {
+
+                    clearTimeout(
+                        panelTimeout
+                    );
+
+
+                    console.warn(
+                        `${panelName} OCR request failed:`,
+                        panelError
+                    );
+
+                }
+
+            }
+
+
+            /* =================================================
+               VERIFY RESULTS
+            ================================================= */
+
+            if (
+                !analysisResults.length
+            ) {
+
+                throw new Error(
+                    "AI OCR failed for all product images."
+                );
+
+            }
+
+
+            console.log(
+                "================================="
+            );
+
+
+            console.log(
+                "MULTI-PANEL OCR COMPLETE"
+            );
+
+
+            console.log(
+                "Successful panels:",
+                analysisResults.length
+            );
+
+
+            console.log(
+                "Panels:",
+                analysisResults.map(
+                    item =>
+                        item.panel
+                )
+            );
+
+
+            console.log(
+                "================================="
+            );
+
+
+            /* =================================================
+               BUILD COMBINED RESULT
+            ================================================= */
+
+            /*
+             * FRONT remains primary result.
+             */
+
+            const frontAnalysis =
+                analysisResults.find(
+                    item =>
+                        item.panel ===
+                        "FRONT"
+                );
+
+
+            const primaryResult =
+                frontAnalysis
+                    ? frontAnalysis.result
+                    : analysisResults[0].result;
+
+
+            /*
+             * Combine OCR text.
+             */
+
+            const combinedOcrText =
+                analysisResults
+                    .map(
+                        item => {
+
+                            const text =
+                                item.result.raw_ocr_text ||
+                                item.result.rawOcrText ||
+                                "";
+
+
+                            if (
+                                !text
+                            ) {
+
+                                return "";
+
+                            }
+
+
+                            return (
+                                `[${item.panel}]\n` +
+                                text
+                            );
+
+                        }
+                    )
+                    .filter(Boolean)
+                    .join(
+                        "\n\n"
+                    );
+
+
+            /*
+             * Combine extracted data.
+             */
+
+            const combinedExtractedData =
+                analysisResults.reduce(
+                    (
+                        combined,
+                        item
+                    ) => {
+
+                        const data =
+                            item.result.extracted_data ||
+                            item.result.extractedData ||
+                            item.result.product ||
+                            {};
+
+
+                        return {
+
+                            ...combined,
+
+                            ...data
+
+                        };
+
+                    },
+                    {}
+                );
+
+
+            /*
+             * Combined final result.
+             */
+
+            const combinedResult = {
+
+                ...primaryResult,
+
+                raw_ocr_text:
+                    combinedOcrText,
+
+                extracted_data:
+                    combinedExtractedData,
+
+                multi_panel_analysis:
+                    analysisResults.map(
+                        item => ({
+
+                            panel:
+                                item.panel,
+
+                            result:
+                                item.result
+
+                        })
+                    )
+
+            };
+
+
+            console.log(
+                "Combined OCR text length:",
+                combinedOcrText.length
+            );
+
+
+            console.log(
+                "Combined extracted data:",
+                combinedExtractedData
+            );
+
+
+            /* =================================================
+               STEP 3 — PROCESS COMBINED RESULT
+            ================================================= */
+
+            const result =
+                combinedResult;
+
+
+            console.log(
+                "================================="
+            );
+
+
+            console.log(
+                "COMBINED AI RESPONSE:"
+            );
+
+
+            console.log(
+                result
+            );
+
+
+            console.log(
+                "================================="
+            );
+
+
+            if (
+                !result ||
+                typeof result !==
+                    "object"
+            ) {
+
+                throw new Error(
+                    "AI returned an invalid combined response."
+                );
+
+            }
+
+
+            /* =================================================
+               EXTRACT DATA
+            ================================================= */
+
+            const extractedData =
+                result.extracted_data ||
+                result.product ||
+                result.data ||
+                {};
+
+
+            console.log(
+                "COMBINED EXTRACTED DATA:",
+                extractedData
+            );
+
+
+            /* =================================================
+               SAVE AI RESULT
+            ================================================= */
+
+            safeSaveAIResult(
+                result
+            );
+
+
+            /* =================================================
+               POPULATE FORM
+            ================================================= */
+
+            populateInspectionForm(
+                extractedData
+            );
+
+
+            /* =================================================
+               UPDATE CHECKLIST
+            ================================================= */
+
+            updateChecklist(
+                {
+                    extracted_data:
+                        extractedData
+                }
+            );
+
+
+            /* =================================================
+               SUCCESS
+            ================================================= */
+
+            aiCompleted =
+                true;
+
+
+            aiRequestRunning =
+                false;
+
+
+            showAIStatus(
+                "AI analysis completed successfully. Please review the extracted information before continuing.",
+                "success"
+            );
+
+
+            console.log(
+                "================================="
+            );
+
+
+            console.log(
+                "MULTI-PANEL AI OCR COMPLETED"
+            );
+
+
+            console.log(
+                "================================="
+
+            );
+
+
+        } catch (error) {
+
+            aiRequestRunning =
+                false;
+
+
+            console.error(
+                "================================="
+            );
+
+
+            console.error(
+                "AI OCR ERROR"
+            );
+
+
+            console.error(
+                error
+            );
+
+
+            console.error(
+                "================================="
+            );
+
+
+            if (
+                error.name ===
+                "AbortError"
+            ) {
+
+                showAIStatus(
+                    "AI OCR timed out after 3 minutes. Please verify the extracted information manually or try scanning again.",
+                    "error"
+                );
+
+            } else {
+
+                showAIStatus(
+                    "AI OCR could not be completed. You may continue with manual verification.",
+                    "error"
+                );
+
+            }
+
+
+            /*
+             * AI failure must NOT block officer.
+             */
+
+            console.warn(
+                "Manual verification is available."
+            );
+
         }
 
-        /* Read JSON */
-
-        const result = await aiResponse.json();
-
-        console.log("=================================");
-        console.log("FULL AI RESPONSE:");
-        console.log(result);
-        console.log("=================================");
-
-        /*
-         * TEMPORARY DEBUG POPUP
-         * This will show us exactly what
-         * Python is returning.
-         */
-
-        alert(
-            "AI Response received!\n\n" +
-            JSON.stringify(result, null, 2)
-        );
-
-        /* Validate response */
-
-        if (!result) {
-
-            throw new Error(
-                "AI returned an empty response."
-            );
-        }
-
-        /*
-         * Accept both possible response formats:
-         *
-         * {
-         *   status: "success",
-         *   extracted_data: {...}
-         * }
-         *
-         * OR
-         *
-         * {
-         *   success: true,
-         *   data: {...}
-         * }
-         */
-
-        const extractedData =
-            result.extracted_data ||
-            result.product ||
-            result.data ||
-            {};
-
-        console.log(
-            "EXTRACTED DATA:",
-            extractedData
-        );
-
-        /* Save complete AI response */
-
-        localStorage.setItem(
-            "aiAnalysisResult",
-            JSON.stringify(result)
-        );
-
-        /* Populate form */
-
-        populateInspectionForm(
-            extractedData
-        );
-
-        /* Update checklist */
-
-        updateChecklist({
-            extracted_data: extractedData
-        });
-
-        /* Success */
-
-        showAIStatus(
-            "AI analysis completed. Please review the extracted information.",
-            "success"
-        );
-
-        console.log(
-            "AI ANALYSIS COMPLETED SUCCESSFULLY"
-        );
-
-    } catch (error) {
-
-        console.error(
-            "AI OCR ERROR:",
-            error
-        );
-
-        showAIStatus(
-            "AI analysis could not be completed. Please enter or verify the information manually.",
-            "error"
-        );
-
-        alert(
-            "AI Analysis Error:\n\n" +
-            error.message
-        );
     }
-} 
+
+
+    /* =====================================================
+       SAFE SAVE AI RESULT
+    ===================================================== */
+
+    function safeSaveAIResult(
+        result
+    ) {
+
+        try {
+
+            const json =
+                JSON.stringify(
+                    result
+                );
+
+
+            try {
+
+                sessionStorage.setItem(
+                    AI_RESULT_KEY,
+                    json
+                );
+
+
+                console.log(
+                    "AI result saved to sessionStorage."
+                );
+
+
+                return true;
+
+            } catch (
+                sessionError
+            ) {
+
+                console.warn(
+                    "AI result could not be saved to sessionStorage:",
+                    sessionError
+                );
+
+            }
+
+
+            try {
+
+                localStorage.setItem(
+                    AI_RESULT_KEY,
+                    json
+                );
+
+
+                console.log(
+                    "AI result saved to localStorage."
+                );
+
+
+                return true;
+
+            } catch (
+                localError
+            ) {
+
+                console.warn(
+                    "AI result could not be saved to localStorage:",
+                    localError
+                );
+
+            }
+
+
+            return false;
+
+        } catch (error) {
+
+            console.warn(
+                "AI result serialization failed:",
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       GET SAVED AI RESULT
+    ===================================================== */
+
+    function getSavedAIResult() {
+
+        let raw =
+            sessionStorage.getItem(
+                AI_RESULT_KEY
+            );
+
+
+        if (!raw) {
+
+            raw =
+                localStorage.getItem(
+                    AI_RESULT_KEY
+                );
+
+        }
+
+
+        if (!raw) {
+
+            return null;
+
+        }
+
+
+        try {
+
+            return JSON.parse(
+                raw
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Invalid stored AI result:",
+                error
+            );
+
+
+            return null;
+
+        }
+
+    }
+
 
     /* =====================================================
        POPULATE INSPECTION FORM
     ===================================================== */
 
-    function populateInspectionForm(data) {
+    function populateInspectionForm(
+        data
+    ) {
 
-        if (!data) return;
+        if (!data) {
+
+            return;
+
+        }
 
 
-        /* Product name */
+        console.log(
+            "Populating inspection form..."
+        );
+
 
         setValue(
             "productName",
-            cleanValue(data.product_name)
+            cleanValue(
+                data.product_name
+            )
         );
 
-
-        /* Manufacturer */
 
         setValue(
             "manufacturer",
-            cleanValue(data.manufacturer)
+            cleanValue(
+                data.manufacturer
+            )
         );
 
-
-        /* Net quantity */
 
         setValue(
             "netQuantity",
-            cleanValue(data.net_quantity)
+            cleanValue(
+                data.net_quantity
+            )
         );
 
-
-        /* MRP */
 
         setValue(
             "mrp",
-            cleanValue(data.mrp)
+            cleanValue(
+                data.mrp
+            )
         );
 
-
-        /* Consumer care */
 
         setValue(
             "consumerCare",
-            cleanValue(data.customer_care)
+            cleanValue(
+                data.customer_care
+            )
         );
 
-
-        /* Manufacturer address */
 
         setValue(
             "address",
-            cleanValue(data.manufacturer_address)
-        );
-
-
-        /* Packing / manufacturing date */
-
-        const dateValue =
             cleanValue(
-                data.date_of_manufacture
-            );
+                data.manufacturer_address
+            )
+        );
 
 
         setValue(
             "packingDate",
-            dateValue
+            cleanValue(
+                data.date_of_manufacture
+            )
         );
 
 
-        /* Additional declarations */
-
-        const additional = [];
+        const additional =
+            [];
 
 
         if (data.brand_name) {
@@ -578,6 +1865,11 @@ async function analyzeProductWithAI(imageData) {
             additional.join("\n")
         );
 
+
+        console.log(
+            "Inspection form populated."
+        );
+
     }
 
 
@@ -585,7 +1877,9 @@ async function analyzeProductWithAI(imageData) {
        CLEAN VALUE
     ===================================================== */
 
-    function cleanValue(value) {
+    function cleanValue(
+        value
+    ) {
 
         if (
             value === null ||
@@ -596,13 +1890,16 @@ async function analyzeProductWithAI(imageData) {
 
         }
 
-        return String(value).trim();
+
+        return String(
+            value
+        ).trim();
 
     }
 
 
     /* =====================================================
-       SET INPUT VALUE
+       SET VALUE
     ===================================================== */
 
     function setValue(
@@ -611,21 +1908,22 @@ async function analyzeProductWithAI(imageData) {
     ) {
 
         const element =
-            document.getElementById(id);
+            document.getElementById(
+                id
+            );
 
 
-        if (!element) return;
+        if (!element) {
 
-
-        if (
-            value !== undefined &&
-            value !== null
-        ) {
-
-            element.value =
-                value;
+            return;
 
         }
+
+
+        element.value =
+            cleanValue(
+                value
+            );
 
     }
 
@@ -634,28 +1932,40 @@ async function analyzeProductWithAI(imageData) {
        GET INPUT VALUE
     ===================================================== */
 
-    function getInputValue(id) {
+    function getInputValue(
+        id
+    ) {
 
         const element =
-            document.getElementById(id);
+            document.getElementById(
+                id
+            );
 
 
-        return element
-            ? element.value.trim()
-            : "";
+        if (!element) {
+
+            return "";
+
+        }
+
+
+        return element.value.trim();
 
     }
 
 
     /* =====================================================
-       CHECKLIST UPDATE
+       CHECKLIST
     ===================================================== */
 
-    function updateChecklist(result) {
+    function updateChecklist(
+        result
+    ) {
 
         const data =
             result.extracted_data ||
             result.product ||
+            result.data ||
             {};
 
 
@@ -701,7 +2011,7 @@ async function analyzeProductWithAI(imageData) {
 
 
     /* =====================================================
-       UPDATE INDIVIDUAL CHECK ITEM
+       UPDATE CHECK ITEM
     ===================================================== */
 
     function updateCheckItem(
@@ -715,96 +2025,108 @@ async function analyzeProductWithAI(imageData) {
             );
 
 
-        items.forEach(item => {
+        items.forEach(
+            item => {
 
-            const strong =
-                item.querySelector("strong");
+                const strong =
+                    item.querySelector(
+                        "strong"
+                    );
 
 
-            if (!strong) return;
+                if (!strong) {
+
+                    return;
+
+                }
 
 
-            if (
-                strong.textContent.trim() !==
-                title
-            ) {
+                if (
+                    strong.textContent.trim() !==
+                    title
+                ) {
 
-                return;
+                    return;
+
+                }
+
+
+                const icon =
+                    item.querySelector(
+                        ".check-icon"
+                    );
+
+
+                const status =
+                    item.querySelector(
+                        ".check-status"
+                    );
+
+
+                if (detected) {
+
+                    if (icon) {
+
+                        icon.textContent =
+                            "✓";
+
+
+                        icon.classList.remove(
+                            "pending"
+                        );
+
+
+                        icon.classList.add(
+                            "verified"
+                        );
+
+                    }
+
+
+                    if (status) {
+
+                        status.textContent =
+                            "Detected";
+
+                    }
+
+                } else {
+
+                    if (icon) {
+
+                        icon.textContent =
+                            "?";
+
+
+                        icon.classList.remove(
+                            "verified"
+                        );
+
+
+                        icon.classList.add(
+                            "pending"
+                        );
+
+                    }
+
+
+                    if (status) {
+
+                        status.textContent =
+                            "Review";
+
+                    }
+
+                }
 
             }
-
-
-            const icon =
-                item.querySelector(
-                    ".check-icon"
-                );
-
-
-            const status =
-                item.querySelector(
-                    ".check-status"
-                );
-
-
-            if (detected) {
-
-                if (icon) {
-
-                    icon.textContent =
-                        "✓";
-
-                    icon.classList.remove(
-                        "pending"
-                    );
-
-                    icon.classList.add(
-                        "verified"
-                    );
-
-                }
-
-
-                if (status) {
-
-                    status.textContent =
-                        "Detected";
-
-                }
-
-            } else {
-
-                if (icon) {
-
-                    icon.textContent =
-                        "?";
-
-                    icon.classList.remove(
-                        "verified"
-                    );
-
-                    icon.classList.add(
-                        "pending"
-                    );
-
-                }
-
-
-                if (status) {
-
-                    status.textContent =
-                        "Review";
-
-                }
-
-            }
-
-        });
+        );
 
     }
 
 
     /* =====================================================
-       AI STATUS MESSAGE
+       AI STATUS
     ===================================================== */
 
     function showAIStatus(
@@ -831,13 +2153,14 @@ async function analyzeProductWithAI(imageData) {
 
 
             statusBox.style.cssText = `
-                margin: 16px 0;
-                padding: 14px 16px;
-                border-radius: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                border: 1px solid #dbe3ea;
-                background: #f7f9fb;
+                margin:16px 0;
+                padding:14px 16px;
+                border-radius:10px;
+                font-size:13px;
+                font-weight:600;
+                border:1px solid #dbe3ea;
+                background:#f7f9fb;
+                line-height:1.5;
             `;
 
 
@@ -860,7 +2183,9 @@ async function analyzeProductWithAI(imageData) {
             message;
 
 
-        if (type === "loading") {
+        if (
+            type === "loading"
+        ) {
 
             statusBox.style.background =
                 "#fff8e6";
@@ -871,7 +2196,9 @@ async function analyzeProductWithAI(imageData) {
             statusBox.style.color =
                 "#8a6500";
 
-        } else if (
+        }
+
+        else if (
             type === "success"
         ) {
 
@@ -884,7 +2211,9 @@ async function analyzeProductWithAI(imageData) {
             statusBox.style.color =
                 "#187348";
 
-        } else {
+        }
+
+        else {
 
             statusBox.style.background =
                 "#fff1f1";
@@ -901,7 +2230,7 @@ async function analyzeProductWithAI(imageData) {
 
 
     /* =====================================================
-       RETAKE / SCAN AGAIN
+       RETAKE
     ===================================================== */
 
     if (retakeBtn) {
@@ -910,8 +2239,23 @@ async function analyzeProductWithAI(imageData) {
             "click",
             () => {
 
+                try {
+
+                    sessionStorage.removeItem(
+                        AI_RESULT_KEY
+                    );
+
+                } catch (error) {
+
+                    console.warn(
+                        error
+                    );
+
+                }
+
+
                 window.location.href =
-                    "../scan.html";
+                    "scan.html";
 
             }
         );
@@ -933,12 +2277,13 @@ async function analyzeProductWithAI(imageData) {
                     !productImage ||
                     !productImage.src ||
                     productImage.style.display ===
-                    "none"
+                        "none"
                 ) {
 
                     alert(
                         "Please scan or upload a product image first."
                     );
+
 
                     return;
 
@@ -958,6 +2303,7 @@ async function analyzeProductWithAI(imageData) {
                     imageModal.hidden =
                         false;
 
+
                     document.body.style.overflow =
                         "hidden";
 
@@ -970,7 +2316,7 @@ async function analyzeProductWithAI(imageData) {
 
 
     /* =====================================================
-       CLOSE IMAGE MODAL
+       CLOSE MODAL
     ===================================================== */
 
     function closeImageModal() {
@@ -1039,134 +2385,162 @@ async function analyzeProductWithAI(imageData) {
 
 
     /* =====================================================
-       FORM DATA
+       GET FORM DATA
     ===================================================== */
 
     function getFormData() {
 
-        let aiAnalysis = null;
-
-
-        try {
-
-            aiAnalysis =
-                JSON.parse(
-                    localStorage.getItem(
-                        "aiAnalysisResult"
-                    ) || "null"
-                );
-
-        } catch (error) {
-
-            console.error(
-                "Unable to parse AI analysis:",
-                error
-            );
-
-            aiAnalysis = null;
-
-        }
+        const aiAnalysis =
+            getSavedAIResult();
 
 
         return {
 
             inspectionId:
-
                 inspectionId,
 
-
             manufacturer:
-
                 getInputValue(
                     "manufacturer"
                 ),
 
-
             productName:
-
                 getInputValue(
                     "productName"
                 ),
 
-
             netQuantity:
-
                 getInputValue(
                     "netQuantity"
                 ),
 
-
             mrp:
-
                 getInputValue(
                     "mrp"
                 ),
 
-
             packingDate:
-
                 getInputValue(
                     "packingDate"
                 ),
 
-
             consumerCare:
-
                 getInputValue(
                     "consumerCare"
                 ),
 
-
             address:
-
                 getInputValue(
                     "address"
                 ),
 
-
             additionalDeclarations:
-
                 getInputValue(
                     "additionalDeclarations"
                 ),
 
-
-            /* Captured product image */
+            /*
+             * NEVER store Base64 image here.
+             */
 
             productImage:
+                null,
 
-                sessionStorage.getItem(
-                    "eParakhCapturedImage"
-                ) || "",
-
-
-            /* Officer */
+            imageStorageKey:
+                IMAGE_STORAGE_KEY,
 
             officerName:
-
-                savedOfficerName || "",
-
+                savedOfficerName,
 
             officerId:
-
-                savedOfficerId || "",
-
-
-            /* AI */
+                savedOfficerId,
 
             aiAnalysis:
-
-
                 aiAnalysis,
 
-
-            /* Timestamp */
-
             savedAt:
-
                 new Date().toISOString()
 
         };
+
+    }
+
+
+    /* =====================================================
+       SAFE LOCAL STORAGE
+    ===================================================== */
+
+    function safeLocalStorageSet(
+        key,
+        value
+    ) {
+
+        try {
+
+            localStorage.setItem(
+                key,
+                JSON.stringify(value)
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                `Unable to save ${key}:`,
+                error
+            );
+
+
+            try {
+
+                localStorage.removeItem(
+                    DRAFT_KEY
+                );
+
+
+                localStorage.removeItem(
+                    AI_RESULT_KEY
+                );
+
+            } catch (
+                cleanupError
+            ) {
+
+                console.warn(
+                    "Storage cleanup failed:",
+                    cleanupError
+                );
+
+            }
+
+
+            try {
+
+                localStorage.setItem(
+                    key,
+                    JSON.stringify(value)
+                );
+
+
+                return true;
+
+            } catch (
+                retryError
+            ) {
+
+                console.error(
+                    "Storage retry failed:",
+                    retryError
+                );
+
+
+                return false;
+
+            }
+
+        }
 
     }
 
@@ -1185,15 +2559,30 @@ async function analyzeProductWithAI(imageData) {
                     getFormData();
 
 
-                localStorage.setItem(
-                    "inspectionDraft",
-                    JSON.stringify(data)
-                );
+                data.productImage =
+                    null;
 
 
-                showMessage(
-                    "Inspection draft saved successfully."
-                );
+                const saved =
+                    safeLocalStorageSet(
+                        DRAFT_KEY,
+                        data
+                    );
+
+
+                if (saved) {
+
+                    showMessage(
+                        "Inspection draft saved successfully."
+                    );
+
+                } else {
+
+                    showMessage(
+                        "Draft could not be saved. Please continue with the inspection."
+                    );
+
+                }
 
             }
         );
@@ -1202,12 +2591,12 @@ async function analyzeProductWithAI(imageData) {
 
 
     /* =====================================================
-       LOAD EXISTING DRAFT
+       LOAD DRAFT
     ===================================================== */
 
     const savedDraft =
         localStorage.getItem(
-            "inspectionDraft"
+            DRAFT_KEY
         );
 
 
@@ -1216,7 +2605,9 @@ async function analyzeProductWithAI(imageData) {
         try {
 
             const data =
-                JSON.parse(savedDraft);
+                JSON.parse(
+                    savedDraft
+                );
 
 
             setValue(
@@ -1268,25 +2659,42 @@ async function analyzeProductWithAI(imageData) {
 
 
             /*
-             * Restore image from draft if needed.
+             * Legacy migration.
              */
 
+            const currentImage =
+                sessionStorage.getItem(
+                    IMAGE_STORAGE_KEY
+                );
+
+
             if (
-                data.productImage &&
-                !sessionStorage.getItem(
-                    "eParakhCapturedImage"
-                )
+                !currentImage &&
+                data.productImage
             ) {
 
-                sessionStorage.setItem(
-                    "eParakhCapturedImage",
-                    data.productImage
-                );
+                try {
+
+                    sessionStorage.setItem(
+                        IMAGE_STORAGE_KEY,
+                        data.productImage
+                    );
 
 
-                showProductImage(
-                    data.productImage
-                );
+                    showProductImage(
+                        data.productImage
+                    );
+
+                } catch (
+                    sessionError
+                ) {
+
+                    console.warn(
+                        "Unable to restore old draft image:",
+                        sessionError
+                    );
+
+                }
 
             }
 
@@ -1304,6 +2712,7 @@ async function analyzeProductWithAI(imageData) {
 
     /* =====================================================
        FORM SUBMIT
+       CONTINUE TO COMPLIANCE
     ===================================================== */
 
     if (inspectionForm) {
@@ -1315,22 +2724,18 @@ async function analyzeProductWithAI(imageData) {
                 event.preventDefault();
 
 
-                /*
-                 * IMPORTANT:
-                 * Use the SAME storage key that
-                 * scan.html uses.
-                 */
+                const productImageData =
+                    sessionStorage.getItem(
+                        IMAGE_STORAGE_KEY
+                    );
 
-                 const productImageData =
-    sessionStorage.getItem(
-        "eParakhCapturedImage"
-    );
 
                 if (!productImageData) {
 
                     alert(
                         "Please scan or upload a product image before continuing."
                     );
+
 
                     return;
 
@@ -1342,26 +2747,52 @@ async function analyzeProductWithAI(imageData) {
 
 
                 /*
-                 * Save complete inspection
+                 * ABSOLUTE SAFETY:
+                 * Never put Base64 into localStorage.
                  */
 
-                localStorage.setItem(
-                    "currentInspection",
-                    JSON.stringify(data)
-                );
+                data.productImage =
+                    null;
+
+
+                data.imageStorageKey =
+                    IMAGE_STORAGE_KEY;
+
+
+                const saved =
+                    safeLocalStorageSet(
+                        CURRENT_INSPECTION_KEY,
+                        data
+                    );
+
+
+                if (!saved) {
+
+                    console.warn(
+                        "currentInspection could not be stored."
+                    );
+
+                }
+
+
+                try {
+
+                    localStorage.removeItem(
+                        DRAFT_KEY
+                    );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Unable to remove draft:",
+                        error
+                    );
+
+                }
 
 
                 /*
-                 * Remove temporary draft
-                 */
-
-                localStorage.removeItem(
-                    "inspectionDraft"
-                );
-
-
-                /*
-                 * Move to compliance
+                 * Navigate to compliance.
                  */
 
                 window.location.href =
@@ -1381,7 +2812,7 @@ async function analyzeProductWithAI(imageData) {
 
         logoutBtn.addEventListener(
             "click",
-            () => {
+            async () => {
 
                 const confirmed =
                     confirm(
@@ -1407,32 +2838,78 @@ async function analyzeProductWithAI(imageData) {
 
 
                 localStorage.removeItem(
-                    "inspectionDraft"
+                    DRAFT_KEY
                 );
 
 
                 localStorage.removeItem(
-                    "currentInspection"
+                    CURRENT_INSPECTION_KEY
                 );
 
 
                 localStorage.removeItem(
-                    "currentInspectionId"
+                    INSPECTION_ID_KEY
                 );
 
 
                 localStorage.removeItem(
-                    "aiAnalysisResult"
+                    AI_RESULT_KEY
+                );
+
+
+                sessionStorage.removeItem(
+                    IMAGE_STORAGE_KEY
+                );
+
+
+                sessionStorage.removeItem(
+                    AI_RESULT_KEY
                 );
 
 
                 /*
-                 * Clear captured image
+                 * Clear multi-panel IndexedDB.
                  */
 
-                sessionStorage.removeItem(
-                    "eParakhCapturedImage"
-                );
+                try {
+
+                    if (
+                        window.indexedDB
+                    ) {
+
+                        const request =
+                            indexedDB.deleteDatabase(
+                                PANEL_DB_NAME
+                            );
+
+
+                        request.onsuccess = () => {
+
+                            console.log(
+                                "Multi-panel scanner data cleared."
+                            );
+
+                        };
+
+
+                        request.onerror = () => {
+
+                            console.warn(
+                                "Unable to clear scanner database."
+                            );
+
+                        };
+
+                    }
+
+                } catch (error) {
+
+                    console.warn(
+                        "IndexedDB cleanup failed:",
+                        error
+                    );
+
+                }
 
 
                 window.location.href =
@@ -1448,10 +2925,59 @@ async function analyzeProductWithAI(imageData) {
        MESSAGE
     ===================================================== */
 
-    function showMessage(message) {
+    function showMessage(
+        message
+    ) {
 
-        alert(message);
+        alert(
+            message
+        );
 
     }
 
+
+    /* =====================================================
+       FINAL DEBUG
+    ===================================================== */
+
+    console.log(
+        "Inspection ID:",
+        inspectionId
+    );
+
+
+    console.log(
+        "AI Service:",
+        AI_SERVICE_URL
+    );
+
+
+    console.log(
+        "AI Timeout:",
+        AI_TIMEOUT_MS / 1000,
+        "seconds"
+    );
+
+
+    console.log(
+        "Image in sessionStorage:",
+        !!sessionStorage.getItem(
+            IMAGE_STORAGE_KEY
+        )
+    );
+
+
+    console.log(
+        "================================="
+    );
+
+
+    /* =====================================================
+       START INSPECTION IMAGE LOADING
+    ===================================================== */
+
+    initializeInspectionImages();
+
 });
+
+

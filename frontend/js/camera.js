@@ -1,5 +1,6 @@
 // ==========================================
-// e-PARAKH - Camera Module
+// e-PARAKH - Multi Evidence Camera Module
+// Minimum 1 / Maximum 4 Images
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -31,6 +32,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const stopCameraBtn =
         document.getElementById("stopCameraBtn");
 
+    const browsePhotoBtn =
+        document.getElementById("browsePhotoBtn");
+
+    const photoInput =
+        document.getElementById("photoInput");
+
+    const currentEvidenceLabel =
+        document.getElementById("currentEvidenceLabel");
+
+    const scanPositionLabel =
+        document.getElementById("scanPositionLabel");
+
+    const cameraStatus =
+        document.getElementById("cameraStatus");
+
+    const evidenceCount =
+        document.getElementById("evidenceCount");
+
+    const continueBtn =
+        document.getElementById("continueBtn");
+
+    const continueHint =
+        document.getElementById("continueHint");
+
     const capturePreviewContainer =
         document.getElementById("capturePreviewContainer");
 
@@ -40,19 +65,207 @@ document.addEventListener("DOMContentLoaded", () => {
     const retakeBtn =
         document.getElementById("retakeBtn");
 
-    const continueBtn =
-        document.getElementById("continueBtn");
+    const saveEvidenceBtn =
+        document.getElementById("saveEvidenceBtn");
 
 
     // ==========================================
-    // CAMERA STATE
+    // EVIDENCE CONFIG
+    // ==========================================
+
+    const evidenceTypes = [
+        "front",
+        "back",
+        "side",
+        "batch"
+    ];
+
+    const evidenceLabels = {
+        front: "Front",
+        back: "Back",
+        side: "Side",
+        batch: "Batch / MRP"
+    };
+
+    const MAX_EVIDENCE = 4;
+    const MIN_EVIDENCE = 1;
+
+
+    // ==========================================
+    // STATE
     // ==========================================
 
     let stream = null;
 
     let facingMode = "environment";
 
-    let capturedImageData = null;
+    let currentEvidence = "front";
+
+    let pendingImage = null;
+
+    let evidencePhotos = {
+        front: null,
+        back: null,
+        side: null,
+        batch: null
+    };
+
+
+    // ==========================================
+    // INDEXED DB
+    // ==========================================
+
+    const DB_NAME = "eParakhEvidenceDB";
+    const DB_VERSION = 1;
+    const STORE_NAME = "inspectionEvidence";
+
+    let db = null;
+
+
+    function openDatabase() {
+
+        return new Promise((resolve, reject) => {
+
+            const request =
+                indexedDB.open(
+                    DB_NAME,
+                    DB_VERSION
+                );
+
+            request.onupgradeneeded = (event) => {
+
+                const database =
+                    event.target.result;
+
+                if (
+                    !database.objectStoreNames.contains(
+                        STORE_NAME
+                    )
+                ) {
+
+                    database.createObjectStore(
+                        STORE_NAME
+                    );
+
+                }
+
+            };
+
+            request.onsuccess = () => {
+
+                db = request.result;
+
+                resolve(db);
+
+            };
+
+            request.onerror = () => {
+
+                reject(request.error);
+
+            };
+
+        });
+
+    }
+
+
+    function saveEvidenceToDB(type, imageData) {
+
+        return new Promise((resolve, reject) => {
+
+            if (!db) {
+
+                reject(
+                    new Error(
+                        "Database is not ready."
+                    )
+                );
+
+                return;
+            }
+
+            const transaction =
+                db.transaction(
+                    STORE_NAME,
+                    "readwrite"
+                );
+
+            const store =
+                transaction.objectStore(
+                    STORE_NAME
+                );
+
+            store.put(
+                imageData,
+                type
+            );
+
+            transaction.oncomplete = () => {
+
+                resolve();
+
+            };
+
+            transaction.onerror = () => {
+
+                reject(
+                    transaction.error
+                );
+
+            };
+
+        });
+
+    }
+
+
+    async function loadEvidenceFromDB() {
+
+        if (!db) return;
+
+        for (const type of evidenceTypes) {
+
+            const image =
+                await new Promise((resolve) => {
+
+                    const transaction =
+                        db.transaction(
+                            STORE_NAME,
+                            "readonly"
+                        );
+
+                    const store =
+                        transaction.objectStore(
+                            STORE_NAME
+                        );
+
+                    const request =
+                        store.get(type);
+
+                    request.onsuccess = () => {
+
+                        resolve(
+                            request.result || null
+                        );
+
+                    };
+
+                    request.onerror = () => {
+
+                        resolve(null);
+
+                    };
+
+                });
+
+            evidencePhotos[type] = image;
+
+        }
+
+        updateEvidenceUI();
+
+    }
 
 
     // ==========================================
@@ -61,8 +274,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function startCamera() {
 
-        if (!navigator.mediaDevices ||
-            !navigator.mediaDevices.getUserMedia) {
+        if (
+            !navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia
+        ) {
 
             showCameraError(
                 "Camera is not supported by this browser."
@@ -79,16 +294,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
             stream =
                 await navigator.mediaDevices.getUserMedia({
+
                     video: {
-                        facingMode: facingMode,
+
+                        facingMode:
+                            facingMode,
+
                         width: {
                             ideal: 1920
                         },
+
                         height: {
                             ideal: 1080
                         }
+
                     },
+
                     audio: false
+
                 });
 
             video.srcObject = stream;
@@ -107,7 +330,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             switchCameraBtn.disabled = false;
 
-            console.log("Camera started successfully.");
+            cameraStatus.textContent =
+                "● LIVE CAMERA";
+
+            cameraStatus.classList.add("live");
+
+            console.log(
+                "Camera started successfully."
+            );
 
         } catch (error) {
 
@@ -117,7 +347,9 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             handleCameraError(error);
+
         }
+
     }
 
 
@@ -129,24 +361,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (stream) {
 
-            stream.getTracks().forEach((track) => {
-                track.stop();
-            });
+            stream
+                .getTracks()
+                .forEach((track) => {
+
+                    track.stop();
+
+                });
 
             stream = null;
+
         }
 
         if (video) {
+
             video.srcObject = null;
+
         }
 
-        captureBtn.disabled = true;
-        stopCameraBtn.disabled = true;
-        switchCameraBtn.disabled = true;
+        if (captureBtn) {
 
-        overlay.classList.add("hidden");
+            captureBtn.disabled = true;
 
-        console.log("Camera stopped.");
+        }
+
+        if (stopCameraBtn) {
+
+            stopCameraBtn.disabled = true;
+
+        }
+
+        if (switchCameraBtn) {
+
+            switchCameraBtn.disabled = true;
+
+        }
+
+        if (overlay) {
+
+            overlay.classList.add("hidden");
+
+        }
+
+        if (cameraStatus) {
+
+            cameraStatus.textContent =
+                "● CAMERA OFFLINE";
+
+            cameraStatus.classList.remove("live");
+
+        }
+
     }
 
 
@@ -162,6 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 : "environment";
 
         await startCamera();
+
     }
 
 
@@ -171,7 +437,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function captureImage() {
 
-        if (!stream || !video.videoWidth) {
+        if (
+            !stream ||
+            !video.videoWidth
+        ) {
 
             showCameraError(
                 "Camera is not ready. Please try again."
@@ -183,8 +452,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const canvas =
             document.createElement("canvas");
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width =
+            video.videoWidth;
+
+        canvas.height =
+            video.videoHeight;
 
         const context =
             canvas.getContext("2d");
@@ -197,14 +469,108 @@ document.addEventListener("DOMContentLoaded", () => {
             canvas.height
         );
 
-        capturedImageData =
+        pendingImage =
             canvas.toDataURL(
                 "image/jpeg",
-                0.92
+                0.90
             );
 
+        showPreview();
+
+    }
+
+
+    // ==========================================
+    // BROWSE PHOTO
+    // ==========================================
+
+    function browsePhoto() {
+
+        if (
+            Object.values(evidencePhotos).filter(Boolean).length
+            >= MAX_EVIDENCE
+        ) {
+
+            alert(
+                "Maximum 4 evidence images allowed."
+            );
+
+            return;
+
+        }
+
+        if (photoInput) {
+
+            photoInput.value = "";
+
+            photoInput.click();
+
+        }
+
+    }
+
+
+    if (photoInput) {
+
+        photoInput.addEventListener(
+            "change",
+            (event) => {
+
+                const file =
+                    event.target.files[0];
+
+                if (!file) return;
+
+                if (
+                    !file.type.startsWith("image/")
+                ) {
+
+                    alert(
+                        "Please select a valid image file."
+                    );
+
+                    return;
+
+                }
+
+                const reader =
+                    new FileReader();
+
+                reader.onload = () => {
+
+                    pendingImage =
+                        reader.result;
+
+                    showPreview();
+
+                };
+
+                reader.onerror = () => {
+
+                    alert(
+                        "Unable to read the selected image."
+                    );
+
+                };
+
+                reader.readAsDataURL(file);
+
+            }
+        );
+
+    }
+
+
+    // ==========================================
+    // SHOW PREVIEW
+    // ==========================================
+
+    function showPreview() {
+
+        if (!pendingImage) return;
+
         capturedImage.src =
-            capturedImageData;
+            pendingImage;
 
         capturePreviewContainer
             .classList
@@ -216,19 +582,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         captureBtn.disabled = true;
 
-        console.log(
-            "Product image captured successfully."
-        );
     }
 
 
     // ==========================================
-    // RETAKE IMAGE
+    // RETAKE
     // ==========================================
 
     function retakeImage() {
 
-        capturedImageData = null;
+        pendingImage = null;
 
         capturedImage.src = "";
 
@@ -238,13 +601,363 @@ document.addEventListener("DOMContentLoaded", () => {
 
         video.classList.remove("hidden");
 
-        overlay.classList.remove("hidden");
+        if (stream) {
 
-        if (!stream) {
-            startCamera();
-        } else {
+            overlay.classList.remove("hidden");
+
             captureBtn.disabled = false;
+
+        } else {
+
+            startCamera();
+
         }
+
+    }
+
+
+    // ==========================================
+    // SAVE CURRENT EVIDENCE
+    // ==========================================
+
+    async function saveCurrentEvidence() {
+
+        if (!pendingImage) {
+
+            alert(
+                "Please capture or select an image first."
+            );
+
+            return;
+
+        }
+
+        const completedCount =
+            Object.values(evidencePhotos)
+                .filter(Boolean)
+                .length;
+
+        /*
+         * Allow replacing an existing slot.
+         * Only block when trying to create
+         * a 5th different image.
+         */
+
+        if (
+            !evidencePhotos[currentEvidence] &&
+            completedCount >= MAX_EVIDENCE
+        ) {
+
+            alert(
+                "Maximum 4 evidence images allowed."
+            );
+
+            return;
+
+        }
+
+        try {
+
+            await saveEvidenceToDB(
+                currentEvidence,
+                pendingImage
+            );
+
+            evidencePhotos[currentEvidence] =
+                pendingImage;
+
+            pendingImage = null;
+
+            capturedImage.src = "";
+
+            capturePreviewContainer
+                .classList
+                .add("hidden");
+
+            video.classList.remove("hidden");
+
+            if (stream) {
+
+                overlay.classList.remove("hidden");
+
+                captureBtn.disabled = false;
+
+            }
+
+            updateEvidenceUI();
+
+            moveToNextEvidence();
+
+        } catch (error) {
+
+            console.error(
+                "Evidence save error:",
+                error
+            );
+
+            alert(
+                "Unable to save evidence image."
+            );
+
+        }
+
+    }
+
+
+    // ==========================================
+    // SELECT EVIDENCE SLOT
+    // ==========================================
+
+    function selectEvidence(type) {
+
+        if (
+            !evidenceTypes.includes(type)
+        ) {
+
+            return;
+
+        }
+
+        currentEvidence = type;
+
+        updateCurrentEvidence();
+
+        document
+            .querySelectorAll(".evidence-slot")
+            .forEach((slot) => {
+
+                slot.classList.toggle(
+                    "active",
+                    slot.dataset.evidence === type
+                );
+
+            });
+
+    }
+
+
+    // ==========================================
+    // NEXT EVIDENCE
+    // ==========================================
+
+    function moveToNextEvidence() {
+
+        const currentIndex =
+            evidenceTypes.indexOf(
+                currentEvidence
+            );
+
+        if (currentIndex === -1) return;
+
+        /*
+         * Find the next empty slot first.
+         * This makes the workflow:
+         *
+         * Front → Back → Side → Batch
+         *
+         * but does not force completion.
+         */
+
+        for (
+            let i = currentIndex + 1;
+            i < evidenceTypes.length;
+            i++
+        ) {
+
+            const nextType =
+                evidenceTypes[i];
+
+            if (!evidencePhotos[nextType]) {
+
+                selectEvidence(nextType);
+
+                return;
+
+            }
+
+        }
+
+        /*
+         * If everything after current is filled,
+         * find any empty slot.
+         */
+
+        const firstEmpty =
+            evidenceTypes.find(
+                (type) =>
+                    !evidencePhotos[type]
+            );
+
+        if (firstEmpty) {
+
+            selectEvidence(firstEmpty);
+
+        }
+
+    }
+
+
+    // ==========================================
+    // UPDATE CURRENT LABEL
+    // ==========================================
+
+    function updateCurrentEvidence() {
+
+        const label =
+            evidenceLabels[currentEvidence];
+
+        if (currentEvidenceLabel) {
+
+            currentEvidenceLabel.textContent =
+                label;
+
+        }
+
+        if (scanPositionLabel) {
+
+            scanPositionLabel.textContent =
+                label.toUpperCase();
+
+        }
+
+    }
+
+
+    // ==========================================
+    // UPDATE EVIDENCE UI
+    // ==========================================
+
+    function updateEvidenceUI() {
+
+        let completed = 0;
+
+        document
+            .querySelectorAll(".evidence-slot")
+            .forEach((slot) => {
+
+                const type =
+                    slot.dataset.evidence;
+
+                const image =
+                    evidencePhotos[type];
+
+                const imageContainer =
+                    slot.querySelector(
+                        ".slot-image"
+                    );
+
+                const status =
+                    slot.querySelector(
+                        ".slot-status"
+                    );
+
+                if (image) {
+
+                    completed++;
+
+                    slot.classList.add(
+                        "completed"
+                    );
+
+                    if (imageContainer) {
+
+                        imageContainer.innerHTML =
+                            `<img src="${image}" alt="${evidenceLabels[type]} evidence">`;
+
+                    }
+
+                    if (status) {
+
+                        status.textContent =
+                            "Captured";
+
+                    }
+
+                } else {
+
+                    slot.classList.remove(
+                        "completed"
+                    );
+
+                    if (imageContainer) {
+
+                        imageContainer.innerHTML =
+                            `<span>＋</span>`;
+
+                    }
+
+                    if (status) {
+
+                        status.textContent =
+                            "Optional";
+
+                    }
+
+                }
+
+            });
+
+
+        // ==========================================
+        // COUNT
+        // ==========================================
+
+        if (evidenceCount) {
+
+            evidenceCount.textContent =
+                completed;
+
+        }
+
+
+        // ==========================================
+        // CONTINUE STATE
+        // ==========================================
+
+        if (completed >= MIN_EVIDENCE) {
+
+            if (continueBtn) {
+
+                continueBtn.disabled = false;
+
+            }
+
+            if (continueHint) {
+
+                if (completed >= MAX_EVIDENCE) {
+
+                    continueHint.textContent =
+                        "4 evidence images captured. Ready for inspection.";
+
+                } else {
+
+                    const remaining =
+                        MAX_EVIDENCE - completed;
+
+                    continueHint.textContent =
+                        `${completed} evidence image${completed === 1 ? "" : "s"} captured. You can add ${remaining} more or continue to inspection.`;
+
+                }
+
+            }
+
+        } else {
+
+            if (continueBtn) {
+
+                continueBtn.disabled = true;
+
+            }
+
+            if (continueHint) {
+
+                continueHint.textContent =
+                    "Capture at least 1 evidence image to continue.";
+
+            }
+
+        }
+
     }
 
 
@@ -252,23 +965,42 @@ document.addEventListener("DOMContentLoaded", () => {
     // CONTINUE
     // ==========================================
 
-    function continueWithImage() {
+    function continueToInspection() {
 
-    if (!capturedImageData) {
+        const completedCount =
+            Object.values(evidencePhotos)
+                .filter(Boolean)
+                .length;
 
-        alert(
-            "Please capture a product image first."
-        );
+        if (completedCount < MIN_EVIDENCE) {
 
-        return;
-    }
+            alert(
+                "Please capture at least 1 evidence image."
+            );
 
-    try {
+            return;
 
-        // Save image for inspection page
+        }
+
+        if (completedCount > MAX_EVIDENCE) {
+
+            alert(
+                "Maximum 4 evidence images are allowed."
+            );
+
+            return;
+
+        }
+
+        /*
+         * Lightweight inspection marker.
+         *
+         * Actual images remain in IndexedDB.
+         */
+
         sessionStorage.setItem(
-            "eParakhCapturedImage",
-            capturedImageData
+            "eParakhEvidenceReady",
+            "true"
         );
 
         sessionStorage.setItem(
@@ -276,26 +1008,14 @@ document.addEventListener("DOMContentLoaded", () => {
             "camera"
         );
 
-        console.log(
-            "Captured image saved successfully."
-        );
+        stopCamera();
 
-        // Go to inspection page
         window.location.href =
             "inspection.html";
 
-    } catch (error) {
-
-        console.error(
-            "Unable to save captured image:",
-            error
-        );
-
-        alert(
-            "Unable to continue with this image."
-        );
     }
-}
+
+
     // ==========================================
     // CAMERA ERROR
     // ==========================================
@@ -305,22 +1025,34 @@ document.addEventListener("DOMContentLoaded", () => {
         let message =
             "Unable to access the camera.";
 
-        if (error.name === "NotAllowedError") {
+        if (
+            error.name ===
+            "NotAllowedError"
+        ) {
 
             message =
                 "Camera permission was denied. Please allow camera access in your browser settings.";
 
-        } else if (error.name === "NotFoundError") {
+        } else if (
+            error.name ===
+            "NotFoundError"
+        ) {
 
             message =
                 "No camera was found on this device.";
 
-        } else if (error.name === "NotReadableError") {
+        } else if (
+            error.name ===
+            "NotReadableError"
+        ) {
 
             message =
                 "The camera may already be in use by another application.";
 
-        } else if (error.name === "SecurityError") {
+        } else if (
+            error.name ===
+            "SecurityError"
+        ) {
 
             message =
                 "Camera access is blocked for security reasons.";
@@ -328,6 +1060,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         showCameraError(message);
+
     }
 
 
@@ -337,19 +1070,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showCameraError(message) {
 
-        cameraErrorMessage.textContent = message;
+        if (cameraErrorMessage) {
 
-        cameraError.classList.remove("hidden");
+            cameraErrorMessage.textContent =
+                message;
 
-        placeholder.classList.add("hidden");
+        }
 
-        overlay.classList.add("hidden");
+        if (cameraError) {
 
-        captureBtn.disabled = true;
+            cameraError.classList.remove(
+                "hidden"
+            );
 
-        stopCameraBtn.disabled = true;
+        }
 
-        switchCameraBtn.disabled = true;
+        if (placeholder) {
+
+            placeholder.classList.add(
+                "hidden"
+            );
+
+        }
+
+        if (overlay) {
+
+            overlay.classList.add(
+                "hidden"
+            );
+
+        }
+
+        if (captureBtn) {
+
+            captureBtn.disabled = true;
+
+        }
+
+        if (stopCameraBtn) {
+
+            stopCameraBtn.disabled = true;
+
+        }
+
+        if (switchCameraBtn) {
+
+            switchCameraBtn.disabled = true;
+
+        }
+
     }
 
 
@@ -359,7 +1128,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function hideCameraError() {
 
-        cameraError.classList.add("hidden");
+        if (cameraError) {
+
+            cameraError.classList.add(
+                "hidden"
+            );
+
+        }
+
     }
 
 
@@ -367,91 +1143,140 @@ document.addEventListener("DOMContentLoaded", () => {
     // EVENT LISTENERS
     // ==========================================
 
-    if (startCameraBtn) {
+    startCameraBtn?.addEventListener(
+        "click",
+        startCamera
+    );
 
-        startCameraBtn.addEventListener(
-            "click",
-            startCamera
-        );
-    }
+    retryCameraBtn?.addEventListener(
+        "click",
+        startCamera
+    );
 
+    switchCameraBtn?.addEventListener(
+        "click",
+        switchCamera
+    );
 
-    if (retryCameraBtn) {
+    captureBtn?.addEventListener(
+        "click",
+        captureImage
+    );
 
-        retryCameraBtn.addEventListener(
-            "click",
-            startCamera
-        );
-    }
+    stopCameraBtn?.addEventListener(
+        "click",
+        stopCamera
+    );
 
+    browsePhotoBtn?.addEventListener(
+        "click",
+        browsePhoto
+    );
 
-    if (switchCameraBtn) {
+    saveEvidenceBtn?.addEventListener(
+        "click",
+        saveCurrentEvidence
+    );
 
-        switchCameraBtn.addEventListener(
-            "click",
-            switchCamera
-        );
-    }
+    retakeBtn?.addEventListener(
+        "click",
+        retakeImage
+    );
 
-
-    if (captureBtn) {
-
-        captureBtn.addEventListener(
-            "click",
-            captureImage
-        );
-    }
-
-
-    if (stopCameraBtn) {
-
-        stopCameraBtn.addEventListener(
-            "click",
-            stopCamera
-        );
-    }
-
-
-    if (retakeBtn) {
-
-        retakeBtn.addEventListener(
-            "click",
-            retakeImage
-        );
-    }
-
-
-    if (continueBtn) {
-
-        continueBtn.addEventListener(
-            "click",
-            continueWithImage
-        );
-    }
+    continueBtn?.addEventListener(
+        "click",
+        continueToInspection
+    );
 
 
     // ==========================================
-    // PAGE EXIT CLEANUP
+    // EVIDENCE SLOT EVENTS
+    // ==========================================
+
+    document
+        .querySelectorAll(".evidence-slot")
+        .forEach((slot) => {
+
+            slot.addEventListener(
+                "click",
+                () => {
+
+                    selectEvidence(
+                        slot.dataset.evidence
+                    );
+
+                }
+            );
+
+        });
+
+
+    // ==========================================
+    // PAGE EXIT
     // ==========================================
 
     window.addEventListener(
         "beforeunload",
         () => {
+
             stopCamera();
+
         }
     );
 
 
     // ==========================================
-    // INITIAL STATE
+    // INITIALIZE
     // ==========================================
 
-    overlay.classList.add("hidden");
-    cameraError.classList.add("hidden");
-    capturePreviewContainer.classList.add("hidden");
+    async function initialize() {
 
-    console.log(
-        "e-PARAKH camera module initialized."
-    );
+        try {
+
+            await openDatabase();
+
+            await loadEvidenceFromDB();
+
+        } catch (error) {
+
+            console.error(
+                "IndexedDB initialization failed:",
+                error
+            );
+
+        }
+
+        updateCurrentEvidence();
+
+        updateEvidenceUI();
+
+        if (overlay) {
+
+            overlay.classList.add("hidden");
+
+        }
+
+        if (cameraError) {
+
+            cameraError.classList.add("hidden");
+
+        }
+
+        if (capturePreviewContainer) {
+
+            capturePreviewContainer
+                .classList
+                .add("hidden");
+
+        }
+
+        console.log(
+            "e-PARAKH multi-evidence camera initialized."
+        );
+
+    }
+
+
+    initialize();
 
 });

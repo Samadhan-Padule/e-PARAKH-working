@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 const fs = require('fs');
 
@@ -42,15 +43,18 @@ POST /api/scans
 Content-Type: multipart/form-data
 
 Fields:
-image       -> image file
+images      -> multiple image files
 product     -> optional Product ObjectId
 inspection  -> optional Inspection ObjectId
+panelTypes  -> optional panel type information
+
+Maximum images: 7
 =========================================================
 */
 
 async function createScan(req, res, next) {
 
-    let uploadedFilePath = null;
+    let uploadedFiles = [];
 
     try {
 
@@ -61,20 +65,22 @@ async function createScan(req, res, next) {
 
         /*
         -------------------------------------------------
-        CHECK UPLOADED IMAGE
+        CHECK UPLOADED IMAGES
         -------------------------------------------------
         */
 
-        if (!req.file) {
+        const files = req.files || [];
+
+        if (!files.length) {
 
             return res.status(400).json({
                 success: false,
-                message: 'Product image file is required.'
+                message: 'At least one product image is required.'
             });
 
         }
 
-        uploadedFilePath = req.file.path;
+        uploadedFiles = files;
 
 
         /*
@@ -87,6 +93,37 @@ async function createScan(req, res, next) {
             product,
             inspection
         } = req.body;
+
+
+        /*
+        -------------------------------------------------
+        PANEL TYPES
+        -------------------------------------------------
+        */
+
+        let panelTypes = [];
+
+        if (req.body.panelTypes) {
+
+            try {
+
+                panelTypes =
+                    typeof req.body.panelTypes === 'string'
+                        ? JSON.parse(req.body.panelTypes)
+                        : req.body.panelTypes;
+
+            } catch (error) {
+
+                console.warn(
+                    'Unable to parse panelTypes:',
+                    error.message
+                );
+
+                panelTypes = [];
+
+            }
+
+        }
 
 
         /*
@@ -217,6 +254,63 @@ async function createScan(req, res, next) {
 
         /*
         -------------------------------------------------
+        BUILD IMAGE METADATA
+        -------------------------------------------------
+        */
+
+        const imageMetadata =
+            uploadedFiles.map((file, index) => {
+
+                const requestedPanel =
+                    panelTypes[index];
+
+                const allowedPanels = [
+                    'FRONT',
+                    'BACK',
+                    'SIDE',
+                    'TOP',
+                    'BOTTOM',
+                    'MRP_PANEL',
+                    'OTHER'
+                ];
+
+                const panelType =
+                    allowedPanels.includes(requestedPanel)
+                        ? requestedPanel
+                        : index === 0
+                            ? 'FRONT'
+                            : 'OTHER';
+
+
+                return {
+
+                    reference:
+                        file.filename,
+
+                    panelType,
+
+                    originalName:
+                        file.originalname,
+
+                    mimeType:
+                        file.mimetype,
+
+                    width:
+                        null,
+
+                    height:
+                        null,
+
+                    capturedAt:
+                        new Date()
+
+                };
+
+            });
+
+
+        /*
+        -------------------------------------------------
         CREATE INITIAL SCAN RECORD
         -------------------------------------------------
         */
@@ -232,7 +326,10 @@ async function createScan(req, res, next) {
                 inspection || null,
 
             imageReference:
-                req.file.filename,
+                uploadedFiles[0].filename,
+
+            images:
+                imageMetadata,
 
             status:
                 'PROCESSING',
@@ -244,71 +341,244 @@ async function createScan(req, res, next) {
 
         /*
         -------------------------------------------------
-        RUN AI ANALYSIS
+        RUN AI ANALYSIS ON EVERY IMAGE
         -------------------------------------------------
         */
 
         try {
 
-            const analysis =
-                await analyzeImage(
-                    uploadedFilePath,
-                    req.file.originalname
+            const analyses = [];
+
+
+            for (let index = 0; index < uploadedFiles.length; index++) {
+
+                const file =
+                    uploadedFiles[index];
+
+                const panel =
+                    imageMetadata[index]?.panelType ||
+                    'OTHER';
+
+
+                console.log(
+    'Analyzing image ' +
+    (index + 1) +
+    '/' +
+    uploadedFiles.length +
+    ': ' +
+    file.originalname +
+    ' [' +
+    panel +
+    ']'
+);
+
+
+                const analysis =
+                    await analyzeImage(
+                        file.path,
+                        file.originalname
+                    );
+
+
+                analyses.push({
+
+                    panel,
+
+                    fileName:
+                        file.originalname,
+
+                    result:
+                        analysis
+
+                });
+
+            }
+
+
+            /*
+            -------------------------------------------------
+            CHECK ANALYSIS RESULTS
+            -------------------------------------------------
+            */
+
+            if (!analyses.length) {
+
+                throw new Error(
+                    'No AI analysis result was returned.'
+                );
+
+            }
+
+
+            /*
+            -------------------------------------------------
+            COMBINE OCR FROM ALL PANELS
+            -------------------------------------------------
+            */
+
+            scan.rawOcrText =
+                analyses
+                    .map(item => {
+
+                        const analysis =
+                            item.result || {};
+
+                        return (
+                            analysis.raw_ocr_text ||
+                            analysis.rawOcrText ||
+                            ''
+                        );
+
+                    })
+                    .filter(Boolean)
+                    .join('\n\n');
+
+
+            /*
+            -------------------------------------------------
+            COMBINE EXTRACTED DATA
+            -------------------------------------------------
+            */
+
+            scan.extractedData =
+                analyses.reduce(
+                    (combined, item) => {
+
+                        const analysis =
+                            item.result || {};
+
+                        const data =
+                            analysis.extracted_data ||
+                            analysis.extractedData ||
+                            analysis.product ||
+                            {};
+
+                        return {
+                            ...combined,
+                            ...data
+                        };
+
+                    },
+                    {}
                 );
 
 
             /*
-            ---------------------------------------------
-            SAVE AI RESULTS
-            ---------------------------------------------
+            -------------------------------------------------
+            PRIMARY / FRONT ANALYSIS
+            -------------------------------------------------
+            */
+
+            const primaryItem =
+                analyses.find(
+                    item =>
+                        item.panel === 'FRONT'
+                ) ||
+                analyses[0];
+
+
+            const primaryAnalysis =
+                primaryItem?.result || {};
+
+
+            /*
+            -------------------------------------------------
+            VISION ANALYSIS
+            -------------------------------------------------
+            */
+
+            scan.visionAnalysis =
+                primaryAnalysis.vision_analysis ||
+                primaryAnalysis.visionAnalysis ||
+                null;
+
+
+            /*
+            -------------------------------------------------
+            EVIDENCE
+            -------------------------------------------------
+            */
+
+            scan.evidence =
+                analyses
+                    .map(item => {
+
+                        const analysis =
+                            item.result || {};
+
+                        return analysis.evidence;
+
+                    })
+                    .filter(Boolean)
+                    .flat();
+
+
+            /*
+            -------------------------------------------------
+            COMPLIANCE RESULT
+            -------------------------------------------------
+            */
+
+            scan.complianceResult =
+                primaryAnalysis.compliance_result ||
+                primaryAnalysis.complianceResult ||
+                null;
+
+
+            /*
+            -------------------------------------------------
+            REPORT
+            -------------------------------------------------
+            */
+
+            scan.report =
+                primaryAnalysis.report ||
+                null;
+
+
+            /*
+            -------------------------------------------------
+            MULTI-PANEL PROCESSING METADATA
+            -------------------------------------------------
+            */
+
+            scan.processingMetadata = {
+
+                totalImages:
+                    uploadedFiles.length,
+
+                analyzedImages:
+                    analyses.length,
+
+                panels:
+                    analyses.map(item => ({
+                        panel: item.panel,
+                        fileName: item.fileName
+                    })),
+
+                analyzedAt:
+                    new Date()
+
+            };
+
+
+            /*
+            -------------------------------------------------
+            MARK COMPLETED
+            -------------------------------------------------
             */
 
             scan.status =
                 'COMPLETED';
 
 
-            scan.rawOcrText =
-                analysis.raw_ocr_text ||
-                analysis.rawOcrText ||
-                '';
-
-
-            scan.extractedData =
-                analysis.extracted_data ||
-                analysis.extractedData ||
-                analysis.product ||
-                {};
-
-
-            scan.visionAnalysis =
-                analysis.vision_analysis ||
-                analysis.visionAnalysis ||
-                null;
-
-
-            scan.evidence =
-                analysis.evidence ||
-                null;
-
-
-            scan.complianceResult =
-                analysis.compliance_result ||
-                analysis.complianceResult ||
-                null;
-
-
-            scan.report =
-                analysis.report ||
-                null;
-
-
             await scan.save();
 
 
             /*
-            ---------------------------------------------
+            -------------------------------------------------
             SUCCESS RESPONSE
-            ---------------------------------------------
+            -------------------------------------------------
             */
 
             return res.status(201).json({
@@ -316,7 +586,7 @@ async function createScan(req, res, next) {
                 success: true,
 
                 message:
-                    'Product image scanned and analyzed successfully.',
+                    'Product images scanned and analyzed successfully.',
 
                 scan
 
@@ -326,10 +596,16 @@ async function createScan(req, res, next) {
         } catch (error) {
 
             /*
-            ---------------------------------------------
+            -------------------------------------------------
             AI FAILURE
-            ---------------------------------------------
+            -------------------------------------------------
             */
+
+            console.error(
+                'AI analysis failed:',
+                error
+            );
+
 
             scan.status =
                 'FAILED';
@@ -369,27 +645,33 @@ async function createScan(req, res, next) {
 
         /*
         -------------------------------------------------
-        DELETE TEMPORARY UPLOAD
+        DELETE ALL TEMPORARY UPLOADED FILES
         -------------------------------------------------
         */
 
-        if (
-            uploadedFilePath &&
-            fs.existsSync(uploadedFilePath)
-        ) {
+        for (const file of uploadedFiles) {
 
-            try {
+            if (
+                file?.path &&
+                fs.existsSync(file.path)
+            ) {
 
-                fs.unlinkSync(
-                    uploadedFilePath
-                );
+                try {
 
-            } catch (cleanupError) {
+                    fs.unlinkSync(
+                        file.path
+                    );
 
-                console.error(
-                    'Unable to remove temporary image:',
-                    cleanupError.message
-                );
+                } catch (cleanupError) {
+
+                 console.error(
+    'Unable to remove temporary image ' +
+    file.originalname +
+    ':',
+    cleanupError.message
+);   
+
+                }
 
             }
 
@@ -670,3 +952,4 @@ module.exports = {
     getAIHealth
 
 };
+

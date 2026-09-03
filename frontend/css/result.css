@@ -1,7 +1,7 @@
 /* =========================================================
    e-PARAKH — INSPECTION RESULT
    Professional Government Compliance UI
-   SCREEN + A4 PRINT/PDF OPTIMIZED
+   SCREEN + A4 PRINT/PDF
 ========================================================= */
 
 * {
@@ -83,7 +83,6 @@ body {
 
 .brand-text span {
     margin-top: 2px;
-
     color: #b9cce0;
     font-size: 11px;
 }
@@ -491,6 +490,8 @@ body {
 
     font-size: 8px;
     font-weight: 800;
+
+    white-space: nowrap;
 }
 
 /* =========================================================
@@ -709,6 +710,106 @@ body {
 }
 
 /* =========================================================
+   EVIDENCE
+========================================================= */
+
+.evidence-section {
+    margin-bottom: 24px;
+}
+
+.evidence-gallery {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+.evidence-card {
+    min-width: 0;
+
+    padding: 10px;
+
+    border: 1px solid #dfe7ef;
+    border-radius: 10px;
+
+    background: #fbfcfd;
+
+    overflow: hidden;
+}
+
+.evidence-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+
+    margin-bottom: 8px;
+}
+
+.evidence-header strong {
+    color: #1769aa;
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.evidence-header span {
+    color: #8795a5;
+
+    font-size: 8px;
+}
+
+.evidence-image {
+    display: block;
+
+    width: 100%;
+    height: 150px;
+
+    object-fit: contain;
+
+    border: 1px solid #e1e7ed;
+    border-radius: 7px;
+
+    background: #f3f6f9;
+}
+
+.evidence-name {
+    margin-top: 7px;
+
+    overflow: hidden;
+
+    color: #536b83;
+
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 8px;
+    font-weight: 700;
+}
+
+.empty-state {
+    width: 100%;
+
+    padding: 25px;
+
+    border: 1px dashed #ccd8e4;
+    border-radius: 9px;
+
+    background: #fafcfe;
+
+    color: #8795a5;
+
+    text-align: center;
+
+    font-size: 10px;
+}
+
+/* =========================================================
    OFFICIAL NOTICE
 ========================================================= */
 
@@ -864,62 +965,46 @@ body {
 }
 
 /* =========================================================
-   PRINT / PDF
-   IMPORTANT
+   PRINT / A4 PDF
 ========================================================= */
 
 @media print {
 
-    /* -----------------------------------------------------
-       A4 PAGE
-    ----------------------------------------------------- */
-
     @page {
-        size: A4;
-        margin: 10mm 11mm;
+        size: A4 portrait;
+        margin: 10mm 11mm 12mm 11mm;
     }
-
-    /* -----------------------------------------------------
-       RESET PAGE DIMENSIONS
-       Prevents blank first page
-    ----------------------------------------------------- */
 
     html,
     body {
         width: 100% !important;
-        height: auto !important;
-
         min-height: 0 !important;
 
         margin: 0 !important;
         padding: 0 !important;
 
-        overflow: visible !important;
-
         background: #ffffff !important;
-    }
 
-    body {
+        color: #132b4f !important;
+
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    /* -----------------------------------------------------
-       HIDE SCREEN-ONLY ELEMENTS
-    ----------------------------------------------------- */
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 9px;
+        line-height: 1.35;
+    }
 
+    /* Hide browser UI */
     .result-header,
-    .result-footer,
     .result-actions,
+    .result-footer,
     button,
-    nav,
     .no-print {
         display: none !important;
     }
-
-    /* -----------------------------------------------------
-       MAIN
-    ----------------------------------------------------- */
 
     .result-main {
         display: block !important;
@@ -942,108 +1027,200 @@ body {
     }
 
     /* -----------------------------------------------------
-       FIRST PAGE HEADING
-       Must not be pushed to page 2
+       PRINT HEADER
+    ----------------------------------------------------- */
+
+    .page-container::before {
+        content:
+            "e-PARAKH  |  LEGAL METROLOGY INSPECTION REPORT";
+
+        display: block;
+
+        margin-bottom: 5mm;
+        padding-bottom: 4mm;
+
+        border-bottom: 1.2px solid #124d91;
+
+        color: #124d91;
+
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    /* -----------------------------------------------------
+       PAGE HEADING
     ----------------------------------------------------- */
 
     .page-heading {
         display: flex !important;
 
-        margin-top: 0 !important;
-        margin-bottom: 14px !important;
+        align-items: flex-start;
+        justify-content: space-between;
 
-        padding-top: 0 !important;
+        gap: 8mm;
+
+        margin-bottom: 4mm;
 
         break-before: auto !important;
         page-break-before: auto !important;
 
-        break-after: auto !important;
-        page-break-after: auto !important;
-    }
-
-    .page-heading h1 {
-        font-size: 24px !important;
-        margin-bottom: 4px !important;
-    }
-
-    .page-heading p {
-        font-size: 9px !important;
-        line-height: 1.4 !important;
+        break-after: avoid !important;
+        page-break-after: avoid !important;
     }
 
     .page-eyebrow {
-        font-size: 7px !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 1mm;
+
+        color: #1769aa;
+
+        font-size: 7px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+    }
+
+    .page-heading h1 {
+        margin: 1mm 0;
+
+        color: #102f55;
+
+        font-size: 22px;
+        line-height: 1.05;
+    }
+
+    .page-heading p {
+        margin: 0;
+
+        color: #526b87;
+
+        font-size: 8.5px;
     }
 
     .inspection-id {
-        min-width: 160px !important;
+        min-width: 42mm;
 
-        padding: 9px 12px !important;
+        padding: 3mm;
+
+        border: 1px solid #d8e3ef;
+        border-radius: 3mm;
+
+        background: #fbfdff;
+
+        text-align: right;
 
         box-shadow: none !important;
     }
 
     .inspection-id span {
-        font-size: 7px !important;
+        display: block;
+
+        margin-bottom: 1mm;
+
+        color: #71849a;
+
+        font-size: 6px;
+        font-weight: 800;
+        letter-spacing: 1px;
     }
 
     .inspection-id strong {
-        font-size: 10px !important;
+        color: #124d91;
+        font-size: 9px;
     }
 
     /* -----------------------------------------------------
-       RESULT STATUS
+       FINAL ASSESSMENT
     ----------------------------------------------------- */
 
     .result-status-card {
-        margin-bottom: 12px !important;
+        display: grid !important;
 
-        padding: 13px !important;
+        grid-template-columns:
+            13mm
+            1fr
+            32mm;
 
-        border-radius: 8px !important;
+        align-items: center;
+
+        min-height: 27mm;
+
+        margin-bottom: 4mm;
+        padding: 4mm 5mm;
+
+        border: 1px solid #bfe6d7;
+        border-radius: 3mm;
+
+        background: #fbfffd !important;
 
         box-shadow: none !important;
-
-        break-before: auto !important;
-        page-break-before: auto !important;
 
         break-inside: avoid !important;
         page-break-inside: avoid !important;
     }
 
     .result-icon {
-        width: 42px !important;
-        height: 42px !important;
+        width: 10mm !important;
+        height: 10mm !important;
 
-        flex-basis: 42px !important;
+        flex-basis: 10mm !important;
 
-        font-size: 20px !important;
+        display: flex !important;
+
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        font-size: 15px;
+    }
+
+    .result-status-content {
+        padding-left: 2mm;
     }
 
     .result-label {
-        font-size: 7px !important;
+        margin-bottom: 1mm;
+
+        color: #16845b;
+
+        font-size: 6.5px;
     }
 
     .result-status-content h2 {
-        font-size: 16px !important;
+        margin: 1mm 0;
+
+        color: #123b68;
+
+        font-size: 14px;
     }
 
     .result-status-content p {
-        font-size: 8px !important;
+        margin: 0;
+
+        color: #536b83;
+
+        font-size: 8px;
     }
 
     .compliance-score {
-        min-width: 95px !important;
-        padding-left: 12px !important;
+        min-width: 0;
+
+        padding-left: 5mm;
+
+        border-left: 1px solid #d9e4ee;
     }
 
     .compliance-score span {
-        font-size: 6px !important;
+        font-size: 6px;
     }
 
     .compliance-score strong {
-        font-size: 20px !important;
+        margin-top: 1mm;
+
+        color: #16845b;
+
+        font-size: 24px;
+        line-height: 1;
     }
 
     /* -----------------------------------------------------
@@ -1051,46 +1228,66 @@ body {
     ----------------------------------------------------- */
 
     .summary-grid {
+        display: grid !important;
+
         grid-template-columns:
-            repeat(4, 1fr) !important;
+            1.15fr
+            1.65fr
+            .85fr
+            .85fr;
 
-        gap: 7px !important;
+        gap: 2mm;
 
-        margin-bottom: 12px !important;
+        margin-bottom: 4mm;
 
         break-inside: avoid !important;
         page-break-inside: avoid !important;
     }
 
     .summary-card {
-        min-height: 58px !important;
+        min-height: 17mm;
 
-        padding: 10px !important;
+        padding: 3mm;
 
-        border-radius: 7px !important;
+        border: 1px solid #d8e3ef;
+        border-radius: 2mm;
+
+        background: #ffffff !important;
 
         box-shadow: none !important;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
     }
 
     .summary-label {
-        font-size: 6px !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 1.2mm;
+
+        color: #71849a;
+
+        font-size: 6px;
     }
 
     .summary-card strong {
-        font-size: 8px !important;
+        color: #163b68;
+
+        font-size: 8.5px;
+        line-height: 1.25;
     }
 
     /* -----------------------------------------------------
-       ALL RESULT CARDS
+       RESULT CARDS
     ----------------------------------------------------- */
 
     .result-card {
-        margin-bottom: 12px !important;
+        margin-bottom: 4mm;
 
-        padding: 15px !important;
+        padding: 4mm;
 
-        border-radius: 8px !important;
+        border: 1px solid #d7e2ee;
+        border-radius: 2.5mm;
+
+        background: #ffffff !important;
 
         box-shadow: none !important;
 
@@ -1102,21 +1299,29 @@ body {
     }
 
     .section-heading {
-        margin-bottom: 11px !important;
+        margin-bottom: 3mm;
+
+        break-after: avoid !important;
+        page-break-after: avoid !important;
     }
 
     .card-eyebrow {
-        font-size: 6px !important;
-        margin-bottom: 3px !important;
+        margin-bottom: 1mm;
+
+        font-size: 6px;
+        letter-spacing: 1px;
     }
 
     .section-heading h2 {
-        font-size: 14px !important;
+        font-size: 13px;
     }
 
     .check-count {
-        font-size: 6px !important;
-        padding: 5px 8px !important;
+        padding: 1.5mm 3mm;
+
+        font-size: 6.5px;
+
+        white-space: nowrap;
     }
 
     /* -----------------------------------------------------
@@ -1124,44 +1329,46 @@ body {
     ----------------------------------------------------- */
 
     .checks-list {
-        grid-template-columns:
-            repeat(2, 1fr) !important;
+        display: grid !important;
 
-        gap: 6px !important;
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 1.8mm;
     }
 
     .check-item {
-        min-height: 48px !important;
+        min-height: 12mm;
 
-        padding: 7px 8px !important;
+        padding: 2.5mm;
 
-        gap: 7px !important;
+        gap: 2mm;
 
-        border-radius: 6px !important;
+        border-radius: 1.8mm;
 
         break-inside: avoid !important;
         page-break-inside: avoid !important;
     }
 
     .check-icon {
-        width: 22px !important;
-        height: 22px !important;
+        width: 6mm;
+        height: 6mm;
 
-        flex-basis: 22px !important;
+        flex-basis: 6mm;
 
-        font-size: 9px !important;
+        font-size: 8px;
     }
 
     .check-content strong {
-        font-size: 7px !important;
+        font-size: 7px;
     }
 
     .check-content span {
-        font-size: 6px !important;
+        font-size: 6px;
     }
 
     .check-status {
-        font-size: 6px !important;
+        font-size: 6.5px;
     }
 
     /* -----------------------------------------------------
@@ -1169,33 +1376,34 @@ body {
     ----------------------------------------------------- */
 
     .violation-item {
-        padding: 8px !important;
-        margin-bottom: 6px !important;
+        padding: 3mm;
 
-        gap: 8px !important;
+        margin-bottom: 2mm;
 
-        border-radius: 6px !important;
+        gap: 3mm;
 
         break-inside: avoid !important;
         page-break-inside: avoid !important;
     }
 
     .violation-icon {
-        width: 22px !important;
-        height: 22px !important;
+        width: 7mm;
+        height: 7mm;
 
-        flex-basis: 22px !important;
+        flex-basis: 7mm;
 
-        font-size: 9px !important;
+        font-size: 8px;
     }
 
     .violation-content strong {
-        font-size: 7px !important;
+        font-size: 8px;
     }
 
     .violation-content p {
-        font-size: 6px !important;
-        margin-top: 2px !important;
+        margin-top: 1mm;
+
+        font-size: 7px;
+        line-height: 1.4;
     }
 
     /* -----------------------------------------------------
@@ -1203,148 +1411,226 @@ body {
     ----------------------------------------------------- */
 
     .details-grid {
-        grid-template-columns:
-            repeat(2, 1fr) !important;
+        display: grid !important;
 
-        gap: 10px !important;
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 0;
+
+        border: 1px solid #dce5ee;
+        border-radius: 2mm;
+
+        overflow: hidden;
     }
 
     .detail-item {
-        padding-bottom: 8px !important;
+        min-height: 12mm;
+
+        padding: 2.5mm 3mm;
+
+        border-right: 1px solid #e2e9f0;
+        border-bottom: 1px solid #e2e9f0;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .detail-item:nth-child(even) {
+        border-right: none;
     }
 
     .detail-item span {
-        font-size: 6px !important;
-        margin-bottom: 3px !important;
+        margin-bottom: 1mm;
+
+        font-size: 6px;
     }
 
     .detail-item strong {
-        font-size: 7px !important;
-        line-height: 1.4 !important;
+        font-size: 7.5px;
+        line-height: 1.35;
+    }
+
+    .detail-item.full-width {
+        grid-column: 1 / -1;
+
+        border-right: none;
     }
 
     /* -----------------------------------------------------
-       OFFICIAL NOTICE
+       EVIDENCE
+    ----------------------------------------------------- */
+
+    #evidenceSection {
+        width: 100% !important;
+
+        margin-bottom: 4mm !important;
+
+        break-before: auto !important;
+        page-break-before: auto !important;
+
+        break-after: auto !important;
+        page-break-after: auto !important;
+
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+
+    #evidenceGallery {
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 3mm;
+
+        width: 100% !important;
+
+        overflow: visible !important;
+    }
+
+    .evidence-card {
+        min-width: 0;
+
+        padding: 2mm;
+
+        border: 1px solid #d7e2ee;
+        border-radius: 2mm;
+
+        background: #ffffff !important;
+
+        overflow: hidden;
+
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .evidence-header {
+        display: flex !important;
+
+        align-items: center;
+        justify-content: space-between;
+
+        margin-bottom: 1.5mm;
+
+        font-size: 6px;
+    }
+
+    .evidence-header strong {
+        font-size: 6px;
+    }
+
+    .evidence-header span {
+        font-size: 5.5px;
+    }
+
+    .evidence-image {
+        display: block !important;
+
+        width: 100% !important;
+        height: 30mm !important;
+
+        object-fit: contain !important;
+
+        border: 1px solid #e1e7ed;
+        border-radius: 1.2mm;
+
+        background: #f7f9fb !important;
+    }
+
+    .evidence-name {
+        margin-top: 1.5mm;
+
+        font-size: 6px;
+    }
+
+    #evidenceCount {
+        background: #eef5ff !important;
+        color: #1769aa !important;
+    }
+
+    /* -----------------------------------------------------
+       NOTICE
     ----------------------------------------------------- */
 
     .official-notice {
-        margin-top: 12px !important;
+        display: flex !important;
 
-        padding: 10px !important;
+        gap: 3mm;
 
-        gap: 8px !important;
+        margin-top: 4mm;
+        padding: 3mm;
 
-        border-radius: 7px !important;
+        border-radius: 2mm;
+
+        background: #f7fbff !important;
 
         break-inside: avoid !important;
         page-break-inside: avoid !important;
     }
 
     .notice-icon {
-        width: 25px !important;
-        height: 25px !important;
+        width: 7mm;
+        height: 7mm;
 
-        flex-basis: 25px !important;
+        flex-basis: 7mm;
 
-        font-size: 11px !important;
+        font-size: 8px;
     }
 
     .official-notice strong {
-        font-size: 8px !important;
+        font-size: 8px;
     }
 
     .official-notice p {
-        font-size: 6px !important;
-        line-height: 1.45 !important;
+        margin-top: 1mm;
+
+        font-size: 7px;
+        line-height: 1.4;
     }
 
     /* -----------------------------------------------------
-       GENERAL PAGE-BREAK CONTROL
+       GENERAL PAGE BREAK RULES
     ----------------------------------------------------- */
 
     section {
         break-before: auto !important;
         page-break-before: auto !important;
+
+        break-after: auto !important;
+        page-break-after: auto !important;
     }
-
-    .summary-grid,
-    .result-status-card,
-    .result-card,
-    .official-notice {
-        break-before: auto !important;
-        page-break-before: auto !important;
-    }
-
-    /* Don't force every card to remain on one page.
-       That can itself create blank pages. */
-
-    .result-card {
-        break-inside: auto !important;
-        page-break-inside: auto !important;
-    }
-
-    /* Small individual blocks stay together */
 
     .check-item,
-    .violation-item,
+    .summary-card,
     .detail-item,
-    .summary-card {
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-    }
-
-    /* -----------------------------------------------------
-       IMAGE / EVIDENCE SUPPORT
-       Works if result.js adds evidence image.
-    ----------------------------------------------------- */
-
-    .evidence-section,
+    .violation-item,
     .evidence-card,
-    .evidence-image,
-    .product-evidence,
-    .inspection-evidence {
-        width: 100% !important;
-
-        height: auto !important;
-        min-height: 0 !important;
-
-        overflow: visible !important;
-
-        break-before: auto !important;
-        page-break-before: auto !important;
-    }
-
-    .evidence-card {
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-    }
-
-    .evidence-image img,
-    .evidence-card img,
-    .product-evidence img,
-    .inspection-evidence img {
-        display: block !important;
-
-        width: auto !important;
-        max-width: 100% !important;
-
-        height: auto !important;
-        max-height: 220mm !important;
-
-        margin: 8px auto !important;
-
-        object-fit: contain !important;
-
+    .official-notice {
         break-inside: avoid !important;
         page-break-inside: avoid !important;
     }
 
     /* -----------------------------------------------------
-       REMOVE POSSIBLE EMPTY FLEX/GRID SPACE
+       PRINT FOOTER
     ----------------------------------------------------- */
 
-    .page-container > *:empty {
-        display: none !important;
+    .page-container::after {
+        content:
+            "e-PARAKH  |  Legal Metrology Compliance System  |  Government Inspection Platform";
+
+        display: block;
+
+        margin-top: 5mm;
+        padding-top: 2.5mm;
+
+        border-top: 1px solid #d6e0ea;
+
+        color: #71849a;
+
+        text-align: center;
+
+        font-size: 6.5px;
     }
 
     /* -----------------------------------------------------
@@ -1358,7 +1644,7 @@ body {
 }
 
 /* =========================================================
-   RESPONSIVE — TABLET
+   TABLET
 ========================================================= */
 
 @media (max-width: 1000px) {
@@ -1375,10 +1661,15 @@ body {
     .checks-list {
         grid-template-columns: 1fr;
     }
+
+    .evidence-gallery {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
 }
 
 /* =========================================================
-   RESPONSIVE — MOBILE
+   MOBILE
 ========================================================= */
 
 @media (max-width: 700px) {
@@ -1441,6 +1732,10 @@ body {
         grid-column: auto;
     }
 
+    .evidence-gallery {
+        grid-template-columns: 1fr;
+    }
+
     .result-actions {
         flex-direction: column;
     }
@@ -1459,7 +1754,7 @@ body {
 }
 
 /* =========================================================
-   RESPONSIVE — SMALL MOBILE
+   SMALL MOBILE
 ========================================================= */
 
 @media (max-width: 450px) {

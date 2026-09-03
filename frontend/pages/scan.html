@@ -2,102 +2,213 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="description"
-        content="e-PARAKH Product Scanner"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="e-PARAKH Product Evidence Scanner">
 
     <title>Scan Product | e-PARAKH</title>
 
-    <!-- Main CSS -->
-    <link
-        rel="stylesheet"
-        href="../css/style.css"
-    >
-
-    <!-- Scanner CSS -->
-    <link
-        rel="stylesheet"
-        href="../css/scanner.css"
-    >
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/inspection.css">
+    <link rel="stylesheet" href="../css/scanner.css">
 </head>
 
 <body>
 
-    <!-- ==========================================
-         HEADER
-    =========================================== -->
+<header class="inspection-header">
 
-    <header class="site-header">
+    <div class="brand">
 
-        <div class="container header-inner">
+        <a href="../index.html" class="brand-mark" aria-label="e-PARAKH Home">
+            ⚖
+        </a>
 
-            <a
-                href="../index.html"
-                class="logo"
-                aria-label="e-PARAKH Home"
-            >
-                e-PARAKH
-            </a>
+        <div class="brand-text">
+            <strong>e-PARAKH</strong>
+            <span>Legal Metrology Compliance System</span>
+        </div>
 
-            <a
-                href="../index.html"
-                class="back-btn"
-            >
-                ← Home
-            </a>
+    </div>
+
+    <div class="header-right">
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            <span>System Online</span>
+        </div>
+
+        <div class="officer-profile">
+
+            <div class="officer-avatar">
+                LM
+            </div>
+
+            <div class="officer-details">
+                <strong>Legal Metrology Officer</strong>
+                <span>Officer ID: LM-2026-001</span>
+            </div>
 
         </div>
 
-    </header>
+        <button
+            type="button"
+            class="logout-btn"
+            id="logoutBtn"
+        >
+            Logout
+        </button>
+
+    </div>
+
+</header>
 
 
-    <!-- ==========================================
-         MAIN SCANNER
-    =========================================== -->
+<main class="inspection-main">
 
-    <main class="scanner-page">
+    <div class="page-container">
 
-        <div class="container">
+        <!-- PAGE HEADING -->
 
-            <!-- Page Heading -->
+        <section class="page-heading">
 
-            <section class="scanner-heading">
+            <div>
 
-                <span class="section-label">
+                <span class="page-eyebrow">
                     PRODUCT VERIFICATION
                 </span>
 
                 <h1>
-                    Scan Product
+                    Capture Product Evidence
                 </h1>
 
                 <p>
-                    Capture a clear image of the product label
-                    to check its Legal Metrology declarations.
+                    Capture four clear images of the packaged commodity
+                    for Legal Metrology declaration verification.
                 </p>
 
-            </section>
+            </div>
+
+            <div class="inspection-id">
+
+                <span>
+                    INSPECTION STAGE
+                </span>
+
+                <strong>
+                    Step 01 — Product Scan
+                </strong>
+
+            </div>
+
+        </section>
 
 
-            <!-- ======================================
-                 CAMERA CONTAINER
-            ======================================= -->
+        <!-- PROGRESS -->
 
-            <section class="scanner-card">
+        <section class="progress-section">
+
+            <div class="progress-step active">
+
+                <div class="step-number">
+                    01
+                </div>
+
+                <div>
+                    <strong>Scan Product</strong>
+                    <span>Capture evidence</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line active"></div>
+
+            <div class="progress-step">
+
+                <div class="step-number">
+                    02
+                </div>
+
+                <div>
+                    <strong>Inspect</strong>
+                    <span>Review declaration</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line"></div>
+
+            <div class="progress-step">
+
+                <div class="step-number">
+                    03
+                </div>
+
+                <div>
+                    <strong>Compliance</strong>
+                    <span>Verify requirements</span>
+                </div>
+
+            </div>
+
+            <div class="progress-line"></div>
+
+            <div class="progress-step">
+
+                <div class="step-number">
+                    04
+                </div>
+
+                <div>
+                    <strong>Report</strong>
+                    <span>Generate report</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SCANNER WORKSPACE -->
+
+        <section class="scanner-workspace">
+
+
+            <!-- CAMERA PANEL -->
+
+            <div class="camera-panel">
+
+                <div class="scanner-card-header">
+
+                    <div>
+
+                        <span class="card-eyebrow">
+                            EVIDENCE CAPTURE
+                        </span>
+
+                        <h2>
+                            <span id="currentEvidenceLabel">
+                                Front
+                            </span>
+                            Image
+                        </h2>
+
+                    </div>
+
+                    <span
+                        class="camera-status"
+                        id="cameraStatus"
+                    >
+                        ● CAMERA OFFLINE
+                    </span>
+
+                </div>
+
+
+                <!-- CAMERA -->
 
                 <div
                     class="camera-container"
                     id="cameraContainer"
                 >
-
-                    <!-- Camera Preview -->
 
                     <video
                         id="cameraPreview"
@@ -107,8 +218,6 @@
                         muted
                     ></video>
 
-
-                    <!-- Camera Placeholder -->
 
                     <div
                         id="cameraPlaceholder"
@@ -120,18 +229,18 @@
                         </div>
 
                         <h2>
-                            Camera Access Required
+                            Camera Ready
                         </h2>
 
                         <p>
-                            Allow camera access to scan
-                            the product label.
+                            Start the camera to capture
+                            product evidence.
                         </p>
 
                         <button
                             type="button"
                             id="startCameraBtn"
-                            class="btn btn-primary"
+                            class="primary-btn"
                         >
                             Start Camera
                         </button>
@@ -139,11 +248,11 @@
                     </div>
 
 
-                    <!-- Camera Overlay -->
+                    <!-- SCAN OVERLAY -->
 
                     <div
                         id="cameraOverlay"
-                        class="camera-overlay"
+                        class="camera-overlay hidden"
                     >
 
                         <div class="scan-frame">
@@ -155,15 +264,19 @@
 
                         </div>
 
-                        <p class="scan-hint">
-                            Position the product label
-                            inside the frame
-                        </p>
+                        <div class="scan-label">
+                            <span id="scanPositionLabel">
+                                FRONT
+                            </span>
+                            <small>
+                                Position the label inside the frame
+                            </small>
+                        </div>
 
                     </div>
 
 
-                    <!-- Camera Error -->
+                    <!-- ERROR -->
 
                     <div
                         id="cameraError"
@@ -181,7 +294,7 @@
                         <button
                             type="button"
                             id="retryCameraBtn"
-                            class="btn btn-secondary"
+                            class="secondary-btn"
                         >
                             Try Again
                         </button>
@@ -191,9 +304,7 @@
                 </div>
 
 
-                <!-- ==================================
-                     CAMERA CONTROLS
-                =================================== -->
+                <!-- CAMERA CONTROLS -->
 
                 <div class="camera-controls">
 
@@ -213,7 +324,7 @@
                         id="captureBtn"
                         class="capture-btn"
                         disabled
-                        aria-label="Capture product image"
+                        aria-label="Capture evidence image"
                     >
                         <span class="capture-circle"></span>
                     </button>
@@ -232,114 +343,354 @@
                 </div>
 
 
-                <!-- ==================================
-                     CAPTURE PREVIEW
-                =================================== -->
+                <!-- BROWSE -->
 
-                <div
-                    id="capturePreviewContainer"
-                    class="capture-preview-container hidden"
-                >
+                <div class="browse-divider">
+                    <span>OR</span>
+                </div>
 
-                    <h2>
-                        Captured Image
-                    </h2>
+                <div class="browse-area">
 
-                    <div class="captured-image-wrapper">
+                    <input
+                        type="file"
+                        id="photoInput"
+                        accept="image/*"
+                        hidden
+                    >
 
-                        <img
-                            id="capturedImage"
-                            src=""
-                            alt="Captured product"
-                        >
+                    <button
+                        type="button"
+                        id="browsePhotoBtn"
+                        class="browse-photo-btn"
+                    >
+                        <span class="browse-icon">🖼️</span>
+
+                        <span>
+                            <strong>Browse Photo</strong>
+                            <small>
+                                Select an existing product image
+                            </small>
+                        </span>
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- EVIDENCE PANEL -->
+
+            <aside class="evidence-panel">
+
+                <div class="evidence-header">
+
+                    <div>
+
+                        <span class="card-eyebrow">
+                            INSPECTION EVIDENCE
+                        </span>
+
+                        <h2>
+                            Evidence Photos
+                        </h2>
 
                     </div>
 
-                    <div class="preview-actions">
-
-                        <button
-                            type="button"
-                            id="retakeBtn"
-                            class="btn btn-secondary"
-                        >
-                            Retake
-                        </button>
-
-                        <button
-                            type="button"
-                            id="continueBtn"
-                            class="btn btn-primary"
-                        >
-                            Continue
-                        </button>
-
+                    <div class="evidence-counter">
+                        <strong id="evidenceCount">0</strong>
+                        <span>/ 4</span>
                     </div>
 
                 </div>
 
 
-                <!-- ==================================
-                     INSTRUCTIONS
-                =================================== -->
+                <p class="evidence-description">
+                    Capture all four required views of the product.
+                </p>
 
-                <div class="scanner-instructions">
 
-                    <h2>
-                        Tips for a better scan
-                    </h2>
+                <!-- EVIDENCE SLOTS -->
+
+                <div class="evidence-grid">
+
+
+                    <button
+                        type="button"
+                        class="evidence-slot active"
+                        data-evidence="front"
+                    >
+
+                        <div class="slot-image">
+                            <span>＋</span>
+                        </div>
+
+                        <div class="slot-info">
+                            <strong>Front</strong>
+                            <span>Main label</span>
+                        </div>
+
+                        <span class="slot-status">
+                            Required
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="evidence-slot"
+                        data-evidence="back"
+                    >
+
+                        <div class="slot-image">
+                            <span>＋</span>
+                        </div>
+
+                        <div class="slot-info">
+                            <strong>Back</strong>
+                            <span>Declarations</span>
+                        </div>
+
+                        <span class="slot-status">
+                            Required
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="evidence-slot"
+                        data-evidence="side"
+                    >
+
+                        <div class="slot-image">
+                            <span>＋</span>
+                        </div>
+
+                        <div class="slot-info">
+                            <strong>Side</strong>
+                            <span>Package details</span>
+                        </div>
+
+                        <span class="slot-status">
+                            Required
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="evidence-slot"
+                        data-evidence="batch"
+                    >
+
+                        <div class="slot-image">
+                            <span>＋</span>
+                        </div>
+
+                        <div class="slot-info">
+                            <strong>Batch / MRP</strong>
+                            <span>Batch & pricing</span>
+                        </div>
+
+                        <span class="slot-status">
+                            Required
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <!-- GUIDANCE -->
+
+                <div class="field-guidance">
+
+                    <span class="card-eyebrow">
+                        FIELD GUIDANCE
+                    </span>
+
+                    <h3>
+                        Capture requirements
+                    </h3>
 
                     <ul>
 
                         <li>
-                            Keep the product label clearly visible.
+                            Keep all declaration text visible.
                         </li>
 
                         <li>
-                            Avoid glare and strong reflections.
+                            Avoid glare and reflections.
                         </li>
 
                         <li>
-                            Make sure the text is readable.
+                            Ensure image is sharp and readable.
                         </li>
 
                         <li>
-                            Hold your phone steady while capturing.
+                            Capture the complete package where possible.
                         </li>
 
                     </ul>
 
                 </div>
 
-            </section>
+
+                <!-- CONTINUE -->
+
+                <button
+                    type="button"
+                    id="continueBtn"
+                    class="continue-btn"
+                    disabled
+                >
+                    Continue to Inspection
+                    <span>→</span>
+                </button>
+
+                <p
+                    class="continue-hint"
+                    id="continueHint"
+                >
+                    Capture all 4 evidence images to continue.
+                </p>
+
+            </aside>
+
+        </section>
+
+
+        <!-- CAPTURE PREVIEW -->
+
+        <section
+            id="capturePreviewContainer"
+            class="capture-preview-container hidden"
+        >
+
+            <div class="preview-header">
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        IMAGE REVIEW
+                    </span>
+
+                    <h2>
+                        Captured Evidence
+                    </h2>
+
+                </div>
+
+                <span class="image-status">
+                    IMAGE READY
+                </span>
+
+            </div>
+
+            <div class="captured-image-wrapper">
+
+                <img
+                    id="capturedImage"
+                    src=""
+                    alt="Captured product evidence"
+                >
+
+            </div>
+
+            <div class="preview-actions">
+
+                <button
+                    type="button"
+                    id="retakeBtn"
+                    class="secondary-btn"
+                >
+                    Retake
+                </button>
+
+                <button
+                    type="button"
+                    id="saveEvidenceBtn"
+                    class="primary-btn"
+                >
+                    Save Evidence
+                    <span>✓</span>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- INTEGRITY NOTICE -->
+
+        <div class="compliance-notice">
+
+            <div class="notice-icon">
+                ✓
+            </div>
+
+            <div>
+
+                <strong>
+                    Evidence Integrity
+                </strong>
+
+                <p>
+                    Captured evidence is associated with the current
+                    inspection and will be available during declaration
+                    verification and report generation.
+                </p>
+
+            </div>
 
         </div>
 
-    </main>
+    </div>
+
+</main>
 
 
-    <!-- ==========================================
-         FOOTER
-    =========================================== -->
+<footer class="inspection-footer">
 
-    <footer class="site-footer">
+    <span>
+        © 2026 e-PARAKH
+    </span>
 
-        <div class="container">
+    <span>
+        Legal Metrology Compliance Platform
+    </span>
 
-            <p>
-                © <span id="currentYear"></span>
-                e-PARAKH. Legal Metrology Compliance Platform.
-            </p>
+    <span>
+        Inspection Evidence System
+    </span>
 
-        </div>
-
-    </footer>
+</footer>
 
 
-    <!-- ==========================================
-         CAMERA SCRIPT
-    =========================================== -->
+<script src="../js/camera.js"></script>
 
-    <script src="../js/camera.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+
+        logoutBtn.addEventListener("click", () => {
+
+            sessionStorage.removeItem("eParakhCurrentUser");
+
+            window.location.href = "login.html";
+
+        });
+
+    }
+
+});
+</script>
 
 </body>
 </html>

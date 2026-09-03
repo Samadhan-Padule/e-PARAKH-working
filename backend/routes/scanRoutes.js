@@ -46,7 +46,7 @@ POST /api/scans
 router.post(
     '/',
     authenticateToken,
-    upload.single('image'),
+    upload.array('images', 7),
     createScan
 );
 

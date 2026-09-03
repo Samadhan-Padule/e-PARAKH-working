@@ -1,8 +1,9 @@
+```javascript
 /* =========================================================
    e-PARAKH
    PRODUCT SCANNER
-   Camera + Image Upload + AI Analysis
-========================================================= */
+   Multi-Panel Camera + Image Upload
+   ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -27,21 +28,332 @@ document.addEventListener("DOMContentLoaded", () => {
     let cameraStream = null;
     let selectedImage = null;
 
+    /* =====================================================
+       MULTI-PANEL STATE
+       ===================================================== */
+
+    let currentPanel = "FRONT";
+
+    const panelImages = {
+        FRONT: null,
+        BACK: null,
+        SIDE: null,
+        TOP: null,
+        BOTTOM: null,
+        MRP_PANEL: null,
+        OTHER: null
+    };
 
     /* =====================================================
-       AI SERVICE
-    ===================================================== */
+       INDEXED DB
+       ===================================================== */
 
-    const AI_SERVICE_URL = "http://localhost:8000";
+    const DB_NAME = "eParakhScannerDB";
+    const DB_VERSION = 1;
+    const STORE_NAME = "panelImages";
+
+    function openPanelDB() {
+
+        return new Promise((resolve, reject) => {
+
+            const request = indexedDB.open(
+                DB_NAME,
+                DB_VERSION
+            );
+
+            request.onupgradeneeded = (event) => {
+
+                const db = event.target.result;
+
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+
+                    db.createObjectStore(
+                        STORE_NAME,
+                        { keyPath: "panel" }
+                    );
+
+                }
+
+            };
+
+            request.onsuccess = () => {
+
+                resolve(request.result);
+
+            };
+
+            request.onerror = () => {
+
+                reject(request.error);
+
+            };
+
+        });
+
+    }
+
+
+    async function savePanelImage(panel, file) {
+
+        const reader = new FileReader();
+
+        const dataUrl = await new Promise(
+            (resolve, reject) => {
+
+                reader.onload = () =>
+                    resolve(reader.result);
+
+                reader.onerror = () =>
+                    reject(reader.error);
+
+                reader.readAsDataURL(file);
+
+            }
+        );
+
+        const db = await openPanelDB();
+
+        return new Promise((resolve, reject) => {
+
+            const transaction =
+                db.transaction(
+                    STORE_NAME,
+                    "readwrite"
+                );
+
+            const store =
+                transaction.objectStore(
+                    STORE_NAME
+                );
+
+            store.put({
+                panel: panel,
+                name: file.name,
+                type: file.type,
+                dataUrl: dataUrl,
+                savedAt: new Date().toISOString()
+            });
+
+            transaction.oncomplete = () => {
+
+                db.close();
+
+                resolve();
+
+            };
+
+            transaction.onerror = () => {
+
+                db.close();
+
+                reject(transaction.error);
+
+            };
+
+        });
+
+    }
+
+
+    async function clearPanelImages() {
+
+        try {
+
+            const db = await openPanelDB();
+
+            await new Promise((resolve, reject) => {
+
+                const transaction =
+                    db.transaction(
+                        STORE_NAME,
+                        "readwrite"
+                    );
+
+                transaction
+                    .objectStore(STORE_NAME)
+                    .clear();
+
+                transaction.oncomplete =
+                    resolve;
+
+                transaction.onerror =
+                    () => reject(
+                        transaction.error
+                    );
+
+            });
+
+            db.close();
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to clear panel database:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       PANEL SELECTOR
+       ===================================================== */
+
+    function createPanelSelector() {
+
+        const existing =
+            document.getElementById(
+                "panelSelector"
+            );
+
+        if (existing) return;
+
+        const selector =
+            document.createElement("div");
+
+        selector.id = "panelSelector";
+
+        selector.style.cssText = `
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin:15px 0;
+        `;
+
+        const panels = [
+            ["FRONT", "Front"],
+            ["BACK", "Back"],
+            ["SIDE", "Side"],
+            ["TOP", "Top"],
+            ["BOTTOM", "Bottom"],
+            ["MRP_PANEL", "MRP"],
+            ["OTHER", "Other"]
+        ];
+
+        panels.forEach(([value, label]) => {
+
+            const button =
+                document.createElement("button");
+
+            button.type = "button";
+
+            button.textContent = label;
+
+            button.dataset.panel = value;
+
+            button.style.cssText = `
+                padding:8px 12px;
+                border:1px solid #d1d5db;
+                border-radius:8px;
+                background:#fff;
+                cursor:pointer;
+                font-weight:600;
+                font-size:13px;
+            `;
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    currentPanel = value;
+
+                    document
+                        .querySelectorAll(
+                            "#panelSelector button"
+                        )
+                        .forEach(btn => {
+
+                            btn.style.fontWeight =
+                                btn.dataset.panel === value
+                                    ? "800"
+                                    : "600";
+
+                        });
+
+                    updatePanelStatus();
+
+                }
+            );
+
+            selector.appendChild(button);
+
+        });
+
+        const target =
+            cameraArea?.parentElement ||
+            document.body;
+
+        target.insertBefore(
+            selector,
+            cameraArea
+        );
+
+    }
+
+
+    function updatePanelStatus() {
+
+        const existing =
+            document.getElementById(
+                "panelStatus"
+            );
+
+        if (existing) {
+
+            existing.textContent =
+                `Current panel: ${currentPanel}`;
+
+        }
+
+    }
+
+
+    function createPanelStatus() {
+
+        const status =
+            document.createElement("div");
+
+        status.id = "panelStatus";
+
+        status.style.cssText = `
+            margin:8px 0;
+            font-size:13px;
+            font-weight:700;
+        `;
+
+        status.textContent =
+            `Current panel: ${currentPanel}`;
+
+        const selector =
+            document.getElementById(
+                "panelSelector"
+            );
+
+        if (selector) {
+
+            selector.after(status);
+
+        }
+
+    }
+
+
+    createPanelSelector();
+    createPanelStatus();
 
 
     /* =====================================================
        START CAMERA
-    ===================================================== */
+       ===================================================== */
 
     if (startCameraBtn) {
 
-        startCameraBtn.addEventListener("click", startCamera);
+        startCameraBtn.addEventListener(
+            "click",
+            startCamera
+        );
 
     }
 
@@ -50,14 +362,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
-            if (!navigator.mediaDevices ||
-                !navigator.mediaDevices.getUserMedia) {
+            if (
+                !navigator.mediaDevices ||
+                !navigator.mediaDevices.getUserMedia
+            ) {
 
                 showCameraError(
                     "Camera access is not supported by this browser."
                 );
 
                 return;
+
             }
 
             cameraStream =
@@ -80,15 +395,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
 
-            console.error("Camera Error:", error);
+            console.error(
+                "Camera Error:",
+                error
+            );
 
-            if (error.name === "NotAllowedError") {
+            if (
+                error.name ===
+                "NotAllowedError"
+            ) {
 
                 showCameraError(
                     "Camera permission was denied. Please allow camera access in your browser."
                 );
 
-            } else if (error.name === "NotFoundError") {
+            } else if (
+                error.name ===
+                "NotFoundError"
+            ) {
 
                 showCameraError(
                     "No camera was found on this device."
@@ -109,85 +433,135 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        OPEN CAMERA
-    ===================================================== */
+       ===================================================== */
 
     function openCamera() {
 
         cameraArea.innerHTML = "";
 
-        cameraArea.classList.add("camera-active");
+        cameraArea.classList.add(
+            "camera-active"
+        );
 
-        const video = document.createElement("video");
+        const video =
+            document.createElement("video");
 
-        video.id = "cameraVideo";
+        video.id =
+            "cameraVideo";
 
         video.autoplay = true;
         video.playsInline = true;
         video.muted = true;
 
-        video.srcObject = cameraStream;
+        video.srcObject =
+            cameraStream;
 
-        cameraArea.appendChild(video);
-
-
-        const controls = document.createElement("div");
-
-        controls.className = "camera-controls";
+        cameraArea.appendChild(
+            video
+        );
 
 
-        const captureBtn = document.createElement("button");
+        const guide =
+            document.createElement("div");
+
+        guide.style.cssText = `
+            position:absolute;
+            inset:12%;
+            border:2px dashed rgba(255,255,255,.8);
+            border-radius:12px;
+            pointer-events:none;
+        `;
+
+        cameraArea.appendChild(
+            guide
+        );
+
+
+        const controls =
+            document.createElement("div");
+
+        controls.className =
+            "camera-controls";
+
+
+        const captureBtn =
+            document.createElement("button");
 
         captureBtn.type = "button";
-        captureBtn.className = "capture-btn";
+
+        captureBtn.className =
+            "capture-btn";
 
         captureBtn.innerHTML = `
             <span class="capture-circle"></span>
-            Capture Product
+            Capture ${currentPanel}
         `;
 
 
-        const stopBtn = document.createElement("button");
+        const stopBtn =
+            document.createElement("button");
 
         stopBtn.type = "button";
-        stopBtn.className = "stop-camera-btn";
 
-        stopBtn.textContent = "Stop Camera";
+        stopBtn.className =
+            "stop-camera-btn";
 
-
-        controls.appendChild(captureBtn);
-        controls.appendChild(stopBtn);
-
-        cameraArea.appendChild(controls);
+        stopBtn.textContent =
+            "Stop Camera";
 
 
-        captureBtn.addEventListener("click", () => {
+        controls.appendChild(
+            captureBtn
+        );
 
-            captureImage(video);
+        controls.appendChild(
+            stopBtn
+        );
 
-        });
+        cameraArea.appendChild(
+            controls
+        );
 
 
-        stopBtn.addEventListener("click", () => {
+        captureBtn.addEventListener(
+            "click",
+            () => {
 
-            stopCamera();
+                captureImage(video);
 
-        });
+            }
+        );
+
+
+        stopBtn.addEventListener(
+            "click",
+            stopCamera
+        );
 
     }
 
 
     /* =====================================================
        CAPTURE IMAGE
-    ===================================================== */
+       ===================================================== */
 
     function captureImage(video) {
 
-        const canvas = document.createElement("canvas");
+        const canvas =
+            document.createElement(
+                "canvas"
+            );
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width =
+            video.videoWidth;
 
-        const context = canvas.getContext("2d");
+        canvas.height =
+            video.videoHeight;
+
+        const context =
+            canvas.getContext(
+                "2d"
+            );
 
         context.drawImage(
             video,
@@ -199,41 +573,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         canvas.toBlob(
-            (blob) => {
+            async (blob) => {
 
                 if (!blob) {
 
-                    alert("Unable to capture image.");
+                    alert(
+                        "Unable to capture image."
+                    );
 
                     return;
 
                 }
 
-                selectedImage = new File(
-                    [blob],
-                    "camera-capture.jpg",
-                    {
-                        type: "image/jpeg"
-                    }
+                selectedImage =
+                    new File(
+                        [blob],
+                        `${currentPanel}-panel.jpg`,
+                        {
+                            type:
+                                "image/jpeg"
+                        }
+                    );
+
+                panelImages[currentPanel] =
+                    selectedImage;
+
+                await savePanelImage(
+                    currentPanel,
+                    selectedImage
                 );
 
-
-                const imageUrl =
-                    URL.createObjectURL(selectedImage);
-
-                imagePreview.src = imageUrl;
-
-                fileName.textContent =
-                    "Camera Capture";
-
-                previewArea.hidden = false;
-
-                continueBtn.disabled = false;
+                showSelectedImage(
+                    selectedImage
+                );
 
                 stopCamera();
 
                 showSuccess(
-                    "Product image captured successfully."
+                    `${currentPanel} panel captured successfully.`
                 );
 
             },
@@ -245,8 +622,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
+       SHOW SELECTED IMAGE
+       ===================================================== */
+
+    function showSelectedImage(file) {
+
+        const imageUrl =
+            URL.createObjectURL(file);
+
+        imagePreview.src =
+            imageUrl;
+
+        fileName.textContent =
+            `${currentPanel}: ${file.name}`;
+
+        previewArea.hidden =
+            false;
+
+        continueBtn.disabled =
+            false;
+
+    }
+
+
+    /* =====================================================
        STOP CAMERA
-    ===================================================== */
+       ===================================================== */
 
     function stopCamera() {
 
@@ -254,13 +655,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
             cameraStream
                 .getTracks()
-                .forEach(track => track.stop());
+                .forEach(
+                    track =>
+                        track.stop()
+                );
 
             cameraStream = null;
 
         }
 
-        cameraArea.classList.remove("camera-active");
+        cameraArea.classList.remove(
+            "camera-active"
+        );
 
         restoreCameraPlaceholder();
 
@@ -269,7 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        RESTORE CAMERA
-    ===================================================== */
+       ===================================================== */
 
     function restoreCameraPlaceholder() {
 
@@ -286,8 +692,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 </h3>
 
                 <p>
-                    Position the packaged commodity label
-                    clearly inside the camera frame.
+                    Select a panel and capture
+                    the packaged commodity label.
                 </p>
 
                 <button
@@ -305,7 +711,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const newButton =
-            document.getElementById("startCameraBtn");
+            document.getElementById(
+                "startCameraBtn"
+            );
 
         if (newButton) {
 
@@ -321,7 +729,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        FILE UPLOAD
-    ===================================================== */
+       ===================================================== */
 
     if (productImage) {
 
@@ -333,14 +741,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    function handleFileUpload(event) {
+    async function handleFileUpload(event) {
 
         const file =
             event.target.files[0];
 
-        if (!file) {
-            return;
-        }
+        if (!file) return;
 
 
         const allowedTypes = [
@@ -350,7 +756,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ];
 
 
-        if (!allowedTypes.includes(file.type)) {
+        if (
+            !allowedTypes.includes(
+                file.type
+            )
+        ) {
 
             alert(
                 "Please select a JPG, PNG or WEBP image."
@@ -380,56 +790,110 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        selectedImage = file;
+        selectedImage =
+            file;
+
+        panelImages[currentPanel] =
+            file;
 
 
-        const reader =
-            new FileReader();
+        try {
+
+            await savePanelImage(
+                currentPanel,
+                file
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Panel save error:",
+                error
+            );
+
+        }
 
 
-        reader.onload = function (e) {
-
-            imagePreview.src =
-                e.target.result;
-
-            fileName.textContent =
-                file.name;
-
-            previewArea.hidden =
-                false;
-
-            continueBtn.disabled =
-                false;
-
-        };
-
-
-        reader.readAsDataURL(file);
+        showSelectedImage(file);
 
     }
 
 
     /* =====================================================
        REMOVE IMAGE
-    ===================================================== */
+       ===================================================== */
 
     if (removeImageBtn) {
 
         removeImageBtn.addEventListener(
             "click",
-            () => {
+            async () => {
 
-                selectedImage = null;
+                selectedImage =
+                    null;
 
-                productImage.value = "";
+                panelImages[currentPanel] =
+                    null;
 
-                imagePreview.src = "";
+                productImage.value =
+                    "";
 
-                fileName.textContent = "-";
+                imagePreview.src =
+                    "";
 
-                previewArea.hidden = true;
+                fileName.textContent =
+                    "-";
 
-                continueBtn.disabled = true;
+                previewArea.hidden =
+                    true;
+
+                continueBtn.disabled =
+                    true;
+
+                try {
+
+                    const db =
+                        await openPanelDB();
+
+                    await new Promise(
+                        (resolve, reject) => {
+
+                            const transaction =
+                                db.transaction(
+                                    STORE_NAME,
+                                    "readwrite"
+                                );
+
+                            transaction
+                                .objectStore(
+                                    STORE_NAME
+                                )
+                                .delete(
+                                    currentPanel
+                                );
+
+                            transaction.oncomplete =
+                                resolve;
+
+                            transaction.onerror =
+                                () =>
+                                    reject(
+                                        transaction.error
+                                    );
+
+                        }
+                    );
+
+                    db.close();
+
+                } catch (error) {
+
+                    console.warn(
+                        "Unable to remove panel image:",
+                        error
+                    );
+
+                }
 
             }
         );
@@ -439,7 +903,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        ANALYZE PRODUCT
-    ===================================================== */
+       ===================================================== */
 
     if (continueBtn) {
 
@@ -453,10 +917,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function analyzeProduct() {
 
-        if (!selectedImage) {
+        if (!panelImages.FRONT) {
 
             alert(
-                "Please scan or upload a product image first."
+                "Please scan or upload the FRONT panel image first."
             );
 
             return;
@@ -464,16 +928,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /* Prevent duplicate requests */
-
-        continueBtn.disabled = true;
+        continueBtn.disabled =
+            true;
 
         const originalText =
             continueBtn.innerHTML;
 
-
         continueBtn.innerHTML = `
-            <span>Analyzing Product...</span>
+            <span>Preparing Inspection...</span>
             <span class="loading-spinner"></span>
         `;
 
@@ -481,63 +943,55 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
 
             /* =============================================
-               FORM DATA
-            ============================================= */
+               SAVE FRONT IMAGE FOR BACKWARD COMPATIBILITY
+               ============================================= */
 
-            const formData =
-                new FormData();
+            const reader =
+                new FileReader();
 
-            formData.append(
-                "image",
-                selectedImage,
-                selectedImage.name || "product.jpg"
+            reader.onload = () => {
+
+                sessionStorage.setItem(
+                    "eParakhCapturedImage",
+                    reader.result
+                );
+
+                localStorage.setItem(
+                    "scannedProductImage",
+                    reader.result
+                );
+
+            };
+
+            reader.readAsDataURL(
+                panelImages.FRONT
             );
 
 
             /* =============================================
-               CALL AI SERVICE
-            ============================================= */
+               SAVE PANEL METADATA
+               ============================================= */
 
-            const response =
-                await fetch(
-                    `${AI_SERVICE_URL}/analyze`,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
+            const panelMetadata = {};
 
+            Object.keys(panelImages)
+                .forEach(panel => {
 
-            if (!response.ok) {
+                    panelMetadata[panel] =
+                        panelImages[panel]
+                            ? panelImages[panel].name
+                            : null;
 
-                throw new Error(
-                    `AI service returned HTTP ${response.status}`
-                );
-
-            }
+                });
 
 
-            const result =
-                await response.json();
+            sessionStorage.setItem(
+                "panelImages",
+                JSON.stringify(
+                    panelMetadata
+                )
+            );
 
-
-            /* =============================================
-               VALIDATE RESPONSE
-            ============================================= */
-
-            if (result.status !== "success") {
-
-                throw new Error(
-                    result.message ||
-                    "Product analysis failed."
-                );
-
-            }
-
-
-            /* =============================================
-               STORE ANALYSIS RESULT
-            ============================================= */
 
             sessionStorage.setItem(
                 "inspectionStarted",
@@ -545,94 +999,32 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-            sessionStorage.setItem(
-                "analysisResult",
-                JSON.stringify(result)
-            );
+            /*
+             * IMPORTANT:
+             * We do NOT call /analyze here.
+             *
+             * inspection.js will perform the
+             * multi-image OCR analysis.
+             */
 
 
-            sessionStorage.setItem(
-                "lastInspection",
-                JSON.stringify({
-                    filename: result.filename,
-                    status: result.compliance_result?.overall_status,
-                    score: result.compliance_result?.score,
-                    analyzedAt: new Date().toISOString()
-                })
-            );
-
-
-            /* =============================================
-               INSPECTION COUNT
-            ============================================= */
-
-            let count =
-                parseInt(
-                    sessionStorage.getItem(
-                        "inspectionCount"
-                    ) || "0",
-                    10
-                );
-
-
-            count += 1;
-
-
-            sessionStorage.setItem(
-                "inspectionCount",
-                count.toString()
-            );
-
-
-            /* =============================================
-               SAVE IMAGE FOR RESULT PAGE
-            ============================================= */
-
-            const reader =
-                new FileReader();
-
-
-            reader.onload = () => {
-
-                localStorage.setItem(
-                    "scannedProductImage",
-                    reader.result
-                );
-
-
-                /* =========================================
-                   MOVE TO INSPECTION PAGE
-                ========================================= */
-
-                window.location.href =
-                    "pages/inspection.html";
-
-            };
-
-
-            reader.readAsDataURL(
-                selectedImage
-            );
+            window.location.href =
+                "pages/inspection.html";
 
         } catch (error) {
 
             console.error(
-                "Product Analysis Error:",
+                "Scanner Error:",
                 error
             );
 
-
             alert(
-                "Unable to analyze the product.\n\n" +
-                "Please make sure the e-PARAKH AI service is running on port 8000.\n\n" +
-                "Error: " +
+                "Unable to continue with inspection.\n\n" +
                 error.message
             );
 
-
             continueBtn.disabled =
                 false;
-
 
             continueBtn.innerHTML =
                 originalText;
@@ -644,7 +1036,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        LOGOUT
-    ===================================================== */
+       ===================================================== */
 
     if (logoutBtn) {
 
@@ -653,6 +1045,8 @@ document.addEventListener("DOMContentLoaded", () => {
             () => {
 
                 sessionStorage.clear();
+
+                clearPanelImages();
 
                 window.location.href =
                     "pages/login.html";
@@ -665,7 +1059,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        CAMERA ERROR
-    ===================================================== */
+       ===================================================== */
 
     function showCameraError(message) {
 
@@ -703,7 +1097,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 "retryCameraBtn"
             );
 
-
         if (retryButton) {
 
             retryButton.addEventListener(
@@ -718,13 +1111,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        SUCCESS MESSAGE
-    ===================================================== */
+       ===================================================== */
 
     function showSuccess(message) {
 
         const messageBox =
-            document.createElement("div");
-
+            document.createElement(
+                "div"
+            );
 
         messageBox.style.cssText = `
             margin-top:12px;
@@ -737,10 +1131,8 @@ document.addEventListener("DOMContentLoaded", () => {
             font-weight:700;
         `;
 
-
         messageBox.textContent =
             message;
-
 
         cameraArea.parentElement.insertBefore(
             messageBox,
@@ -750,7 +1142,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(() => {
 
-            if (messageBox.parentElement) {
+            if (
+                messageBox.parentElement
+            ) {
 
                 messageBox.remove();
 
@@ -763,7 +1157,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
        INITIAL COUNTER
-    ===================================================== */
+       ===================================================== */
 
     if (inspectionCount) {
 
@@ -772,10 +1166,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 "inspectionCount"
             ) || "0";
 
-
         inspectionCount.textContent =
             count;
 
     }
 
 });
+```

@@ -16,7 +16,9 @@ const {
     errorHandler
 } = require('./middleware/errorMiddleware');
 
+
 const app = express();
+
 
 /*
 =========================================================
@@ -48,10 +50,13 @@ FRONTEND STATIC FILES
 =========================================================
 */
 
-const frontendPath = path.join(__dirname, '..', 'frontend');
+const frontendPath =
+    path.join(__dirname, '..', 'frontend');
 
 // Serve CSS, JS, assets, pages, images, etc.
-app.use(express.static(frontendPath));
+app.use(
+    express.static(frontendPath)
+);
 
 
 /*
@@ -62,22 +67,40 @@ API ROUTES
 
 // Health Check
 // GET /api/health
-app.use('/api/health', healthRoutes);
+app.use(
+    '/api/health',
+    healthRoutes
+);
 
 // Authentication
-app.use('/api/auth', authRoutes);
+app.use(
+    '/api/auth',
+    authRoutes
+);
 
 // Products
-app.use('/api/products', productRoutes);
+app.use(
+    '/api/products',
+    productRoutes
+);
 
 // Inspections
-app.use('/api/inspections', inspectionRoutes);
+app.use(
+    '/api/inspections',
+    inspectionRoutes
+);
 
 // Compliance
-app.use('/api/compliance', complianceRoutes);
+app.use(
+    '/api/compliance',
+    complianceRoutes
+);
 
 // Scans / AI
-app.use('/api/scans', scanRoutes);
+app.use(
+    '/api/scans',
+    scanRoutes
+);
 
 
 /*
@@ -88,7 +111,14 @@ FRONTEND ENTRY POINT
 
 // GET /
 app.get('/', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
+
+    res.sendFile(
+        path.join(
+            frontendPath,
+            'index.html'
+        )
+    );
+
 });
 
 
@@ -98,8 +128,9 @@ app.get('/', (req, res) => {
 =========================================================
 */
 
-// Handles unknown routes
-app.use(notFoundHandler);
+app.use(
+    notFoundHandler
+);
 
 
 /*
@@ -108,7 +139,9 @@ GLOBAL ERROR HANDLER
 =========================================================
 */
 
-app.use(errorHandler);
+app.use(
+    errorHandler
+);
 
 
 /*

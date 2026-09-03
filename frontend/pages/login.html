@@ -1277,126 +1277,267 @@
         }
     );
 
-
     /* =====================================================
-       LOGIN
-    ====================================================== */
+   LOGIN
+====================================================== */
 
-    loginForm.addEventListener(
-        "submit",
-        async function (event) {
+loginForm.addEventListener(
+    "submit",
+    async function (event) {
 
-            event.preventDefault();
+        event.preventDefault();
 
+        const officerId =
+            document
+                .getElementById("officerId")
+                .value
+                .trim();
 
-            const officerId =
-                document
-                    .getElementById("officerId")
-                    .value
-                    .trim();
+        const passwordValue =
+            password.value;
 
+        loginMessage.className = "message";
+        loginMessage.textContent = "";
 
-            const passwordValue =
-                password.value;
+        /* =================================================
+           VALIDATION
+        ================================================= */
 
-
-            loginMessage.className =
-                "message";
-
+        if (!officerId || !passwordValue) {
 
             loginMessage.textContent =
-                "";
+                "Please enter your Officer ID and password.";
+
+            loginMessage.className =
+                "message error";
+
+            return;
+        }
+
+        loginMessage.textContent =
+            "Signing in...";
+
+        loginMessage.className =
+            "message";
+
+        try {
+
+            /* =================================================
+               BACKEND LOGIN
+            ================================================= */
+
+            const response = await fetch(
+                "http://localhost:5000/api/auth/login",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        identifier: officerId,
+                        password: passwordValue
+                    })
+                }
+            );
+
+            const result = await response.json();
 
 
-            if (
-                !officerId ||
-                !passwordValue
-            ) {
+            /* =================================================
+               SERVER ERROR
+            ================================================= */
+
+            if (!response.ok) {
 
                 loginMessage.textContent =
-                    "Please enter your Officer ID and password.";
+                    result.message || "Login failed.";
 
                 loginMessage.className =
                     "message error";
 
                 return;
-
             }
 
 
-            loginMessage.textContent = "Signing in...";
-            loginMessage.className = "message";
+            /* =================================================
+               LOGIN RESPONSE VALIDATION
+            ================================================= */
 
-            try {
-                const response = await fetch("http://localhost:5000/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ identifier: officerId, password: passwordValue })
-                });
-                const result = await response.json();
+            if (
+                result.success !== true ||
+                !result.inspector
+            ) {
 
-                if (!response.ok) {
-                    loginMessage.textContent = result.message || "Login failed.";
-                    loginMessage.className = "message error";
-                    return;
-                }
-
-                if (result.success !== true) {
-                    loginMessage.textContent = result.message || "Login failed.";
-                    loginMessage.className = "message error";
-                    return;
-                }
-
-                if (!result.token) {
-                    loginMessage.textContent = "Login succeeded, but authentication token was not received.";
-                    loginMessage.className = "message error";
-                    return;
-                }
-
-                localStorage.setItem("eParakhToken", result.token);
-                localStorage.setItem("officerName", result.inspector.fullName);
-                localStorage.setItem("officerId", result.inspector.employeeId);
-
-                if (!localStorage.getItem("eParakhToken")) {
-                    throw new Error("JWT token was not saved to localStorage.");
-                }
-
-                loginMessage.textContent = "Login successful.";
-                loginMessage.className = "message success";
-                window.location.href = "../scan.html";
-            } catch (error) {
                 loginMessage.textContent =
-                    error.message === "JWT token was not saved to localStorage."
-                        ? error.message
-                        : "Cannot connect to the backend.";
-                loginMessage.className = "message error";
+                    result.message || "Login failed.";
+
+                loginMessage.className =
+                    "message error";
+
+                return;
             }
 
+
+            if (!result.token) {
+
+                loginMessage.textContent =
+                    "Login succeeded, but authentication token was not received.";
+
+                loginMessage.className =
+                    "message error";
+
+                return;
+            }
+
+
+            /* =================================================
+               CLEAR PREVIOUS ACCOUNT
+            ================================================= */
+
+            localStorage.removeItem("eParakhToken");
+            localStorage.removeItem("eParakhUser");
+            localStorage.removeItem("officerName");
+            localStorage.removeItem("officerId");
+
+
+            /* =================================================
+               CURRENT ACCOUNT DATA
+            ================================================= */
+
+            const inspector =
+                result.inspector;
+
+
+            const currentUser = {
+
+                id: inspector.id,
+
+                officerId: inspector.employeeId,
+
+                name: inspector.fullName,
+
+                email: inspector.officialEmail,
+
+                role: inspector.role
+
+            };
+
+
+            /* =================================================
+               SAVE AUTHENTICATION
+            ================================================= */
+
+            localStorage.setItem(
+                "eParakhToken",
+                result.token
+            );
+
+
+            localStorage.setItem(
+                "eParakhUser",
+                JSON.stringify(currentUser)
+            );
+
+
+            /* =================================================
+               LEGACY KEYS
+               Existing pages still use these.
+            ================================================= */
+
+            localStorage.setItem(
+                "officerName",
+                inspector.fullName
+            );
+
+            localStorage.setItem(
+                "officerId",
+                inspector.employeeId
+            );
+
+
+            /* =================================================
+               VERIFY STORAGE
+            ================================================= */
+
+            const savedToken =
+                localStorage.getItem("eParakhToken");
+
+            const savedUser =
+                localStorage.getItem("eParakhUser");
+
+
+            if (!savedToken || !savedUser) {
+
+                throw new Error(
+                    "Authentication data could not be saved."
+                );
+            }
+
+
+            /* =================================================
+               SUCCESS
+            ================================================= */
+
+            loginMessage.textContent =
+                "Login successful.";
+
+            loginMessage.className =
+                "message success";
+
+
+            /* =================================================
+               GO TO SCANNER
+            ================================================= */
+
+            window.location.href =
+                "scan.html";
+
+        } catch (error) {
+
+            console.error(
+                "Login Error:",
+                error
+            );
+
+            loginMessage.textContent =
+                error.message ||
+                "Cannot connect to the backend.";
+
+            loginMessage.className =
+                "message error";
+        }
+
+    }
+);
+
+
+/* =====================================================
+   FORGOT PASSWORD
+====================================================== */
+
+document
+    .getElementById("forgotPassword")
+    .addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            loginMessage.textContent =
+                "Password recovery will be available after backend authentication is connected.";
+
+            loginMessage.className =
+                "message success";
         }
     );
 
 
-    /* =====================================================
-       FORGOT PASSWORD
-    ====================================================== */
-
-    document
-        .getElementById("forgotPassword")
-        .addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
 
 
-                loginMessage.textContent =
-                    "Password recovery will be available after backend authentication is connected.";
 
-                loginMessage.className =
-                    "message success";
-
-            }
-        );
+    
 
 </script>
 

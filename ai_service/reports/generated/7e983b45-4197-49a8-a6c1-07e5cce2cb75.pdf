@@ -1,0 +1,663 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2793 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(e-PARAKH COMPLIANCE INSPECTION REPORT) Tj
+0 -14 Td
+(============================================================) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Report ID: 7e983b45-4197-49a8-a6c1-07e5cce2cb75) Tj
+0 -14 Td
+(Generated At: 2026-08-31T13:45:06.325848+00:00) Tj
+0 -14 Td
+(Photograph: scanned-product.jpg) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(EXTRACTED OCR TEXT) Tj
+0 -14 Td
+(------------------------------------------------------------) Tj
+0 -14 Td
+(Ready to eat Sweets) Tj
+0 -14 Td
+(SERVE CHILLED) Tj
+0 -14 Td
+(INGREDIENTS: Sugar Syrup \\\(95.2%\\\), Chhana \\\(from Milk\\\) \\\(4.3%\\\), Rose Water.) Tj
+0 -14 Td
+(NUTRITIONAL INFORMATION) Tj
+0 -14 Td
+(ALLERGEN ALERT: CONTAINS MILK) Tj
+0 -14 Td
+(Serving Size: 62.5g) Tj
+0 -14 Td
+(May Contain Wheat, Gluten, Peanuts, Sesame, Nuts, Soy and Oats.) Tj
+0 -14 Td
+(Sarvinac Poe Dvcdraa:16) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(DECLARATIONS) Tj
+0 -14 Td
+(------------------------------------------------------------) Tj
+0 -14 Td
+(Product Name: Ready to eat Sweets) Tj
+0 -14 Td
+(Brand Name: N/A) Tj
+0 -14 Td
+(Manufacturer: N/A) Tj
+0 -14 Td
+(Manufacturer Address: N/A) Tj
+0 -14 Td
+(Net Quantity: N/A) Tj
+0 -14 Td
+(Mrp: N/A) Tj
+0 -14 Td
+(Batch Number: N/A) Tj
+0 -14 Td
+(Date Of Manufacture: N/A) Tj
+0 -14 Td
+(Use By: N/A) Tj
+0 -14 Td
+(Ingredients: Sugar Syrup \\\(95.2%\\\), Chhana \\\(from Milk\\\) \\\(4.3%\\\), Rose Water.) Tj
+0 -14 Td
+(Fssai License: N/A) Tj
+0 -14 Td
+(Country Of Origin: N/A) Tj
+0 -14 Td
+(Customer Care: N/A) Tj
+0 -14 Td
+(Brand Owner: N/A) Tj
+0 -14 Td
+(Epr Registration: N/A) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(COMPLIANCE CHECKS) Tj
+0 -14 Td
+(------------------------------------------------------------) Tj
+0 -14 Td
+(Overall Status: REVIEW_REQUIRED) Tj
+0 -14 Td
+(Score: 57) Tj
+0 -14 Td
+(Score Type: MACHINE_EVIDENCE_SCORE) Tj
+0 -14 Td
+(Machine Assessment: This result is an automated evidence assessment based on OCR and image) Tj
+0 -14 Td
+(-derived information. It is not a final legal determination.) Tj
+0 -14 Td
+(Ruleset Version: 0.2.0) Tj
+0 -14 Td
+(Ruleset Effective Date: 2026-08-30) Tj
+0 -14 Td
+(Source Reference: Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and applicable amendm) Tj
+0 -14 Td
+(ents; official verification required before regulatory action.) Tj
+0 -14 Td
+(Total Rules: 15) Tj
+0 -14 Td
+(Checks: [{'rule_id': 'PC-001', 'rule_name': 'Mandatory declaration information', 'field': ) Tj
+0 -14 Td
+('declarations', 'status': 'PASS', 'severity': 'MEDIUM', 'message': 'Structured declaration) Tj
+0 -14 Td
+( information was extracted from the package image.', 'value': '2 declaration fields detect) Tj
+0 -14 Td
+(ed', 'confidence': None, 'evidence': [], 'applicability': 'Packaged commodities; exact app) Tj
+0 -14 Td
+(licable declarations must be confirmed for the commodity.', 'validation_type': 'presence',) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 7 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 5635 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+( 'ruleset_version': '0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged Commodities\\\) R) Tj
+0 -14 Td
+(ules, 2011 and applicable amendments; official verification required before regulatory act) Tj
+0 -14 Td
+(ion.', 'requires_human_verification': True}, {'rule_id': 'PC-002', 'rule_name': 'Product n) Tj
+0 -14 Td
+(ame / commodity identification', 'field': 'product_name', 'status': 'PASS', 'severity': 'H) Tj
+0 -14 Td
+(IGH', 'message': 'Product Name was detected and passed the basic machine-format check. Leg) Tj
+0 -14 Td
+(al applicability and prescribed presentation require human verification.', 'value': 'Ready) Tj
+0 -14 Td
+( to eat Sweets', 'confidence': None, 'evidence': [], 'applicability': 'Packaged commoditie) Tj
+0 -14 Td
+(s; exact prescribed declaration and presentation require human verification.', 'validation) Tj
+0 -14 Td
+(_type': 'presence', 'ruleset_version': '0.2.0', 'source_reference': 'Legal Metrology \\\(Pack) Tj
+0 -14 Td
+(aged Commodities\\\) Rules, 2011 and applicable amendments; official verification required be) Tj
+0 -14 Td
+(fore regulatory action.', 'requires_human_verification': True}, {'rule_id': 'PC-003', 'rul) Tj
+0 -14 Td
+(e_name': 'Manufacturer / packer / importer information', 'field': 'manufacturer', 'status') Tj
+0 -14 Td
+(: 'NOT_DETECTABLE', 'severity': 'HIGH', 'message': 'Manufacturer was not detected by OCR. ) Tj
+0 -14 Td
+(This is not by itself proof of non-compliance.', 'value': None, 'confidence': None, 'evide) Tj
+0 -14 Td
+(nce': [], 'applicability': 'Packaged commodities; responsible-party category and prescribe) Tj
+0 -14 Td
+(d wording require human verification.', 'validation_type': 'presence', 'ruleset_version': ) Tj
+0 -14 Td
+('0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and appli) Tj
+0 -14 Td
+(cable amendments; official verification required before regulatory action.', 'requires_hum) Tj
+0 -14 Td
+(an_verification': True}, {'rule_id': 'PC-004', 'rule_name': 'Manufacturer address', 'field) Tj
+0 -14 Td
+(': 'manufacturer_address', 'status': 'NOT_DETECTABLE', 'severity': 'HIGH', 'message': 'Man) Tj
+0 -14 Td
+(ufacturer Address was not detected by OCR. This is not by itself proof of non-compliance.') Tj
+0 -14 Td
+(, 'value': None, 'confidence': None, 'evidence': [], 'applicability': 'Where applicable un) Tj
+0 -14 Td
+(der the packaged commodity requirements.', 'validation_type': 'presence', 'ruleset_version) Tj
+0 -14 Td
+(': '0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and ap) Tj
+0 -14 Td
+(plicable amendments; official verification required before regulatory action.', 'requires_) Tj
+0 -14 Td
+(human_verification': True}, {'rule_id': 'PC-005', 'rule_name': 'Net quantity declaration',) Tj
+0 -14 Td
+( 'field': 'net_quantity', 'status': 'NOT_DETECTABLE', 'severity': 'HIGH', 'message': 'Net ) Tj
+0 -14 Td
+(Quantity was not detected by OCR. This is not by itself proof of non-compliance.', 'value') Tj
+0 -14 Td
+(: None, 'confidence': None, 'evidence': [], 'applicability': 'Where net quantity declarati) Tj
+0 -14 Td
+(on applies.', 'validation_type': 'presence_and_format', 'ruleset_version': '0.2.0', 'sourc) Tj
+0 -14 Td
+(e_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and applicable amendment) Tj
+0 -14 Td
+(s; official verification required before regulatory action.', 'requires_human_verification) Tj
+0 -14 Td
+(': True}, {'rule_id': 'PC-006', 'rule_name': 'Maximum Retail Price \\\(MRP\\\)', 'field': 'mrp',) Tj
+0 -14 Td
+( 'status': 'NOT_DETECTABLE', 'severity': 'HIGH', 'message': 'Mrp was not detected by OCR. ) Tj
+0 -14 Td
+(This is not by itself proof of non-compliance.', 'value': None, 'confidence': None, 'evide) Tj
+0 -14 Td
+(nce': [], 'applicability': 'Where MRP declaration applies.', 'validation_type': 'presence_) Tj
+0 -14 Td
+(and_format', 'ruleset_version': '0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged Co) Tj
+0 -14 Td
+(mmodities\\\) Rules, 2011 and applicable amendments; official verification required before re) Tj
+0 -14 Td
+(gulatory action.', 'requires_human_verification': True}, {'rule_id': 'PC-007', 'rule_name') Tj
+0 -14 Td
+(: 'Batch / lot identification', 'field': 'batch_number', 'status': 'NOT_DETECTABLE', 'seve) Tj
+0 -14 Td
+(rity': 'MEDIUM', 'message': 'Batch Number was not detected by OCR. This is not by itself p) Tj
+0 -14 Td
+(roof of non-compliance.', 'value': None, 'confidence': None, 'evidence': [], 'applicabilit) Tj
+0 -14 Td
+(y': 'Where applicable to the commodity.', 'validation_type': 'presence', 'ruleset_version') Tj
+0 -14 Td
+(: '0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and app) Tj
+0 -14 Td
+(licable amendments; official verification required before regulatory action.', 'requires_h) Tj
+0 -14 Td
+(uman_verification': True}, {'rule_id': 'PC-008', 'rule_name': 'Date of manufacture / packi) Tj
+0 -14 Td
+(ng', 'field': 'date_of_manufacture', 'status': 'NOT_DETECTABLE', 'severity': 'HIGH', 'mess) Tj
+0 -14 Td
+(age': 'Date Of Manufacture was not detected by OCR. This is not by itself proof of non-com) Tj
+0 -14 Td
+(pliance.', 'value': None, 'confidence': None, 'evidence': [], 'applicability': 'Where appl) Tj
+0 -14 Td
+(icable; exact declaration format requires human verification.', 'validation_type': 'presen) Tj
+0 -14 Td
+(ce_and_format', 'ruleset_version': '0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged) Tj
+0 -14 Td
+( Commodities\\\) Rules, 2011 and applicable amendments; official verification required before) Tj
+0 -14 Td
+( regulatory action.', 'requires_human_verification': True}, {'rule_id': 'PC-009', 'rule_na) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 5556 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(me': 'Use-by / best-before declaration', 'field': 'use_by', 'status': 'NOT_DETECTABLE', 's) Tj
+0 -14 Td
+(everity': 'HIGH', 'message': 'Use By was not detected by OCR. This is not by itself proof ) Tj
+0 -14 Td
+(of non-compliance.', 'value': None, 'confidence': None, 'evidence': [], 'applicability': ') Tj
+0 -14 Td
+(Where applicable to the commodity.', 'validation_type': 'presence_and_format', 'ruleset_ve) Tj
+0 -14 Td
+(rsion': '0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 a) Tj
+0 -14 Td
+(nd applicable amendments; official verification required before regulatory action.', 'requ) Tj
+0 -14 Td
+(ires_human_verification': True}, {'rule_id': 'PC-010', 'rule_name': 'Consumer care informa) Tj
+0 -14 Td
+(tion', 'field': 'customer_care', 'status': 'NOT_DETECTABLE', 'severity': 'MEDIUM', 'messag) Tj
+0 -14 Td
+(e': 'Customer Care was not detected by OCR. This is not by itself proof of non-compliance.) Tj
+0 -14 Td
+(', 'value': None, 'confidence': None, 'evidence': [], 'applicability': 'Where consumer car) Tj
+0 -14 Td
+(e declaration applies.', 'validation_type': 'presence', 'ruleset_version': '0.2.0', 'sourc) Tj
+0 -14 Td
+(e_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and applicable amendment) Tj
+0 -14 Td
+(s; official verification required before regulatory action.', 'requires_human_verification) Tj
+0 -14 Td
+(': True}, {'rule_id': 'PC-011', 'rule_name': 'Country of origin', 'field': 'country_of_ori) Tj
+0 -14 Td
+(gin', 'status': 'NOT_DETECTABLE', 'severity': 'MEDIUM', 'message': 'Country Of Origin was ) Tj
+0 -14 Td
+(not detected by OCR. This is not by itself proof of non-compliance.', 'value': None, 'conf) Tj
+0 -14 Td
+(idence': None, 'evidence': [], 'applicability': 'Where applicable, including applicable im) Tj
+0 -14 Td
+(ported or relevant commodities.', 'validation_type': 'presence', 'ruleset_version': '0.2.0) Tj
+0 -14 Td
+(', 'source_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and applicable ) Tj
+0 -14 Td
+(amendments; official verification required before regulatory action.', 'requires_human_ver) Tj
+0 -14 Td
+(ification': True}, {'rule_id': 'PC-012', 'rule_name': 'Brand owner information', 'field': ) Tj
+0 -14 Td
+('brand_owner', 'status': 'NOT_DETECTABLE', 'severity': 'MEDIUM', 'message': 'Brand Owner w) Tj
+0 -14 Td
+(as not detected by OCR. This is not by itself proof of non-compliance.', 'value': None, 'c) Tj
+0 -14 Td
+(onfidence': None, 'evidence': [], 'applicability': 'Where applicable to the declaration co) Tj
+0 -14 Td
+(ntext.', 'validation_type': 'presence', 'ruleset_version': '0.2.0', 'source_reference': 'L) Tj
+0 -14 Td
+(egal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and applicable amendments; official veri) Tj
+0 -14 Td
+(fication required before regulatory action.', 'requires_human_verification': True}, {'rule) Tj
+0 -14 Td
+(_id': 'PC-013', 'rule_name': 'FSSAI license information', 'field': 'fssai_license', 'statu) Tj
+0 -14 Td
+(s': 'NOT_DETECTABLE', 'severity': 'MEDIUM', 'message': 'Fssai License was not detected by ) Tj
+0 -14 Td
+(OCR. This is not by itself proof of non-compliance.', 'value': None, 'confidence': None, ') Tj
+0 -14 Td
+(evidence': [], 'applicability': 'Relevant to food products where applicable; this is not i) Tj
+0 -14 Td
+(tself a Legal Metrology determination.', 'validation_type': 'format', 'ruleset_version': ') Tj
+0 -14 Td
+(0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and applic) Tj
+0 -14 Td
+(able amendments; official verification required before regulatory action.', 'requires_huma) Tj
+0 -14 Td
+(n_verification': True}, {'rule_id': 'PC-014', 'rule_name': 'EPR registration information',) Tj
+0 -14 Td
+( 'field': 'epr_registration', 'status': 'NOT_DETECTABLE', 'severity': 'LOW', 'message': 'E) Tj
+0 -14 Td
+(pr Registration was not detected by OCR. This is not by itself proof of non-compliance.', ) Tj
+0 -14 Td
+('value': None, 'confidence': None, 'evidence': [], 'applicability': 'Where applicable unde) Tj
+0 -14 Td
+(r the relevant environmental regulatory framework; not itself a Legal Metrology determinat) Tj
+0 -14 Td
+(ion.', 'validation_type': 'format', 'ruleset_version': '0.2.0', 'source_reference': 'Legal) Tj
+0 -14 Td
+( Metrology \\\(Packaged Commodities\\\) Rules, 2011 and applicable amendments; official verifica) Tj
+0 -14 Td
+(tion required before regulatory action.', 'requires_human_verification': True}, {'rule_id') Tj
+0 -14 Td
+(: 'PC-015', 'rule_name': 'Declaration readability and placement', 'field': 'placement', 's) Tj
+0 -14 Td
+(tatus': 'NOT_DETECTABLE', 'severity': 'HIGH', 'message': 'Placement evidence was not suppl) Tj
+0 -14 Td
+(ied by the vision analysis pipeline.', 'value': None, 'confidence': None, 'evidence': [], ) Tj
+0 -14 Td
+('applicability': 'Declaration presentation, prominence, readability and placement require ) Tj
+0 -14 Td
+(package-context verification.', 'validation_type': 'evidence_review', 'ruleset_version': ') Tj
+0 -14 Td
+(0.2.0', 'source_reference': 'Legal Metrology \\\(Packaged Commodities\\\) Rules, 2011 and applic) Tj
+0 -14 Td
+(able amendments; official verification required before regulatory action.', 'requires_huma) Tj
+0 -14 Td
+(n_verification': True}]) Tj
+0 -14 Td
+(Violation Summary: {'potential_non_compliance_count': 0, 'review_required_count': 0, 'not_) Tj
+0 -14 Td
+(detectable_count': 13, 'passed_count': 2, 'potential_non_compliance': [], 'review_required) Tj
+0 -14 Td
+(': [], 'not_detectable': [{'rule_id': 'PC-003', 'rule_name': 'Manufacturer / packer / impo) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 11 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 5363 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(rter information', 'field': 'manufacturer', 'severity': 'HIGH', 'message': 'Manufacturer w) Tj
+0 -14 Td
+(as not detected by OCR. This is not by itself proof of non-compliance.', 'value': None}, {) Tj
+0 -14 Td
+('rule_id': 'PC-004', 'rule_name': 'Manufacturer address', 'field': 'manufacturer_address',) Tj
+0 -14 Td
+( 'severity': 'HIGH', 'message': 'Manufacturer Address was not detected by OCR. This is not) Tj
+0 -14 Td
+( by itself proof of non-compliance.', 'value': None}, {'rule_id': 'PC-005', 'rule_name': ') Tj
+0 -14 Td
+(Net quantity declaration', 'field': 'net_quantity', 'severity': 'HIGH', 'message': 'Net Qu) Tj
+0 -14 Td
+(antity was not detected by OCR. This is not by itself proof of non-compliance.', 'value': ) Tj
+0 -14 Td
+(None}, {'rule_id': 'PC-006', 'rule_name': 'Maximum Retail Price \\\(MRP\\\)', 'field': 'mrp', 's) Tj
+0 -14 Td
+(everity': 'HIGH', 'message': 'Mrp was not detected by OCR. This is not by itself proof of ) Tj
+0 -14 Td
+(non-compliance.', 'value': None}, {'rule_id': 'PC-007', 'rule_name': 'Batch / lot identifi) Tj
+0 -14 Td
+(cation', 'field': 'batch_number', 'severity': 'MEDIUM', 'message': 'Batch Number was not d) Tj
+0 -14 Td
+(etected by OCR. This is not by itself proof of non-compliance.', 'value': None}, {'rule_id) Tj
+0 -14 Td
+(': 'PC-008', 'rule_name': 'Date of manufacture / packing', 'field': 'date_of_manufacture',) Tj
+0 -14 Td
+( 'severity': 'HIGH', 'message': 'Date Of Manufacture was not detected by OCR. This is not ) Tj
+0 -14 Td
+(by itself proof of non-compliance.', 'value': None}, {'rule_id': 'PC-009', 'rule_name': 'U) Tj
+0 -14 Td
+(se-by / best-before declaration', 'field': 'use_by', 'severity': 'HIGH', 'message': 'Use B) Tj
+0 -14 Td
+(y was not detected by OCR. This is not by itself proof of non-compliance.', 'value': None}) Tj
+0 -14 Td
+(, {'rule_id': 'PC-010', 'rule_name': 'Consumer care information', 'field': 'customer_care') Tj
+0 -14 Td
+(, 'severity': 'MEDIUM', 'message': 'Customer Care was not detected by OCR. This is not by ) Tj
+0 -14 Td
+(itself proof of non-compliance.', 'value': None}, {'rule_id': 'PC-011', 'rule_name': 'Coun) Tj
+0 -14 Td
+(try of origin', 'field': 'country_of_origin', 'severity': 'MEDIUM', 'message': 'Country Of) Tj
+0 -14 Td
+( Origin was not detected by OCR. This is not by itself proof of non-compliance.', 'value':) Tj
+0 -14 Td
+( None}, {'rule_id': 'PC-012', 'rule_name': 'Brand owner information', 'field': 'brand_owne) Tj
+0 -14 Td
+(r', 'severity': 'MEDIUM', 'message': 'Brand Owner was not detected by OCR. This is not by ) Tj
+0 -14 Td
+(itself proof of non-compliance.', 'value': None}, {'rule_id': 'PC-013', 'rule_name': 'FSSA) Tj
+0 -14 Td
+(I license information', 'field': 'fssai_license', 'severity': 'MEDIUM', 'message': 'Fssai ) Tj
+0 -14 Td
+(License was not detected by OCR. This is not by itself proof of non-compliance.', 'value':) Tj
+0 -14 Td
+( None}, {'rule_id': 'PC-014', 'rule_name': 'EPR registration information', 'field': 'epr_r) Tj
+0 -14 Td
+(egistration', 'severity': 'LOW', 'message': 'Epr Registration was not detected by OCR. Thi) Tj
+0 -14 Td
+(s is not by itself proof of non-compliance.', 'value': None}, {'rule_id': 'PC-015', 'rule_) Tj
+0 -14 Td
+(name': 'Declaration readability and placement', 'field': 'placement', 'severity': 'HIGH', ) Tj
+0 -14 Td
+('message': 'Placement evidence was not supplied by the vision analysis pipeline.', 'value') Tj
+0 -14 Td
+(: None}], 'passed': [{'rule_id': 'PC-001', 'rule_name': 'Mandatory declaration information) Tj
+0 -14 Td
+(', 'field': 'declarations', 'severity': 'MEDIUM', 'message': 'Structured declaration infor) Tj
+0 -14 Td
+(mation was extracted from the package image.', 'value': '2 declaration fields detected'}, ) Tj
+0 -14 Td
+({'rule_id': 'PC-002', 'rule_name': 'Product name / commodity identification', 'field': 'pr) Tj
+0 -14 Td
+(oduct_name', 'severity': 'HIGH', 'message': 'Product Name was detected and passed the basi) Tj
+0 -14 Td
+(c machine-format check. Legal applicability and prescribed presentation require human veri) Tj
+0 -14 Td
+(fication.', 'value': 'Ready to eat Sweets'}]}) Tj
+0 -14 Td
+(Field Summary: {'total_fields': 15, 'detected_fields': 2, 'missing_fields': 13, 'fields': ) Tj
+0 -14 Td
+({'product_name': {'detected': True, 'value': 'Ready to eat Sweets'}, 'brand_name': {'detec) Tj
+0 -14 Td
+(ted': False, 'value': None}, 'manufacturer': {'detected': False, 'value': None}, 'manufact) Tj
+0 -14 Td
+(urer_address': {'detected': False, 'value': None}, 'net_quantity': {'detected': False, 'va) Tj
+0 -14 Td
+(lue': None}, 'mrp': {'detected': False, 'value': None}, 'batch_number': {'detected': False) Tj
+0 -14 Td
+(, 'value': None}, 'date_of_manufacture': {'detected': False, 'value': None}, 'use_by': {'d) Tj
+0 -14 Td
+(etected': False, 'value': None}, 'ingredients': {'detected': True, 'value': 'Sugar Syrup \\\() Tj
+0 -14 Td
+(95.2%\\\), Chhana \\\(from Milk\\\) \\\(4.3%\\\), Rose Water.'}, 'fssai_license': {'detected': False, 'va) Tj
+0 -14 Td
+(lue': None}, 'country_of_origin': {'detected': False, 'value': None}, 'customer_care': {'d) Tj
+0 -14 Td
+(etected': False, 'value': None}, 'brand_owner': {'detected': False, 'value': None}, 'epr_r) Tj
+0 -14 Td
+(egistration': {'detected': False, 'value': None}}}) Tj
+0 -14 Td
+(Severity Summary: {'HIGH': 7, 'MEDIUM': 5, 'LOW': 1}) Tj
+0 -14 Td
+(Human Verification Required: Yes) Tj
+0 -14 Td
+(Regulatory Action Allowed: No) Tj
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 13 0 R >> >> /Contents 12 0 R >>
+endobj
+12 0 obj
+<< /Length 4367 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(Recommended Action: Review the package image, extracted declarations, supporting evidence ) Tj
+0 -14 Td
+(and applicable rules before taking enforcement or regulatory action.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(VISION SUMMARY) Tj
+0 -14 Td
+(------------------------------------------------------------) Tj
+0 -14 Td
+(Image Quality: {'status': 'PASS', 'confidence': 0.9, 'reason': 'Resolution, sharpness, bri) Tj
+0 -14 Td
+(ghtness, and contrast are within heuristic ranges.', 'width': 2769, 'height': 4096, 'blur_) Tj
+0 -14 Td
+(estimate': 712.99, 'brightness': 150.15, 'contrast': 101.88, 'requires_human_verification') Tj
+0 -14 Td
+(: True}) Tj
+0 -14 Td
+(Ocr Confidence: {'status': 'PASS', 'average_confidence': 0.9547, 'low_confidence_detection) Tj
+0 -14 Td
+(s': [{'text': 'Sarvinac Poe Dvcdraa:16', 'confidence': 0.666, 'bbox': [1783.0, 503.0, 2237) Tj
+0 -14 Td
+(.0, 546.0]}], 'detection_count': 8, 'reason': 'OCR confidence is adequate for preliminary ) Tj
+0 -14 Td
+(machine assistance; human verification remains required.', 'requires_human_verification': ) Tj
+0 -14 Td
+(True}) Tj
+0 -14 Td
+(Readability: {'status': 'PASS', 'confidence': 0.9547, 'reason': 'Text regions appear reada) Tj
+0 -14 Td
+(ble from available signals.', 'text_regions': 8, 'requires_human_verification': True}) Tj
+0 -14 Td
+(Font Size: {'status': 'REVIEW_REQUIRED', 'estimated_relative_size': 'large', 'comparison_r) Tj
+0 -14 Td
+(eference': 'Median OCR text-region height: 73.0 pixels; relative only, not a physical font) Tj
+0 -14 Td
+( measurement.', 'confidence': 0.65, 'requires_human_verification': True}) Tj
+0 -14 Td
+(Placement: {'status': 'REVIEW_REQUIRED', 'placements': [{'field': 'ingredients', 'detected) Tj
+0 -14 Td
+(': True, 'bbox': [112.0, 299.0, 1752.0, 371.0], 'location': 'top-center', 'machine_evaluab) Tj
+0 -14 Td
+(le': False, 'status': 'REVIEW_REQUIRED', 'confidence': 0.9987, 'reason': 'A related OCR la) Tj
+0 -14 Td
+(bel was located, but legal placement requires package-context and human verification.', 'r) Tj
+0 -14 Td
+(equires_human_verification': True}], 'requires_human_verification': True}) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(EVIDENCE) Tj
+0 -14 Td
+(------------------------------------------------------------) Tj
+0 -14 Td
+(- {'field': 'brand_name', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label or v) Tj
+0 -14 Td
+(alue bounding box was detected; image review is required.', 'bbox': None, 'confidence': No) Tj
+0 -14 Td
+(ne}) Tj
+0 -14 Td
+(- {'field': 'manufacturer', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label or) Tj
+0 -14 Td
+( value bounding box was detected; image review is required.', 'bbox': None, 'confidence': ) Tj
+0 -14 Td
+(None}) Tj
+0 -14 Td
+(- {'field': 'manufacturer_address', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration ) Tj
+0 -14 Td
+(label or value bounding box was detected; image review is required.', 'bbox': None, 'confi) Tj
+0 -14 Td
+(dence': None}) Tj
+0 -14 Td
+(- {'field': 'net_quantity', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label or) Tj
+0 -14 Td
+( value bounding box was detected; image review is required.', 'bbox': None, 'confidence': ) Tj
+0 -14 Td
+(None}) Tj
+0 -14 Td
+(- {'field': 'mrp', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label or value bo) Tj
+0 -14 Td
+(unding box was detected; image review is required.', 'bbox': None, 'confidence': None}) Tj
+0 -14 Td
+(- {'field': 'batch_number', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label or) Tj
+0 -14 Td
+( value bounding box was detected; image review is required.', 'bbox': None, 'confidence': ) Tj
+0 -14 Td
+(None}) Tj
+0 -14 Td
+(- {'field': 'date_of_manufacture', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration l) Tj
+0 -14 Td
+(abel or value bounding box was detected; image review is required.', 'bbox': None, 'confid) Tj
+0 -14 Td
+(ence': None}) Tj
+0 -14 Td
+(- {'field': 'use_by', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label or value) Tj
+0 -14 Td
+( bounding box was detected; image review is required.', 'bbox': None, 'confidence': None}) Tj
+0 -14 Td
+(- {'field': 'fssai_license', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label o) Tj
+0 -14 Td
+(r value bounding box was detected; image review is required.', 'bbox': None, 'confidence':) Tj
+0 -14 Td
+( None}) Tj
+0 -14 Td
+(- {'field': 'country_of_origin', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration lab) Tj
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 15 0 R >> >> /Contents 14 0 R >>
+endobj
+14 0 obj
+<< /Length 1118 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+(el or value bounding box was detected; image review is required.', 'bbox': None, 'confiden) Tj
+0 -14 Td
+(ce': None}) Tj
+0 -14 Td
+(- {'field': 'customer_care', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label o) Tj
+0 -14 Td
+(r value bounding box was detected; image review is required.', 'bbox': None, 'confidence':) Tj
+0 -14 Td
+( None}) Tj
+0 -14 Td
+(- {'field': 'brand_owner', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration label or ) Tj
+0 -14 Td
+(value bounding box was detected; image review is required.', 'bbox': None, 'confidence': N) Tj
+0 -14 Td
+(one}) Tj
+0 -14 Td
+(- {'field': 'epr_registration', 'status': 'NOT_DETECTABLE', 'reason': 'No declaration labe) Tj
+0 -14 Td
+(l or value bounding box was detected; image review is required.', 'bbox': None, 'confidenc) Tj
+0 -14 Td
+(e': None}) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(REMARKS) Tj
+0 -14 Td
+(------------------------------------------------------------) Tj
+0 -14 Td
+(Generated automatically by e-PARAKH AI Compliance System. Human verification is required b) Tj
+0 -14 Td
+(efore taking regulatory action.) Tj
+0 -14 Td
+() Tj
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 16
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000147 00000 n 
+0000000273 00000 n 
+0000003118 00000 n 
+0000003244 00000 n 
+0000008931 00000 n 
+0000009057 00000 n 
+0000014665 00000 n 
+0000014793 00000 n 
+0000020209 00000 n 
+0000020338 00000 n 
+0000024758 00000 n 
+0000024887 00000 n 
+0000026058 00000 n 
+trailer
+<< /Size 16 /Root 1 0 R >>
+startxref
+26129
+%%EOF
