@@ -2504,7 +2504,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     ===================================================== */
 
     const API_BASE_URL =
-        "http://localhost:5000/api";
+        "http://https://e-parakh.onrender.com/api";
 
 
     let inspectionSavePromise =

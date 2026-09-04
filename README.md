@@ -33,7 +33,7 @@ Phase 1 provides a modular Express API foundation, environment configuration, Mo
 	npm run dev
 	```
 
-The API listens on `http://localhost:5000` by default.
+The API listens on `https://e-parakh.onrender.com` by default.
 
 The API fails to start when MongoDB cannot be reached so it never presents a false healthy state.
 
