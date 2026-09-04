@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Inspection Report - e-PARAKH</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
+    color:#17202a;
+}
+
+.header{
+    background:#123b63;
+    color:white;
+    padding:18px 24px;
+}
+
+.header h1{
+    margin:0;
+    font-size:20px;
+}
+
+.container{
+    max-width:950px;
+    margin:25px auto;
+    padding:0 16px;
+}
+
+.card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 3px 15px rgba(0,0,0,.08);
+    margin-bottom:18px;
+}
+
+h2{
+    margin-top:0;
+    color:#123b63;
+}
+
+label{
+    display:block;
+    margin:15px 0 7px;
+    font-weight:bold;
+    font-size:14px;
+}
+
+input,
+textarea,
+select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccd5df;
+    border-radius:8px;
+    font:inherit;
+}
+
+textarea{
+    min-height:120px;
+    resize:vertical;
+}
+
+input[readonly]{
+    background:#eef2f6;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+button{
+    padding:12px 18px;
+    border:0;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.save{
+    background:#1769aa;
+    color:white;
+}
+
+.back{
+    background:#e8edf3;
+    color:#17202a;
+}
+
+.message{
+    padding:12px;
+    border-radius:8px;
+    display:none;
+    margin-bottom:15px;
+}
+
+.success{
+    display:block;
+    background:#dff6e7;
+    color:#16733a;
+}
+
+.error{
+    display:block;
+    background:#fde2e2;
+    color:#a52323;
+}
+
+.evidence{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px;
+}
+
+.evidence img{
+    width:100%;
+    height:180px;
+    object-fit:cover;
+    border-radius:8px;
+    border:1px solid #ddd;
+}
+
+@media(max-width:600px){
+    .container{margin:15px auto}
+    .card{padding:16px}
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <h1>e-PARAKH — Edit Inspection Report</h1>
+</header>
+
+<main class="container">
+
+    <div id="message" class="message"></div>
+
+    <section class="card">
+
+        <h2>Inspection Information</h2>
+
+        <label>Inspection ID</label>
+        <input id="inspectionId" readonly>
+
+        <label>Inspection Status</label>
+        <select id="status">
+            <option value="PENDING">PENDING</option>
+            <option value="IN_PROGRESS">IN_PROGRESS</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="CANCELLED">CANCELLED</option>
+        </select>
+
+        <label>Compliance Status</label>
+        <select id="complianceStatus">
+            <option value="PENDING">PENDING</option>
+            <option value="COMPLIANT">COMPLIANT</option>
+            <option value="NON_COMPLIANT">NON_COMPLIANT</option>
+            <option value="WARNING">WARNING</option>
+        </select>
+
+        <label>Compliance Score</label>
+        <input id="complianceScore" type="number" min="0" max="100">
+
+    </section>
+
+
+    <section class="card">
+
+        <h2>Inspector Remarks</h2>
+
+        <label>Observations</label>
+        <textarea id="observations"></textarea>
+
+        <label>Final Remarks</label>
+        <textarea id="remarks"></textarea>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2>Evidence</h2>
+
+        <div id="evidence" class="evidence">
+            No evidence available.
+        </div>
+
+    </section>
+
+
+    <section class="card">
+
+        <div class="actions">
+
+            <button class="save" id="saveBtn">
+                Save Changes
+            </button>
+
+            <button class="back"
+                    onclick="location.href='history.html'">
+                Back to History
+            </button>
+
+            <button class="back"
+                    onclick="window.print()">
+                Print Report
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+
+const API_BASE = "http://localhost:5000/api";
+
+const token =
+    localStorage.getItem("eParakhToken");
+
+if (!token) {
+    location.href = "login.html";
+}
+
+const params =
+    new URLSearchParams(location.search);
+
+const inspectionId =
+    params.get("id");
+
+if (!inspectionId) {
+    alert("Inspection ID is missing.");
+    location.href = "history.html";
+}
+
+function $(id){
+    return document.getElementById(id);
+}
+
+function showMessage(text, type){
+
+    const box = $("message");
+
+    box.textContent = text;
+
+    box.className =
+        `message ${type}`;
+}
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+async function loadInspection(){
+
+    try{
+
+        const response =
+            await fetch(
+                `${API_BASE}/inspections/${inspectionId}`,
+                {
+                    headers:{
+                        Authorization:
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if(!response.ok){
+            throw new Error(
+                data.message ||
+                "Unable to load inspection."
+            );
+        }
+
+        const inspection =
+            data.inspection;
+
+        $("inspectionId").value =
+            inspection._id;
+
+        $("status").value =
+            inspection.status || "PENDING";
+
+        $("complianceStatus").value =
+            inspection.complianceStatus || "PENDING";
+
+        $("complianceScore").value =
+            inspection.complianceScore ?? "";
+
+        $("observations").value =
+            inspection.observations || "";
+
+        $("remarks").value =
+            inspection.remarks || "";
+
+        renderEvidence(
+            inspection.evidenceImages || []
+        );
+
+    }catch(error){
+
+        showMessage(
+            error.message,
+            "error"
+        );
+    }
+}
+
+function renderEvidence(images){
+
+    const container =
+        $("evidence");
+
+    if(!images.length){
+
+        container.innerHTML =
+            "No evidence available.";
+
+        return;
+    }
+
+    container.innerHTML =
+        images.map(
+            (src,index) => `
+                <div>
+                    <img
+                        src="${escapeHtml(src)}"
+                        alt="Evidence ${index + 1}">
+                </div>
+            `
+        ).join("");
+}
+
+$("saveBtn").onclick =
+    async function(){
+
+        this.disabled = true;
+
+        try{
+
+            const scoreValue =
+                $("complianceScore").value;
+
+            const payload = {
+
+                status:
+                    $("status").value,
+
+                complianceStatus:
+                    $("complianceStatus").value,
+
+                complianceScore:
+                    scoreValue === ""
+                        ? null
+                        : Number(scoreValue),
+
+                observations:
+                    $("observations").value,
+
+                remarks:
+                    $("remarks").value
+            };
+
+            const response =
+                await fetch(
+                    `${API_BASE}/inspections/${inspectionId}`,
+                    {
+                        method:"PUT",
+
+                        headers:{
+                            "Content-Type":
+                                "application/json",
+
+                            Authorization:
+                                `Bearer ${token}`
+                        },
+
+                        body:
+                            JSON.stringify(payload)
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if(!response.ok){
+
+                throw new Error(
+                    data.message ||
+                    "Unable to save changes."
+                );
+            }
+
+            showMessage(
+                "Inspection report updated successfully.",
+                "success"
+            );
+
+        }catch(error){
+
+            showMessage(
+                error.message,
+                "error"
+            );
+
+        }finally{
+
+            this.disabled = false;
+        }
+    };
+
+loadInspection();
+
+</script>
+
+</body>
+</html>

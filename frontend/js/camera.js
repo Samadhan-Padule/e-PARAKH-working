@@ -9,11 +9,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // ELEMENTS
     // ==========================================
 
-    const video = document.getElementById("cameraPreview");
-    const placeholder = document.getElementById("cameraPlaceholder");
-    const overlay = document.getElementById("cameraOverlay");
+    const video =
+        document.getElementById("cameraPreview");
 
-    const cameraError = document.getElementById("cameraError");
+    const placeholder =
+        document.getElementById("cameraPlaceholder");
+
+    const overlay =
+        document.getElementById("cameraOverlay");
+
+    const cameraError =
+        document.getElementById("cameraError");
+
     const cameraErrorMessage =
         document.getElementById("cameraErrorMessage");
 
@@ -115,156 +122,373 @@ document.addEventListener("DOMContentLoaded", () => {
     // INDEXED DB
     // ==========================================
 
-    const DB_NAME = "eParakhEvidenceDB";
+    const DB_NAME =
+        "eParakhEvidenceDB";
+
     const DB_VERSION = 1;
-    const STORE_NAME = "inspectionEvidence";
+
+    const STORE_NAME =
+        "inspectionEvidence";
 
     let db = null;
 
 
+    // ==========================================
+    // OPEN DATABASE
+    // ==========================================
+
     function openDatabase() {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(
+            (resolve, reject) => {
 
-            const request =
-                indexedDB.open(
-                    DB_NAME,
-                    DB_VERSION
-                );
+                if (!window.indexedDB) {
 
-            request.onupgradeneeded = (event) => {
+                    reject(
+                        new Error(
+                            "IndexedDB is not supported by this browser."
+                        )
+                    );
 
-                const database =
-                    event.target.result;
+                    return;
+                }
+
+
+                const request =
+                    indexedDB.open(
+                        DB_NAME,
+                        DB_VERSION
+                    );
+
+
+                request.onupgradeneeded =
+                    (event) => {
+
+                        const database =
+                            event.target.result;
+
+
+                        if (
+                            !database.objectStoreNames.contains(
+                                STORE_NAME
+                            )
+                        ) {
+
+                            database.createObjectStore(
+                                STORE_NAME
+                            );
+
+                        }
+
+                    };
+
+
+                request.onsuccess = () => {
+
+                    db =
+                        request.result;
+
+
+                    /*
+                     * If the database connection is closed
+                     * unexpectedly, reset the reference.
+                     */
+                    db.onclose = () => {
+                        db = null;
+                    };
+
+
+                    resolve(db);
+
+                };
+
+
+                request.onerror = () => {
+
+                    reject(
+                        request.error ||
+                        new Error(
+                            "Unable to open evidence database."
+                        )
+                    );
+
+                };
+
+
+                request.onblocked = () => {
+
+                    reject(
+                        new Error(
+                            "Evidence database request was blocked."
+                        )
+                    );
+
+                };
+
+            }
+        );
+    }
+
+
+    // ==========================================
+    // SAVE EVIDENCE TO DB
+    // ==========================================
+
+    function saveEvidenceToDB(
+        type,
+        imageData
+    ) {
+
+        return new Promise(
+            (resolve, reject) => {
+
+                if (!db) {
+
+                    reject(
+                        new Error(
+                            "Database is not ready."
+                        )
+                    );
+
+                    return;
+                }
+
 
                 if (
-                    !database.objectStoreNames.contains(
-                        STORE_NAME
-                    )
+                    !evidenceTypes.includes(type)
                 ) {
 
-                    database.createObjectStore(
+                    reject(
+                        new Error(
+                            "Invalid evidence type."
+                        )
+                    );
+
+                    return;
+                }
+
+
+                const transaction =
+                    db.transaction(
+                        STORE_NAME,
+                        "readwrite"
+                    );
+
+
+                const store =
+                    transaction.objectStore(
                         STORE_NAME
                     );
 
-                }
 
-            };
-
-            request.onsuccess = () => {
-
-                db = request.result;
-
-                resolve(db);
-
-            };
-
-            request.onerror = () => {
-
-                reject(request.error);
-
-            };
-
-        });
-
-    }
-
-
-    function saveEvidenceToDB(type, imageData) {
-
-        return new Promise((resolve, reject) => {
-
-            if (!db) {
-
-                reject(
-                    new Error(
-                        "Database is not ready."
-                    )
+                store.put(
+                    imageData,
+                    type
                 );
 
-                return;
+
+                transaction.oncomplete =
+                    () => {
+
+                        resolve();
+
+                    };
+
+
+                transaction.onerror =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "Unable to save evidence."
+                            )
+                        );
+
+                    };
+
             }
-
-            const transaction =
-                db.transaction(
-                    STORE_NAME,
-                    "readwrite"
-                );
-
-            const store =
-                transaction.objectStore(
-                    STORE_NAME
-                );
-
-            store.put(
-                imageData,
-                type
-            );
-
-            transaction.oncomplete = () => {
-
-                resolve();
-
-            };
-
-            transaction.onerror = () => {
-
-                reject(
-                    transaction.error
-                );
-
-            };
-
-        });
-
+        );
     }
 
+
+    // ==========================================
+    // LOAD EVIDENCE FROM DB
+    // ==========================================
 
     async function loadEvidenceFromDB() {
 
-        if (!db) return;
+        if (!db) {
+            return;
+        }
 
-        for (const type of evidenceTypes) {
+
+        for (
+            const type of evidenceTypes
+        ) {
 
             const image =
-                await new Promise((resolve) => {
+                await new Promise(
+                    (resolve) => {
 
-                    const transaction =
-                        db.transaction(
-                            STORE_NAME,
-                            "readonly"
-                        );
+                        const transaction =
+                            db.transaction(
+                                STORE_NAME,
+                                "readonly"
+                            );
 
-                    const store =
-                        transaction.objectStore(
-                            STORE_NAME
-                        );
 
-                    const request =
-                        store.get(type);
+                        const store =
+                            transaction.objectStore(
+                                STORE_NAME
+                            );
 
-                    request.onsuccess = () => {
 
-                        resolve(
-                            request.result || null
-                        );
+                        const request =
+                            store.get(type);
 
-                    };
 
-                    request.onerror = () => {
+                        request.onsuccess =
+                            () => {
 
-                        resolve(null);
+                                resolve(
+                                    request.result ||
+                                    null
+                                );
 
-                    };
+                            };
 
-                });
 
-            evidencePhotos[type] = image;
+                        request.onerror =
+                            () => {
+
+                                resolve(null);
+
+                            };
+
+                    }
+                );
+
+
+            evidencePhotos[type] =
+                image;
 
         }
 
+
         updateEvidenceUI();
 
+    }
+
+
+    // ==========================================
+    // CLEAR EVIDENCE FOR NEW INSPECTION
+    // ==========================================
+
+    async function clearEvidenceForNewInspection() {
+
+        if (!db) {
+
+            throw new Error(
+                "Database is not ready."
+            );
+
+        }
+
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const transaction =
+                    db.transaction(
+                        STORE_NAME,
+                        "readwrite"
+                    );
+
+
+                const store =
+                    transaction.objectStore(
+                        STORE_NAME
+                    );
+
+
+                const request =
+                    store.clear();
+
+
+                request.onsuccess =
+                    () => {
+
+                        evidencePhotos = {
+                            front: null,
+                            back: null,
+                            side: null,
+                            batch: null
+                        };
+
+
+                        pendingImage = null;
+
+                        currentEvidence =
+                            "front";
+
+
+                        if (capturedImage) {
+
+                            capturedImage.src =
+                                "";
+
+                        }
+
+
+                        if (
+                            capturePreviewContainer
+                        ) {
+
+                            capturePreviewContainer
+                                .classList
+                                .add("hidden");
+
+                        }
+
+
+                        console.log(
+                            "NEW INSPECTION: Old evidence cleared from IndexedDB."
+                        );
+
+
+                        resolve();
+
+                    };
+
+
+                request.onerror =
+                    () => {
+
+                        reject(
+                            request.error ||
+                            new Error(
+                                "Unable to clear previous evidence."
+                            )
+                        );
+
+                    };
+
+
+                transaction.onerror =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "Unable to clear previous evidence."
+                            )
+                        );
+
+                    };
+
+            }
+        );
     }
 
 
@@ -286,11 +510,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+
         hideCameraError();
+
 
         try {
 
             stopCamera();
+
 
             stream =
                 await navigator.mediaDevices.getUserMedia({
@@ -314,26 +541,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 });
 
-            video.srcObject = stream;
+
+            video.srcObject =
+                stream;
+
 
             await video.play();
 
-            placeholder.classList.add("hidden");
 
-            overlay.classList.remove("hidden");
+            if (placeholder) {
 
-            cameraError.classList.add("hidden");
+                placeholder.classList.add(
+                    "hidden"
+                );
 
-            captureBtn.disabled = false;
+            }
 
-            stopCameraBtn.disabled = false;
 
-            switchCameraBtn.disabled = false;
+            if (overlay) {
 
-            cameraStatus.textContent =
-                "● LIVE CAMERA";
+                overlay.classList.remove(
+                    "hidden"
+                );
 
-            cameraStatus.classList.add("live");
+            }
+
+
+            if (cameraError) {
+
+                cameraError.classList.add(
+                    "hidden"
+                );
+
+            }
+
+
+            if (captureBtn) {
+
+                captureBtn.disabled =
+                    false;
+
+            }
+
+
+            if (stopCameraBtn) {
+
+                stopCameraBtn.disabled =
+                    false;
+
+            }
+
+
+            if (switchCameraBtn) {
+
+                switchCameraBtn.disabled =
+                    false;
+
+            }
+
+
+            if (cameraStatus) {
+
+                cameraStatus.textContent =
+                    "● LIVE CAMERA";
+
+                cameraStatus.classList.add(
+                    "live"
+                );
+
+            }
+
 
             console.log(
                 "Camera started successfully."
@@ -346,7 +623,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 error
             );
 
-            handleCameraError(error);
+
+            handleCameraError(
+                error
+            );
 
         }
 
@@ -363,52 +643,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
             stream
                 .getTracks()
-                .forEach((track) => {
+                .forEach(
+                    (track) => {
 
-                    track.stop();
+                        track.stop();
 
-                });
+                    }
+                );
+
 
             stream = null;
 
         }
 
+
         if (video) {
 
-            video.srcObject = null;
+            video.srcObject =
+                null;
 
         }
+
 
         if (captureBtn) {
 
-            captureBtn.disabled = true;
+            captureBtn.disabled =
+                true;
 
         }
+
 
         if (stopCameraBtn) {
 
-            stopCameraBtn.disabled = true;
+            stopCameraBtn.disabled =
+                true;
 
         }
+
 
         if (switchCameraBtn) {
 
-            switchCameraBtn.disabled = true;
+            switchCameraBtn.disabled =
+                true;
 
         }
+
 
         if (overlay) {
 
-            overlay.classList.add("hidden");
+            overlay.classList.add(
+                "hidden"
+            );
 
         }
+
 
         if (cameraStatus) {
 
             cameraStatus.textContent =
                 "● CAMERA OFFLINE";
 
-            cameraStatus.classList.remove("live");
+            cameraStatus.classList.remove(
+                "live"
+            );
 
         }
 
@@ -426,6 +723,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? "user"
                 : "environment";
 
+
         await startCamera();
 
     }
@@ -439,6 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (
             !stream ||
+            !video ||
             !video.videoWidth
         ) {
 
@@ -449,17 +748,37 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+
         const canvas =
-            document.createElement("canvas");
+            document.createElement(
+                "canvas"
+            );
+
 
         canvas.width =
             video.videoWidth;
 
+
         canvas.height =
             video.videoHeight;
 
+
         const context =
-            canvas.getContext("2d");
+            canvas.getContext(
+                "2d"
+            );
+
+
+        if (!context) {
+
+            showCameraError(
+                "Unable to capture image."
+            );
+
+            return;
+
+        }
+
 
         context.drawImage(
             video,
@@ -469,11 +788,13 @@ document.addEventListener("DOMContentLoaded", () => {
             canvas.height
         );
 
+
         pendingImage =
             canvas.toDataURL(
                 "image/jpeg",
                 0.90
             );
+
 
         showPreview();
 
@@ -486,9 +807,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function browsePhoto() {
 
+        const completedCount =
+            Object.values(
+                evidencePhotos
+            )
+                .filter(Boolean)
+                .length;
+
+
         if (
-            Object.values(evidencePhotos).filter(Boolean).length
-            >= MAX_EVIDENCE
+            completedCount >= MAX_EVIDENCE &&
+            evidencePhotos[currentEvidence]
         ) {
 
             alert(
@@ -499,9 +828,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
         if (photoInput) {
 
-            photoInput.value = "";
+            photoInput.value =
+                "";
 
             photoInput.click();
 
@@ -510,6 +841,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    // ==========================================
+    // BROWSE PHOTO INPUT
+    // ==========================================
+
     if (photoInput) {
 
         photoInput.addEventListener(
@@ -517,12 +852,18 @@ document.addEventListener("DOMContentLoaded", () => {
             (event) => {
 
                 const file =
-                    event.target.files[0];
+                    event.target.files?.[0];
 
-                if (!file) return;
+
+                if (!file) {
+                    return;
+                }
+
 
                 if (
-                    !file.type.startsWith("image/")
+                    !file.type.startsWith(
+                        "image/"
+                    )
                 ) {
 
                     alert(
@@ -533,27 +874,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 }
 
+
                 const reader =
                     new FileReader();
 
-                reader.onload = () => {
 
-                    pendingImage =
-                        reader.result;
+                reader.onload =
+                    () => {
 
-                    showPreview();
+                        pendingImage =
+                            reader.result;
 
-                };
 
-                reader.onerror = () => {
+                        showPreview();
 
-                    alert(
-                        "Unable to read the selected image."
-                    );
+                    };
 
-                };
 
-                reader.readAsDataURL(file);
+                reader.onerror =
+                    () => {
+
+                        alert(
+                            "Unable to read the selected image."
+                        );
+
+                    };
+
+
+                reader.readAsDataURL(
+                    file
+                );
 
             }
         );
@@ -567,20 +917,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showPreview() {
 
-        if (!pendingImage) return;
+        if (!pendingImage) {
+            return;
+        }
 
-        capturedImage.src =
-            pendingImage;
 
-        capturePreviewContainer
-            .classList
-            .remove("hidden");
+        if (capturedImage) {
 
-        video.classList.add("hidden");
+            capturedImage.src =
+                pendingImage;
 
-        overlay.classList.add("hidden");
+        }
 
-        captureBtn.disabled = true;
+
+        if (
+            capturePreviewContainer
+        ) {
+
+            capturePreviewContainer
+                .classList
+                .remove("hidden");
+
+        }
+
+
+        if (video) {
+
+            video.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        if (overlay) {
+
+            overlay.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        if (captureBtn) {
+
+            captureBtn.disabled =
+                true;
+
+        }
 
     }
 
@@ -591,21 +975,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function retakeImage() {
 
-        pendingImage = null;
+        pendingImage =
+            null;
 
-        capturedImage.src = "";
 
-        capturePreviewContainer
-            .classList
-            .add("hidden");
+        if (capturedImage) {
 
-        video.classList.remove("hidden");
+            capturedImage.src =
+                "";
+
+        }
+
+
+        if (
+            capturePreviewContainer
+        ) {
+
+            capturePreviewContainer
+                .classList
+                .add("hidden");
+
+        }
+
+
+        if (video) {
+
+            video.classList.remove(
+                "hidden"
+            );
+
+        }
+
 
         if (stream) {
 
-            overlay.classList.remove("hidden");
+            if (overlay) {
 
-            captureBtn.disabled = false;
+                overlay.classList.remove(
+                    "hidden"
+                );
+
+            }
+
+
+            if (captureBtn) {
+
+                captureBtn.disabled =
+                    false;
+
+            }
 
         } else {
 
@@ -632,17 +1050,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
         const completedCount =
-            Object.values(evidencePhotos)
+            Object.values(
+                evidencePhotos
+            )
                 .filter(Boolean)
                 .length;
 
+
         /*
          * Allow replacing an existing slot.
-         * Only block when trying to create
-         * a 5th different image.
+         * Block only when attempting to create
+         * a fifth different evidence image.
          */
-
         if (
             !evidencePhotos[currentEvidence] &&
             completedCount >= MAX_EVIDENCE
@@ -656,6 +1077,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
         try {
 
             await saveEvidenceToDB(
@@ -663,26 +1085,63 @@ document.addEventListener("DOMContentLoaded", () => {
                 pendingImage
             );
 
+
             evidencePhotos[currentEvidence] =
                 pendingImage;
 
-            pendingImage = null;
 
-            capturedImage.src = "";
+            pendingImage =
+                null;
 
-            capturePreviewContainer
-                .classList
-                .add("hidden");
 
-            video.classList.remove("hidden");
+            if (capturedImage) {
+
+                capturedImage.src =
+                    "";
+
+            }
+
+
+            if (
+                capturePreviewContainer
+            ) {
+
+                capturePreviewContainer
+                    .classList
+                    .add("hidden");
+
+            }
+
+
+            if (video) {
+
+                video.classList.remove(
+                    "hidden"
+                );
+
+            }
+
 
             if (stream) {
 
-                overlay.classList.remove("hidden");
+                if (overlay) {
 
-                captureBtn.disabled = false;
+                    overlay.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+
+                if (captureBtn) {
+
+                    captureBtn.disabled =
+                        false;
+
+                }
 
             }
+
 
             updateEvidenceUI();
 
@@ -694,6 +1153,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Evidence save error:",
                 error
             );
+
 
             alert(
                 "Unable to save evidence image."
@@ -718,20 +1178,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        currentEvidence = type;
+
+        currentEvidence =
+            type;
+
 
         updateCurrentEvidence();
 
+
         document
-            .querySelectorAll(".evidence-slot")
-            .forEach((slot) => {
+            .querySelectorAll(
+                ".evidence-slot"
+            )
+            .forEach(
+                (slot) => {
 
-                slot.classList.toggle(
-                    "active",
-                    slot.dataset.evidence === type
-                );
+                    slot.classList.toggle(
+                        "active",
+                        slot.dataset.evidence ===
+                            type
+                    );
 
-            });
+                }
+            );
 
     }
 
@@ -747,19 +1216,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentEvidence
             );
 
-        if (currentIndex === -1) return;
+
+        if (currentIndex === -1) {
+            return;
+        }
+
 
         /*
          * Find the next empty slot first.
-         * This makes the workflow:
          *
          * Front → Back → Side → Batch
-         *
-         * but does not force completion.
          */
-
         for (
-            let i = currentIndex + 1;
+            let i =
+                currentIndex + 1;
             i < evidenceTypes.length;
             i++
         ) {
@@ -767,9 +1237,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const nextType =
                 evidenceTypes[i];
 
-            if (!evidencePhotos[nextType]) {
 
-                selectEvidence(nextType);
+            if (
+                !evidencePhotos[nextType]
+            ) {
+
+                selectEvidence(
+                    nextType
+                );
 
                 return;
 
@@ -777,20 +1252,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        /*
-         * If everything after current is filled,
-         * find any empty slot.
-         */
 
+        /*
+         * If all slots after current
+         * are filled, find any empty slot.
+         */
         const firstEmpty =
             evidenceTypes.find(
                 (type) =>
                     !evidencePhotos[type]
             );
 
+
         if (firstEmpty) {
 
-            selectEvidence(firstEmpty);
+            selectEvidence(
+                firstEmpty
+            );
 
         }
 
@@ -804,7 +1282,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateCurrentEvidence() {
 
         const label =
-            evidenceLabels[currentEvidence];
+            evidenceLabels[
+                currentEvidence
+            ];
+
 
         if (currentEvidenceLabel) {
 
@@ -812,6 +1293,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 label;
 
         }
+
 
         if (scanPositionLabel) {
 
@@ -831,71 +1313,104 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let completed = 0;
 
+
         document
-            .querySelectorAll(".evidence-slot")
-            .forEach((slot) => {
+            .querySelectorAll(
+                ".evidence-slot"
+            )
+            .forEach(
+                (slot) => {
 
-                const type =
-                    slot.dataset.evidence;
+                    const type =
+                        slot.dataset.evidence;
 
-                const image =
-                    evidencePhotos[type];
 
-                const imageContainer =
-                    slot.querySelector(
-                        ".slot-image"
-                    );
+                    const image =
+                        evidencePhotos[type];
 
-                const status =
-                    slot.querySelector(
-                        ".slot-status"
-                    );
 
-                if (image) {
+                    const imageContainer =
+                        slot.querySelector(
+                            ".slot-image"
+                        );
 
-                    completed++;
 
-                    slot.classList.add(
-                        "completed"
-                    );
+                    const status =
+                        slot.querySelector(
+                            ".slot-status"
+                        );
 
-                    if (imageContainer) {
 
-                        imageContainer.innerHTML =
-                            `<img src="${image}" alt="${evidenceLabels[type]} evidence">`;
+                    if (image) {
 
-                    }
+                        completed++;
 
-                    if (status) {
 
-                        status.textContent =
-                            "Captured";
+                        slot.classList.add(
+                            "completed"
+                        );
 
-                    }
 
-                } else {
+                        if (imageContainer) {
 
-                    slot.classList.remove(
-                        "completed"
-                    );
+                            imageContainer.innerHTML =
+                                "";
 
-                    if (imageContainer) {
 
-                        imageContainer.innerHTML =
-                            `<span>＋</span>`;
+                            const img =
+                                document.createElement(
+                                    "img"
+                                );
 
-                    }
 
-                    if (status) {
+                            img.src =
+                                image;
 
-                        status.textContent =
-                            "Optional";
+
+                            img.alt =
+                                `${evidenceLabels[type]} evidence`;
+
+
+                            imageContainer.appendChild(
+                                img
+                            );
+
+                        }
+
+
+                        if (status) {
+
+                            status.textContent =
+                                "Captured";
+
+                        }
+
+                    } else {
+
+                        slot.classList.remove(
+                            "completed"
+                        );
+
+
+                        if (imageContainer) {
+
+                            imageContainer.innerHTML =
+                                "<span>＋</span>";
+
+                        }
+
+
+                        if (status) {
+
+                            status.textContent =
+                                "Optional";
+
+                        }
 
                     }
 
                 }
-
-            });
+            );
 
 
         // ==========================================
@@ -914,17 +1429,23 @@ document.addEventListener("DOMContentLoaded", () => {
         // CONTINUE STATE
         // ==========================================
 
-        if (completed >= MIN_EVIDENCE) {
+        if (
+            completed >= MIN_EVIDENCE
+        ) {
 
             if (continueBtn) {
 
-                continueBtn.disabled = false;
+                continueBtn.disabled =
+                    false;
 
             }
 
+
             if (continueHint) {
 
-                if (completed >= MAX_EVIDENCE) {
+                if (
+                    completed >= MAX_EVIDENCE
+                ) {
 
                     continueHint.textContent =
                         "4 evidence images captured. Ready for inspection.";
@@ -932,10 +1453,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
 
                     const remaining =
-                        MAX_EVIDENCE - completed;
+                        MAX_EVIDENCE -
+                        completed;
+
 
                     continueHint.textContent =
-                        `${completed} evidence image${completed === 1 ? "" : "s"} captured. You can add ${remaining} more or continue to inspection.`;
+                        `${completed} evidence image${
+                            completed === 1
+                                ? ""
+                                : "s"
+                        } captured. You can add ${
+                            remaining
+                        } more or continue to inspection.`;
 
                 }
 
@@ -945,9 +1474,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (continueBtn) {
 
-                continueBtn.disabled = true;
+                continueBtn.disabled =
+                    true;
 
             }
+
 
             if (continueHint) {
 
@@ -962,17 +1493,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // ==========================================
-    // CONTINUE
+    // CONTINUE TO INSPECTION
     // ==========================================
 
     function continueToInspection() {
 
         const completedCount =
-            Object.values(evidencePhotos)
+            Object.values(
+                evidencePhotos
+            )
                 .filter(Boolean)
                 .length;
 
-        if (completedCount < MIN_EVIDENCE) {
+
+        if (
+            completedCount < MIN_EVIDENCE
+        ) {
 
             alert(
                 "Please capture at least 1 evidence image."
@@ -982,7 +1518,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        if (completedCount > MAX_EVIDENCE) {
+
+        if (
+            completedCount > MAX_EVIDENCE
+        ) {
 
             alert(
                 "Maximum 4 evidence images are allowed."
@@ -992,23 +1531,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
         /*
          * Lightweight inspection marker.
          *
          * Actual images remain in IndexedDB.
          */
-
         sessionStorage.setItem(
             "eParakhEvidenceReady",
             "true"
         );
+
 
         sessionStorage.setItem(
             "eParakhScanSource",
             "camera"
         );
 
+
+        /*
+         * Current inspection is now entering
+         * the inspection workflow.
+         */
+        sessionStorage.setItem(
+            "inspectionStarted",
+            "true"
+        );
+
+
         stopCamera();
+
 
         window.location.href =
             "inspection.html";
@@ -1025,8 +1577,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let message =
             "Unable to access the camera.";
 
+
         if (
-            error.name ===
+            error?.name ===
             "NotAllowedError"
         ) {
 
@@ -1034,7 +1587,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Camera permission was denied. Please allow camera access in your browser settings.";
 
         } else if (
-            error.name ===
+            error?.name ===
             "NotFoundError"
         ) {
 
@@ -1042,7 +1595,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "No camera was found on this device.";
 
         } else if (
-            error.name ===
+            error?.name ===
             "NotReadableError"
         ) {
 
@@ -1050,7 +1603,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "The camera may already be in use by another application.";
 
         } else if (
-            error.name ===
+            error?.name ===
             "SecurityError"
         ) {
 
@@ -1059,7 +1612,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        showCameraError(message);
+
+        showCameraError(
+            message
+        );
 
     }
 
@@ -1077,6 +1633,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
         if (cameraError) {
 
             cameraError.classList.remove(
@@ -1084,6 +1641,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
         }
+
 
         if (placeholder) {
 
@@ -1093,6 +1651,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
         if (overlay) {
 
             overlay.classList.add(
@@ -1101,21 +1660,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
         if (captureBtn) {
 
-            captureBtn.disabled = true;
+            captureBtn.disabled =
+                true;
 
         }
+
 
         if (stopCameraBtn) {
 
-            stopCameraBtn.disabled = true;
+            stopCameraBtn.disabled =
+                true;
 
         }
 
+
         if (switchCameraBtn) {
 
-            switchCameraBtn.disabled = true;
+            switchCameraBtn.disabled =
+                true;
 
         }
 
@@ -1148,40 +1713,48 @@ document.addEventListener("DOMContentLoaded", () => {
         startCamera
     );
 
+
     retryCameraBtn?.addEventListener(
         "click",
         startCamera
     );
+
 
     switchCameraBtn?.addEventListener(
         "click",
         switchCamera
     );
 
+
     captureBtn?.addEventListener(
         "click",
         captureImage
     );
+
 
     stopCameraBtn?.addEventListener(
         "click",
         stopCamera
     );
 
+
     browsePhotoBtn?.addEventListener(
         "click",
         browsePhoto
     );
+
 
     saveEvidenceBtn?.addEventListener(
         "click",
         saveCurrentEvidence
     );
 
+
     retakeBtn?.addEventListener(
         "click",
         retakeImage
     );
+
 
     continueBtn?.addEventListener(
         "click",
@@ -1194,21 +1767,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
 
     document
-        .querySelectorAll(".evidence-slot")
-        .forEach((slot) => {
+        .querySelectorAll(
+            ".evidence-slot"
+        )
+        .forEach(
+            (slot) => {
 
-            slot.addEventListener(
-                "click",
-                () => {
+                slot.addEventListener(
+                    "click",
+                    () => {
 
-                    selectEvidence(
-                        slot.dataset.evidence
-                    );
+                        selectEvidence(
+                            slot.dataset.evidence
+                        );
 
-                }
-            );
+                    }
+                );
 
-        });
+            }
+        );
 
 
     // ==========================================
@@ -1235,7 +1812,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
             await openDatabase();
 
-            await loadEvidenceFromDB();
+
+            /*
+             * IMPORTANT:
+             *
+             * Result → New Inspection
+             * and Login → Start Inspection
+             * set this flag.
+             *
+             * Only in that case do we clear
+             * previous evidence.
+             */
+            const startNewInspection =
+                sessionStorage.getItem(
+                    "eParakhStartNewInspection"
+                );
+
+
+            if (
+                startNewInspection ===
+                "true"
+            ) {
+
+                await clearEvidenceForNewInspection();
+
+
+                /*
+                 * Consume the flag.
+                 * This prevents the evidence from
+                 * being cleared again on refresh.
+                 */
+                sessionStorage.removeItem(
+                    "eParakhStartNewInspection"
+                );
+
+            } else {
+
+                /*
+                 * Existing inspection:
+                 * load the already captured evidence.
+                 */
+                await loadEvidenceFromDB();
+
+            }
 
         } catch (error) {
 
@@ -1246,21 +1865,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
         updateCurrentEvidence();
 
         updateEvidenceUI();
 
+
         if (overlay) {
 
-            overlay.classList.add("hidden");
+            overlay.classList.add(
+                "hidden"
+            );
 
         }
+
 
         if (cameraError) {
 
-            cameraError.classList.add("hidden");
+            cameraError.classList.add(
+                "hidden"
+            );
 
         }
+
 
         if (capturePreviewContainer) {
 
@@ -1269,6 +1896,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .add("hidden");
 
         }
+
 
         console.log(
             "e-PARAKH multi-evidence camera initialized."

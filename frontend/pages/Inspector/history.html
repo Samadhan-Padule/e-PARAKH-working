@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="e-PARAKH My Inspection History"
+    >
+
+    <title>My Inspection History - e-PARAKH</title>
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family:
+                Inter,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+
+            background: #f4f7fb;
+            color: #17202a;
+
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .header {
+            background: #123b63;
+            color: #ffffff;
+
+            padding: 18px 24px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .header button {
+            border: 1px solid rgba(255, 255, 255, .4);
+
+            background: transparent;
+            color: #ffffff;
+
+            min-height: 42px;
+
+            padding: 10px 16px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            transition: .2s ease;
+        }
+
+        .header button:hover {
+            background: rgba(255, 255, 255, .10);
+            border-color: rgba(255, 255, 255, .65);
+        }
+
+
+        /* =====================================================
+           MAIN CONTAINER
+        ===================================================== */
+
+        .container {
+            max-width: 1000px;
+
+            margin: 30px auto;
+
+            padding: 0 16px;
+        }
+
+
+        /* =====================================================
+           BACK BUTTON
+        ===================================================== */
+
+        .back-btn {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 8px;
+
+            min-height: 42px;
+
+            margin-bottom: 20px;
+
+            padding: 9px 14px;
+
+            border: 1px solid #d4dde7;
+            border-radius: 8px;
+
+            background: #ffffff;
+            color: #123b6d;
+
+            text-decoration: none;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            transition: .2s ease;
+        }
+
+        .back-btn:hover {
+            background: #123b6d;
+            color: #ffffff;
+
+            border-color: #123b6d;
+
+            transform: translateX(-1px);
+        }
+
+
+        /* =====================================================
+           PAGE TITLE
+        ===================================================== */
+
+        .page-title {
+            margin-bottom: 22px;
+        }
+
+        .page-title h2 {
+            margin: 0 0 6px;
+
+            font-size: 24px;
+            line-height: 1.25;
+        }
+
+        .page-title p {
+            margin: 0;
+
+            color: #687789;
+
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           SEARCH CARD
+        ===================================================== */
+
+        .search-card {
+            background: #ffffff;
+
+            border-radius: 14px;
+
+            padding: 24px;
+
+            box-shadow:
+                0 3px 15px rgba(0, 0, 0, .08);
+
+            margin-bottom: 22px;
+        }
+
+        .search-label {
+            display: block;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            color: #34495e;
+
+            margin-bottom: 8px;
+        }
+
+        .search-row {
+            display: flex;
+
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+
+            min-width: 0;
+
+            height: 46px;
+
+            border: 1px solid #cbd5df;
+
+            border-radius: 8px;
+
+            padding: 0 14px;
+
+            background: #ffffff;
+
+            color: #17202a;
+
+            font-size: 14px;
+
+            outline: none;
+
+            transition: .2s ease;
+        }
+
+        .search-input::placeholder {
+            color: #9aa8b6;
+        }
+
+        .search-input:focus {
+            border-color: #1769aa;
+
+            box-shadow:
+                0 0 0 3px rgba(23, 105, 170, .10);
+        }
+
+        .search-btn {
+            height: 46px;
+
+            border: 0;
+
+            background: #1769aa;
+            color: #ffffff;
+
+            padding: 0 22px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            transition: .2s ease;
+        }
+
+        .search-btn:hover:not(:disabled) {
+            background: #12578d;
+        }
+
+        .search-btn:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+        .search-help {
+            margin: 9px 0 0;
+
+            color: #7a8794;
+
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           RESULT CARD
+        ===================================================== */
+
+        .result-card {
+            background: #ffffff;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 3px 15px rgba(0, 0, 0, .08);
+
+            overflow: hidden;
+        }
+
+        .result-header {
+            background: #f0f4f8;
+
+            padding: 16px 20px;
+
+            border-bottom: 1px solid #e0e6ec;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+        }
+
+        .result-header strong {
+            color: #123b63;
+
+            font-size: 15px;
+        }
+
+        .result-body {
+            padding: 22px;
+        }
+
+        .info-grid {
+            display: grid;
+
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            gap: 16px;
+        }
+
+        .info-box {
+            min-width: 0;
+
+            border: 1px solid #e5eaf0;
+
+            border-radius: 9px;
+
+            padding: 14px;
+
+            background: #fafcfe;
+        }
+
+        .info-label {
+            margin-bottom: 6px;
+
+            font-size: 11px;
+
+            color: #718096;
+
+            text-transform: uppercase;
+
+            letter-spacing: .4px;
+        }
+
+        .info-value {
+            font-size: 14px;
+
+            font-weight: 700;
+
+            color: #17202a;
+
+            word-break: break-word;
+        }
+
+
+        /* =====================================================
+           BADGES
+        ===================================================== */
+
+        .badge {
+            display: inline-block;
+
+            padding: 5px 9px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            line-height: 1.2;
+        }
+
+        .compliant {
+            background: #dff6e7;
+            color: #16733a;
+        }
+
+        .noncompliant {
+            background: #fde2e2;
+            color: #a52323;
+        }
+
+        .pending {
+            background: #fff1c9;
+            color: #8a6200;
+        }
+
+        .warning {
+            background: #fff1c9;
+            color: #8a6200;
+        }
+
+        .status {
+            background: #e8eef5;
+            color: #34506b;
+        }
+
+
+        /* =====================================================
+           ACTIONS
+        ===================================================== */
+
+        .actions {
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 22px;
+
+            padding-top: 20px;
+
+            border-top: 1px solid #e8edf3;
+        }
+
+        .action-btn {
+            border: 0;
+
+            border-radius: 8px;
+
+            min-height: 44px;
+
+            padding: 11px 16px;
+
+            cursor: pointer;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            transition: .2s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .primary {
+            background: #1769aa;
+            color: #ffffff;
+        }
+
+        .primary:hover {
+            background: #12578d;
+        }
+
+        .secondary {
+            background: #e9eef4;
+            color: #23415d;
+        }
+
+        .secondary:hover {
+            background: #dde6ef;
+        }
+
+
+        /* =====================================================
+           STATES
+        ===================================================== */
+
+        .state {
+            background: #ffffff;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 3px 15px rgba(0, 0, 0, .08);
+
+            padding: 45px 25px;
+
+            text-align: center;
+
+            color: #687789;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+        .state.error {
+            color: #a52323;
+        }
+
+        .state strong {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #34495e;
+
+            font-size: 15px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .header button {
+                min-height: 40px;
+                padding: 9px 12px;
+            }
+
+            .container {
+                margin: 20px auto;
+
+                padding: 0 12px;
+            }
+
+            .back-btn {
+                width: auto;
+
+                min-height: 44px;
+
+                margin-bottom: 16px;
+            }
+
+            .page-title h2 {
+                font-size: 21px;
+            }
+
+            .page-title p {
+                font-size: 13px;
+            }
+
+            .search-card {
+                padding: 18px;
+            }
+
+            .search-row {
+                flex-direction: column;
+            }
+
+            .search-input,
+            .search-btn {
+                width: 100%;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-header {
+                align-items: flex-start;
+
+                flex-direction: column;
+            }
+
+            .result-body {
+                padding: 16px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+
+
+        @media (max-width: 450px) {
+
+            .header {
+                align-items: flex-start;
+            }
+
+            .header h1 {
+                font-size: 15px;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+
+            .search-card {
+                padding: 15px;
+            }
+
+            .result-header {
+                padding: 14px 16px;
+            }
+
+            .result-body {
+                padding: 14px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="header">
+
+    <h1>
+        e-PARAKH — My Inspection History
+    </h1>
+
+    <button
+        type="button"
+        id="logoutBtn"
+    >
+        Logout
+    </button>
+
+</header>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="container">
+
+
+    <!-- BACK BUTTON -->
+
+    <a
+        href="../scan.html"
+        class="back-btn"
+        title="Back to Scan"
+    >
+        ← Back to Scan
+    </a>
+
+
+    <!-- PAGE TITLE -->
+
+    <div class="page-title">
+
+        <h2>
+            My Inspection History
+        </h2>
+
+        <p>
+            Search and access your previous inspection record
+            using its Inspection ID.
+        </p>
+
+    </div>
+
+
+    <!-- =================================================
+         SEARCH
+    ================================================== -->
+
+    <section class="search-card">
+
+        <label
+            class="search-label"
+            for="inspectionIdInput"
+        >
+            Inspection ID
+        </label>
+
+
+        <div class="search-row">
+
+            <input
+                type="text"
+                id="inspectionIdInput"
+                class="search-input"
+                placeholder="Enter Inspection ID"
+                autocomplete="off"
+                aria-label="Inspection ID"
+            >
+
+            <button
+                type="button"
+                id="searchBtn"
+                class="search-btn"
+            >
+                Search
+            </button>
+
+        </div>
+
+
+        <p class="search-help">
+            Enter the Inspection ID generated for your inspection.
+        </p>
+
+    </section>
+
+
+    <!-- =================================================
+         RESULT
+    ================================================== -->
+
+    <section id="resultContainer">
+
+        <div class="state">
+
+            <strong>
+                Search an Inspection
+            </strong>
+
+            Enter an Inspection ID above to view its record.
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+const API_BASE = "http://localhost:5000/api";
+
+const token = localStorage.getItem("eParakhToken");
+
+
+/* =====================================================
+   AUTH CHECK
+===================================================== */
+
+if (!token) {
+
+    location.href = "../login.html";
+
+}
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const inspectionIdInput =
+    document.getElementById("inspectionIdInput");
+
+const searchBtn =
+    document.getElementById("searchBtn");
+
+const resultContainer =
+    document.getElementById("resultContainer");
+
+
+/* =====================================================
+   HTML ESCAPE
+===================================================== */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =====================================================
+   COMPLIANCE BADGE
+===================================================== */
+
+function complianceBadge(status) {
+
+    const s =
+        String(status || "PENDING").toUpperCase();
+
+    let cls = "pending";
+
+    if (s === "COMPLIANT") {
+
+        cls = "compliant";
+
+    }
+
+    if (
+        s === "NON_COMPLIANT" ||
+        s === "NON-COMPLIANT"
+    ) {
+
+        cls = "noncompliant";
+
+    }
+
+    if (s === "WARNING") {
+
+        cls = "warning";
+
+    }
+
+    return `
+        <span class="badge ${cls}">
+            ${escapeHtml(s.replace("_", " "))}
+        </span>
+    `;
+
+}
+
+
+/* =====================================================
+   SEARCH INSPECTION
+===================================================== */
+
+async function searchInspection() {
+
+    const inspectionId =
+        inspectionIdInput.value.trim();
+
+    if (!inspectionId) {
+
+        resultContainer.innerHTML = `
+            <div class="state error">
+                <strong>Inspection ID Required</strong>
+                Please enter an Inspection ID.
+            </div>
+        `;
+
+        inspectionIdInput.focus();
+
+        return;
+    }
+
+
+    // Loading state
+    resultContainer.innerHTML = `
+        <div class="state">
+            Searching inspection...
+        </div>
+    `;
+
+    searchBtn.disabled = true;
+    searchBtn.textContent = "Searching...";
+
+
+    try {
+
+        const url =
+            `${API_BASE}/inspections/by-id/${encodeURIComponent(inspectionId)}`;
+
+        const response =
+            await fetch(url, {
+                method: "GET",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+
+        let data = {};
+
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            data = {};
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Inspection not found."
+            );
+
+        }
+
+
+        const inspection =
+            data.inspection ||
+            data.data ||
+            data;
+
+
+        renderInspection(inspection);
+
+
+    } catch (error) {
+
+        console.error(
+            "Inspection search error:",
+            error
+        );
+
+
+        resultContainer.innerHTML = `
+            <div class="state error">
+
+                <strong>
+                    Inspection Not Found
+                </strong>
+
+                ${escapeHtml(
+                    error.message ||
+                    "Unable to fetch inspection."
+                )}
+
+                <div
+                    style="
+                        margin-top:10px;
+                        font-size:12px;
+                        color:#687789;
+                    "
+                >
+                    Make sure the Inspection ID is correct
+                    and belongs to your account.
+                </div>
+
+            </div>
+        `;
+
+    } finally {
+
+        searchBtn.disabled = false;
+        searchBtn.textContent = "Search";
+
+    }
+
+}
+
+/* =====================================================
+   RENDER INSPECTION
+===================================================== */
+
+function renderInspection(inspection) {
+
+    if (!inspection || !inspection._id) {
+
+        resultContainer.innerHTML = `
+            <div class="state error">
+
+                <strong>
+                    Invalid Inspection Record
+                </strong>
+
+                No valid inspection data was returned.
+
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    const date = inspection.inspectedAt
+
+        ? new Date(
+            inspection.inspectedAt
+        ).toLocaleString("en-IN")
+
+        : inspection.createdAt
+
+            ? new Date(
+                inspection.createdAt
+            ).toLocaleString("en-IN")
+
+            : "—";
+
+
+    const score =
+        inspection.complianceScore ?? "—";
+
+
+    const status =
+        inspection.status || "PENDING";
+
+
+    const compliance =
+        inspection.complianceStatus || "PENDING";
+
+
+    const evidenceCount =
+        Array.isArray(inspection.evidenceImages)
+            ? inspection.evidenceImages.length
+            : 0;
+
+
+    resultContainer.innerHTML = `
+
+        <div class="result-card">
+
+            <div class="result-header">
+
+                <div>
+                    <strong>
+                        Inspection Record
+                    </strong>
+                </div>
+
+                ${complianceBadge(compliance)}
+
+            </div>
+
+
+            <div class="result-body">
+
+                <div class="info-grid">
+
+
+                    <div class="info-box">
+
+                        <div class="info-label">
+                            Inspection ID
+                        </div>
+
+                        <div class="info-value">
+                            ${escapeHtml(inspection._id)}
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <div class="info-label">
+                            Inspection Date
+                        </div>
+
+                        <div class="info-value">
+                            ${escapeHtml(date)}
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <div class="info-label">
+                            Inspection Status
+                        </div>
+
+                        <div class="info-value">
+
+                            <span class="badge status">
+                                ${escapeHtml(status)}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <div class="info-label">
+                            Compliance Status
+                        </div>
+
+                        <div class="info-value">
+                            ${complianceBadge(compliance)}
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <div class="info-label">
+                            Compliance Score
+                        </div>
+
+                        <div class="info-value">
+                            ${escapeHtml(score)}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <div class="info-label">
+                            Evidence Images
+                        </div>
+
+                        <div class="info-value">
+                            ${evidenceCount} Photos
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="actions">
+
+
+                    <button
+                        type="button"
+                        class="action-btn primary"
+                        id="viewReportBtn"
+                    >
+                        View / Edit Report
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="action-btn secondary"
+                        id="newInspectionBtn"
+                    >
+                        + New Inspection
+                    </button>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document
+        .getElementById("viewReportBtn")
+        .onclick = () => {
+
+            location.href =
+                `edit-report.html?id=${encodeURIComponent(
+                    inspection._id
+                )}`;
+
+        };
+
+
+    document
+        .getElementById("newInspectionBtn")
+        .onclick = () => {
+
+            location.href =
+                "../scan.html";
+
+        };
+
+}
+
+
+/* =====================================================
+   SEARCH EVENTS
+===================================================== */
+
+searchBtn.addEventListener(
+    "click",
+    searchInspection
+);
+
+
+inspectionIdInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Enter") {
+
+            searchInspection();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+document
+    .getElementById("logoutBtn")
+    .addEventListener("click", () => {
+
+        localStorage.removeItem("eParakhToken");
+        localStorage.removeItem("eParakhUser");
+        localStorage.removeItem("officerName");
+        localStorage.removeItem("officerId");
+
+        location.href = "../login.html";
+
+    });
+
+</script>
+
+</body>
+</html>

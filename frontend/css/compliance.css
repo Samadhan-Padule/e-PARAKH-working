@@ -20,12 +20,10 @@ body {
         Roboto,
         Arial,
         sans-serif;
-
     background: #f4f7fb;
     color: #102a43;
     line-height: 1.5;
 }
-
 
 /* =========================================================
    HEADER
@@ -33,16 +31,12 @@ body {
 
 .compliance-header {
     min-height: 78px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     padding: 0 48px;
-
     background: #08294b;
     border-bottom: 3px solid #e5b93f;
-
     color: #ffffff;
 }
 
@@ -55,17 +49,12 @@ body {
 .brand-mark {
     width: 48px;
     height: 48px;
-
     display: grid;
     place-items: center;
-
     border-radius: 10px;
-
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     color: #f4c542;
-
     font-size: 24px;
     text-decoration: none;
 }
@@ -82,11 +71,9 @@ body {
 
 .brand-text span {
     margin-top: 2px;
-
     color: #b9cce0;
     font-size: 11px;
 }
-
 
 /* =========================================================
    HEADER RIGHT
@@ -102,11 +89,8 @@ body {
     display: flex;
     align-items: center;
     gap: 7px;
-
     padding-right: 20px;
-
-    border-right: 1px solid rgba(255,255,255,0.15);
-
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
     color: #d8e6f3;
     font-size: 11px;
 }
@@ -114,13 +98,10 @@ body {
 .status-dot {
     width: 9px;
     height: 9px;
-
     border-radius: 50%;
-
     background: #31c48d;
-
     box-shadow:
-        0 0 0 4px rgba(49,196,141,0.12);
+        0 0 0 4px rgba(49, 196, 141, 0.12);
 }
 
 .officer-profile {
@@ -132,15 +113,11 @@ body {
 .officer-avatar {
     width: 38px;
     height: 38px;
-
     display: grid;
     place-items: center;
-
     border-radius: 50%;
-
     background: #edf5fc;
     color: #0a3c67;
-
     font-size: 13px;
     font-weight: 800;
 }
@@ -162,28 +139,21 @@ body {
 
 .logout-btn {
     height: 36px;
-
     padding: 0 17px;
-
-    border: 1px solid rgba(255,255,255,0.22);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 8px;
-
     background: transparent;
     color: #ffffff;
-
     font-family: inherit;
     font-size: 10px;
     font-weight: 700;
-
     cursor: pointer;
-
     transition: 0.2s ease;
 }
 
 .logout-btn:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
 }
-
 
 /* =========================================================
    MAIN
@@ -191,13 +161,11 @@ body {
 
 .compliance-main {
     min-height: calc(100vh - 140px);
-
     padding: 52px 24px 70px;
-
     background:
         radial-gradient(
             circle at top right,
-            rgba(40,116,181,0.08),
+            rgba(40, 116, 181, 0.08),
             transparent 35%
         ),
         #f4f7fb;
@@ -208,7 +176,6 @@ body {
     margin: 0 auto;
 }
 
-
 /* =========================================================
    PAGE HEADING
 ========================================================= */
@@ -217,21 +184,16 @@ body {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-
     gap: 30px;
-
     margin-bottom: 38px;
 }
 
 .page-eyebrow,
 .card-eyebrow {
     display: block;
-
     color: #1769aa;
-
     font-size: 10px;
     font-weight: 800;
-
     letter-spacing: 1.5px;
 }
 
@@ -241,61 +203,44 @@ body {
 
 .page-heading h1 {
     margin-bottom: 8px;
-
     color: #092c4c;
-
     font-size: 34px;
     line-height: 1.15;
-
     letter-spacing: -0.7px;
 }
 
 .page-heading p {
     max-width: 720px;
-
     color: #718096;
-
     font-size: 13px;
     line-height: 1.7;
 }
 
 .inspection-id {
     min-width: 210px;
-
     padding: 15px 18px;
-
     background: #ffffff;
-
     border: 1px solid #e1e8f0;
     border-radius: 10px;
-
     text-align: right;
-
     box-shadow:
-        0 8px 25px rgba(15,39,65,0.05);
+        0 8px 25px rgba(15, 39, 65, 0.05);
 }
 
 .inspection-id span {
     display: block;
-
     color: #8795a5;
-
     font-size: 9px;
     font-weight: 700;
-
     letter-spacing: 1px;
 }
 
 .inspection-id strong {
     display: block;
-
     margin-top: 4px;
-
     color: #0c3153;
-
     font-size: 13px;
 }
-
 
 /* =========================================================
    PROGRESS
@@ -304,44 +249,32 @@ body {
 .progress-section {
     display: flex;
     align-items: center;
-
     margin-bottom: 30px;
     padding: 20px 24px;
-
     overflow-x: auto;
-
     background: #ffffff;
-
     border: 1px solid #e0e7ef;
     border-radius: 13px;
-
     box-shadow:
-        0 8px 25px rgba(15,39,65,0.05);
+        0 8px 25px rgba(15, 39, 65, 0.05);
 }
 
 .progress-step {
     display: flex;
     align-items: center;
-
     gap: 10px;
-
     min-width: 170px;
 }
 
 .step-number {
     width: 34px;
     height: 34px;
-
     flex: 0 0 34px;
-
     display: grid;
     place-items: center;
-
     border-radius: 50%;
-
     background: #edf2f7;
     color: #8b98a8;
-
     font-size: 10px;
     font-weight: 800;
 }
@@ -354,38 +287,28 @@ body {
 
 .progress-step strong {
     display: block;
-
     color: #183b5b;
-
     font-size: 11px;
 }
 
 .progress-step span {
     display: block;
-
     margin-top: 2px;
-
     color: #8795a5;
-
     font-size: 9px;
 }
 
 .progress-line {
     height: 2px;
-
     flex: 1;
-
     min-width: 25px;
-
     margin: 0 12px;
-
     background: #dce4ec;
 }
 
 .progress-line.active {
     background: #2a79ad;
 }
-
 
 /* =========================================================
    SUMMARY CARD
@@ -394,29 +317,23 @@ body {
 .summary-card {
     margin-bottom: 24px;
     padding: 27px;
-
     background: #ffffff;
-
     border: 1px solid #e0e7ef;
     border-radius: 14px;
-
     box-shadow:
-        0 12px 35px rgba(15,39,65,0.06);
+        0 12px 35px rgba(15, 39, 65, 0.06);
 }
 
 .section-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     gap: 15px;
-
     margin-bottom: 20px;
 }
 
 .card-eyebrow {
     margin-bottom: 5px;
-
     font-size: 9px;
     letter-spacing: 1.2px;
 }
@@ -424,68 +341,49 @@ body {
 .section-heading h2,
 .card-header h2 {
     color: #123653;
-
     font-size: 19px;
 }
 
 .summary-status {
     padding: 6px 10px;
-
     border-radius: 20px;
-
     background: #edf8f3;
     color: #17845c;
-
     font-size: 8px;
     font-weight: 800;
-
     letter-spacing: 0.7px;
 }
 
 .summary-grid {
     display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
 }
 
 .summary-item {
     min-height: 72px;
-
     padding: 13px 15px;
-
     border: 1px solid #e4eaf0;
     border-radius: 9px;
-
     background: #fbfcfd;
 }
 
 .summary-item span {
     display: block;
-
     margin-bottom: 5px;
-
     color: #8795a5;
-
     font-size: 8px;
     font-weight: 700;
-
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .summary-item strong {
     display: block;
-
     color: #294a65;
-
     font-size: 11px;
-
     word-break: break-word;
 }
-
 
 /* =========================================================
    ASSESSMENT LAYOUT
@@ -493,15 +391,10 @@ body {
 
 .assessment-layout {
     display: grid;
-
-    grid-template-columns:
-        0.75fr 1.25fr;
-
+    grid-template-columns: 0.75fr 1.25fr;
     gap: 24px;
-
     align-items: start;
 }
-
 
 /* =========================================================
    SCORE CARD
@@ -512,12 +405,10 @@ body {
 .observation-card,
 .decision-card {
     background: #ffffff;
-
     border: 1px solid #e0e7ef;
     border-radius: 14px;
-
     box-shadow:
-        0 12px 35px rgba(15,39,65,0.06);
+        0 12px 35px rgba(15, 39, 65, 0.06);
 }
 
 .score-card {
@@ -528,45 +419,52 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-
     gap: 15px;
-
     margin-bottom: 25px;
 }
 
 .score-badge {
     padding: 6px 9px;
-
     border-radius: 20px;
-
     background: #fff5dc;
     color: #9b7014;
-
     font-size: 8px;
     font-weight: 800;
-
     letter-spacing: 0.6px;
 }
 
+/* =========================================================
+   SCORE CIRCLE — DYNAMIC COMPLIANCE METER
+========================================================= */
+
 .score-circle {
+    --score: 0;
+
     width: 185px;
     height: 185px;
-
     margin: 10px auto 22px;
 
     display: grid;
     place-items: center;
 
     border-radius: 50%;
+    position: relative;
 
     background:
         conic-gradient(
-            #176ba7 0deg,
-            #176ba7 0deg,
-            #e7edf3 0deg
+            #176ba7 calc(var(--score) * 1%),
+            #e7edf3 calc(var(--score) * 1%)
         );
 
-    position: relative;
+    box-shadow:
+        0 10px 28px rgba(23, 107, 167, 0.12),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+
+    transition:
+        background 0.8s ease,
+        transform 0.3s ease;
+
+    animation: scoreAppear 0.8s ease;
 }
 
 .score-circle::before {
@@ -580,76 +478,131 @@ body {
     border-radius: 50%;
 
     background: #ffffff;
+
+    box-shadow:
+        inset 0 0 18px rgba(15, 39, 65, 0.04);
 }
 
 .score-content {
     position: relative;
-
     z-index: 2;
 
     display: flex;
     flex-direction: column;
-
     align-items: center;
+    justify-content: center;
+
+    text-align: center;
 }
 
 .score-content strong {
     color: #0d3c61;
-
-    font-size: 34px;
+    font-size: 38px;
+    font-weight: 800;
     line-height: 1;
+    letter-spacing: -1px;
 }
 
 .score-content span {
-    margin-top: 7px;
-
+    margin-top: 8px;
     color: #8795a5;
-
     font-size: 9px;
-    font-weight: 700;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.score-circle:hover {
+    transform: scale(1.02);
+}
+
+/* =========================================================
+   SCORE ANIMATION
+========================================================= */
+
+@keyframes scoreAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* =========================================================
+   SCORE STATUS COLORS
+========================================================= */
+
+.score-circle.score-good {
+    background:
+        conic-gradient(
+            #17845c calc(var(--score) * 1%),
+            #e5eee9 calc(var(--score) * 1%)
+        );
+}
+
+.score-circle.score-warning {
+    background:
+        conic-gradient(
+            #d49a20 calc(var(--score) * 1%),
+            #f2ead7 calc(var(--score) * 1%)
+        );
+}
+
+.score-circle.score-danger {
+    background:
+        conic-gradient(
+            #d9534f calc(var(--score) * 1%),
+            #f3e1e0 calc(var(--score) * 1%)
+        );
+}
+
+/* Score text colors */
+
+.score-circle.score-good .score-content strong {
+    color: #17845c;
+}
+
+.score-circle.score-warning .score-content strong {
+    color: #a87916;
+}
+
+.score-circle.score-danger .score-content strong {
+    color: #c4423e;
 }
 
 .score-message {
     max-width: 260px;
-
     margin: 0 auto;
-
     color: #718096;
-
     font-size: 10px;
-
     line-height: 1.6;
-
     text-align: center;
 }
 
 .score-legend {
     display: flex;
     flex-direction: column;
-
     gap: 8px;
-
     margin-top: 24px;
     padding-top: 18px;
-
     border-top: 1px solid #edf1f5;
-
     color: #718096;
-
     font-size: 9px;
 }
 
 .score-legend div {
     display: flex;
     align-items: center;
-
     gap: 8px;
 }
 
 .legend-dot {
     width: 8px;
     height: 8px;
-
     border-radius: 50%;
 }
 
@@ -665,7 +618,6 @@ body {
     background: #f3c95b;
 }
 
-
 /* =========================================================
    VERIFICATION CARD
 ========================================================= */
@@ -676,25 +628,19 @@ body {
 
 .verification-count {
     padding: 6px 10px;
-
     border-radius: 20px;
-
     background: #f1f5f9;
     color: #718096;
-
     font-size: 8px;
     font-weight: 800;
 }
 
 .section-description {
     margin-bottom: 20px;
-
     color: #75869a;
-
     font-size: 10px;
     line-height: 1.6;
 }
-
 
 /* =========================================================
    RULE LIST
@@ -703,7 +649,6 @@ body {
 .rule-list {
     display: flex;
     flex-direction: column;
-
     gap: 9px;
 }
 
@@ -739,9 +684,7 @@ body {
 
 .rule-item input {
     position: absolute;
-
     opacity: 0;
-
     pointer-events: none;
 }
 
@@ -784,27 +727,20 @@ body {
 
 .rule-content strong {
     display: block;
-
     color: #304a63;
-
     font-size: 10px;
 }
 
 .rule-content small {
     display: block;
-
     margin-top: 3px;
-
     color: #8795a5;
-
     font-size: 8px;
-
     line-height: 1.4;
 }
 
 .rule-status {
     color: #9b7014;
-
     font-size: 8px;
     font-weight: 800;
 }
@@ -813,20 +749,17 @@ body {
     color: #17845c;
 }
 
-
 /* =========================================================
    OBSERVATION
 ========================================================= */
 
 .observation-card {
     margin-top: 24px;
-
     padding: 27px;
 }
 
 .observation-card textarea {
     width: 100%;
-
     min-height: 120px;
 
     padding: 13px;
@@ -837,7 +770,6 @@ body {
     border-radius: 8px;
 
     background: #ffffff;
-
     color: #173854;
 
     font-family: inherit;
@@ -852,13 +784,12 @@ body {
     border-color: #2a78ad;
 
     box-shadow:
-        0 0 0 3px rgba(42,120,173,0.10);
+        0 0 0 3px rgba(42, 120, 173, 0.10);
 }
 
 .observation-card textarea::placeholder {
     color: #a1adba;
 }
-
 
 /* =========================================================
    DECISION
@@ -871,7 +802,6 @@ body {
     gap: 15px;
 
     margin-top: 24px;
-
     padding: 20px 22px;
 }
 
@@ -887,7 +817,6 @@ body {
     border-radius: 10px;
 
     background: #e8f2f9;
-
     color: #1769aa;
 
     font-size: 20px;
@@ -899,21 +828,15 @@ body {
 
 .decision-content strong {
     display: block;
-
     color: #164b70;
-
     font-size: 11px;
 }
 
 .decision-content span {
     display: block;
-
     margin-top: 4px;
-
     color: #718096;
-
     font-size: 9px;
-
     line-height: 1.5;
 }
 
@@ -937,7 +860,6 @@ body {
     border-radius: 8px;
 
     font-family: inherit;
-
     font-size: 10px;
     font-weight: 800;
 
@@ -948,15 +870,12 @@ body {
 
 .secondary-btn {
     border: 1px solid #d4dde7;
-
     background: #ffffff;
-
     color: #34536f;
 }
 
 .secondary-btn:hover {
     background: #f3f7fb;
-
     border-color: #b9c9d8;
 }
 
@@ -973,26 +892,24 @@ body {
     color: #ffffff;
 
     box-shadow:
-        0 8px 18px rgba(15,79,132,0.18);
+        0 8px 18px rgba(15, 79, 132, 0.18);
 }
 
 .primary-btn:hover {
     transform: translateY(-1px);
 
     box-shadow:
-        0 11px 23px rgba(15,79,132,0.24);
+        0 11px 23px rgba(15, 79, 132, 0.24);
 }
 
 .primary-btn:disabled {
     opacity: 0.45;
-
     cursor: not-allowed;
 
     transform: none;
 
     box-shadow: none;
 }
-
 
 /* =========================================================
    NOTICE
@@ -1005,7 +922,6 @@ body {
     gap: 13px;
 
     margin-top: 25px;
-
     padding: 18px;
 
     border: 1px solid #d5e5f2;
@@ -1026,7 +942,6 @@ body {
     border-radius: 9px;
 
     background: #d9ebf8;
-
     color: #1769aa;
 
     font-size: 17px;
@@ -1034,22 +949,16 @@ body {
 
 .compliance-notice strong {
     display: block;
-
     color: #164b70;
-
     font-size: 11px;
 }
 
 .compliance-notice p {
     margin-top: 4px;
-
     color: #607d94;
-
     font-size: 9px;
-
     line-height: 1.6;
 }
-
 
 /* =========================================================
    FOOTER
@@ -1067,12 +976,10 @@ body {
     padding: 15px 25px;
 
     background: #08294b;
-
     color: #9eb4c9;
 
     font-size: 9px;
 }
-
 
 /* =========================================================
    RESPONSIVE
@@ -1091,9 +998,7 @@ body {
     .summary-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-
 }
-
 
 @media (max-width: 700px) {
 
@@ -1120,7 +1025,6 @@ body {
 
     .page-heading {
         flex-direction: column;
-
         align-items: flex-start;
     }
 
@@ -1130,7 +1034,6 @@ body {
 
     .inspection-id {
         width: 100%;
-
         text-align: left;
     }
 
@@ -1147,7 +1050,6 @@ body {
 
     .decision-card {
         align-items: flex-start;
-
         flex-direction: column;
     }
 
@@ -1161,14 +1063,10 @@ body {
 
     .compliance-footer {
         flex-direction: column;
-
         gap: 5px;
-
         text-align: center;
     }
-
 }
-
 
 @media (max-width: 450px) {
 
@@ -1211,5 +1109,4 @@ body {
     .decision-actions button {
         width: 100%;
     }
-
 }

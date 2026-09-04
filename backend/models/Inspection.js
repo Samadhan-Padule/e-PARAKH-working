@@ -2,7 +2,23 @@ const mongoose = require("mongoose");
 
 const inspectionSchema = new mongoose.Schema(
     {
-        // Officer who performed the inspection
+        // =====================================================
+        // UNIQUE HUMAN-READABLE INSPECTION ID
+        // Example: EP-2026-483721
+        // =====================================================
+        inspectionId: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true,
+            trim: true,
+            uppercase: true
+        },
+
+
+        // =====================================================
+        // INSPECTOR WHO PERFORMED THE INSPECTION
+        // =====================================================
         officer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
@@ -10,7 +26,27 @@ const inspectionSchema = new mongoose.Schema(
             index: true
         },
 
-        // Product being inspected
+
+        // =====================================================
+        // ASSIGNED SENIOR OFFICER
+        //
+        // This creates the hierarchy:
+        // Inspector → Senior Officer
+        //
+        // Senior dashboard will use this field to fetch
+        // completed reports belonging to that senior's team.
+        // =====================================================
+        seniorOfficer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            index: true
+        },
+
+
+        // =====================================================
+        // PRODUCT BEING INSPECTED
+        // =====================================================
         product: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Product",
@@ -18,7 +54,15 @@ const inspectionSchema = new mongoose.Schema(
             index: true
         },
 
-        // Inspection status
+
+        // =====================================================
+        // INSPECTION STATUS
+        //
+        // Inspector workflow:
+        // PENDING → IN_PROGRESS → COMPLETED
+        //
+        // Senior Officer should only receive COMPLETED reports.
+        // =====================================================
         status: {
             type: String,
             enum: [
@@ -30,7 +74,14 @@ const inspectionSchema = new mongoose.Schema(
             default: "PENDING"
         },
 
-        // Overall compliance result
+
+        // =====================================================
+        // COMPLIANCE RESULT
+        //
+        // IMPORTANT:
+        // Values originate from compliance.js.
+        // This model only stores them.
+        // =====================================================
         complianceStatus: {
             type: String,
             enum: [
@@ -42,7 +93,10 @@ const inspectionSchema = new mongoose.Schema(
             default: "PENDING"
         },
 
-        // Compliance score
+
+        // =====================================================
+        // COMPLIANCE SCORE
+        // =====================================================
         complianceScore: {
             type: Number,
             min: 0,
@@ -50,19 +104,30 @@ const inspectionSchema = new mongoose.Schema(
             default: null
         },
 
-        // Product image/evidence
+
+        // =====================================================
+        // PRODUCT EVIDENCE IMAGES
+        //
+        // Stored as image DataURLs/strings for current MVP.
+        // =====================================================
         evidenceImages: {
             type: [String],
             default: []
         },
 
-        // Inspector's observations
+
+        // =====================================================
+        // INSPECTOR OBSERVATIONS
+        // =====================================================
         observations: {
             type: String,
             default: ""
         },
 
-        // Detected violations
+
+        // =====================================================
+        // DETECTED VIOLATIONS
+        // =====================================================
         violations: {
             type: [
                 {
@@ -70,14 +135,17 @@ const inspectionSchema = new mongoose.Schema(
                         type: String,
                         trim: true
                     },
+
                     title: {
                         type: String,
                         trim: true
                     },
+
                     description: {
                         type: String,
                         trim: true
                     },
+
                     severity: {
                         type: String,
                         enum: [
@@ -93,21 +161,34 @@ const inspectionSchema = new mongoose.Schema(
             default: []
         },
 
-        // Final remarks
+
+        // =====================================================
+        // FINAL INSPECTOR REMARKS
+        // =====================================================
         remarks: {
             type: String,
             default: ""
         },
 
-        // Inspection completion date
+
+        // =====================================================
+        // INSPECTION COMPLETION DATE
+        // =====================================================
         inspectedAt: {
             type: Date,
             default: null
         }
     },
+
+
     {
         timestamps: true
     }
 );
 
-module.exports = mongoose.model("Inspection", inspectionSchema);
+
+module.exports =
+    mongoose.model(
+        "Inspection",
+        inspectionSchema
+    );

@@ -1277,270 +1277,443 @@
         }
     );
 
+
     /* =====================================================
-   LOGIN
-====================================================== */
-
-loginForm.addEventListener(
-    "submit",
-    async function (event) {
-
-        event.preventDefault();
-
-        const officerId =
-            document
-                .getElementById("officerId")
-                .value
-                .trim();
-
-        const passwordValue =
-            password.value;
-
-        loginMessage.className = "message";
-        loginMessage.textContent = "";
-
-        /* =================================================
-           VALIDATION
-        ================================================= */
-
-        if (!officerId || !passwordValue) {
-
-            loginMessage.textContent =
-                "Please enter your Officer ID and password.";
-
-            loginMessage.className =
-                "message error";
-
-            return;
-        }
-
-        loginMessage.textContent =
-            "Signing in...";
-
-        loginMessage.className =
-            "message";
-
-        try {
-
-            /* =================================================
-               BACKEND LOGIN
-            ================================================= */
-
-            const response = await fetch(
-                "http://localhost:5000/api/auth/login",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        identifier: officerId,
-                        password: passwordValue
-                    })
-                }
-            );
-
-            const result = await response.json();
-
-
-            /* =================================================
-               SERVER ERROR
-            ================================================= */
-
-            if (!response.ok) {
-
-                loginMessage.textContent =
-                    result.message || "Login failed.";
-
-                loginMessage.className =
-                    "message error";
-
-                return;
-            }
-
-
-            /* =================================================
-               LOGIN RESPONSE VALIDATION
-            ================================================= */
-
-            if (
-                result.success !== true ||
-                !result.inspector
-            ) {
-
-                loginMessage.textContent =
-                    result.message || "Login failed.";
-
-                loginMessage.className =
-                    "message error";
-
-                return;
-            }
-
-
-            if (!result.token) {
-
-                loginMessage.textContent =
-                    "Login succeeded, but authentication token was not received.";
-
-                loginMessage.className =
-                    "message error";
-
-                return;
-            }
-
-
-            /* =================================================
-               CLEAR PREVIOUS ACCOUNT
-            ================================================= */
-
-            localStorage.removeItem("eParakhToken");
-            localStorage.removeItem("eParakhUser");
-            localStorage.removeItem("officerName");
-            localStorage.removeItem("officerId");
-
-
-            /* =================================================
-               CURRENT ACCOUNT DATA
-            ================================================= */
-
-            const inspector =
-                result.inspector;
-
-
-            const currentUser = {
-
-                id: inspector.id,
-
-                officerId: inspector.employeeId,
-
-                name: inspector.fullName,
-
-                email: inspector.officialEmail,
-
-                role: inspector.role
-
-            };
-
-
-            /* =================================================
-               SAVE AUTHENTICATION
-            ================================================= */
-
-            localStorage.setItem(
-                "eParakhToken",
-                result.token
-            );
-
-
-            localStorage.setItem(
-                "eParakhUser",
-                JSON.stringify(currentUser)
-            );
-
-
-            /* =================================================
-               LEGACY KEYS
-               Existing pages still use these.
-            ================================================= */
-
-            localStorage.setItem(
-                "officerName",
-                inspector.fullName
-            );
-
-            localStorage.setItem(
-                "officerId",
-                inspector.employeeId
-            );
-
-
-            /* =================================================
-               VERIFY STORAGE
-            ================================================= */
-
-            const savedToken =
-                localStorage.getItem("eParakhToken");
-
-            const savedUser =
-                localStorage.getItem("eParakhUser");
-
-
-            if (!savedToken || !savedUser) {
-
-                throw new Error(
-                    "Authentication data could not be saved."
-                );
-            }
-
-
-            /* =================================================
-               SUCCESS
-            ================================================= */
-
-            loginMessage.textContent =
-                "Login successful.";
-
-            loginMessage.className =
-                "message success";
-
-
-            /* =================================================
-               GO TO SCANNER
-            ================================================= */
-
-            window.location.href =
-                "scan.html";
-
-        } catch (error) {
-
-            console.error(
-                "Login Error:",
-                error
-            );
-
-            loginMessage.textContent =
-                error.message ||
-                "Cannot connect to the backend.";
-
-            loginMessage.className =
-                "message error";
-        }
-
-    }
-);
-
-
-/* =====================================================
-   FORGOT PASSWORD
-====================================================== */
-
-document
-    .getElementById("forgotPassword")
-    .addEventListener(
-        "click",
-        function (event) {
+       LOGIN
+    ====================================================== */
+
+    loginForm.addEventListener(
+        "submit",
+        async function (event) {
 
             event.preventDefault();
 
-            loginMessage.textContent =
-                "Password recovery will be available after backend authentication is connected.";
+
+            const officerId =
+                document
+                    .getElementById("officerId")
+                    .value
+                    .trim();
+
+
+            const passwordValue =
+                password.value;
+
 
             loginMessage.className =
-                "message success";
+                "message";
+
+            loginMessage.textContent =
+                "";
+
+
+            /* =================================================
+               VALIDATION
+            ================================================= */
+
+            if (
+                !officerId ||
+                !passwordValue
+            ) {
+
+                loginMessage.textContent =
+                    "Please enter your Officer ID and password.";
+
+                loginMessage.className =
+                    "message error";
+
+                return;
+
+            }
+
+
+            loginMessage.textContent =
+                "Signing in...";
+
+            loginMessage.className =
+                "message";
+
+
+            try {
+
+                /* =================================================
+                   BACKEND LOGIN
+                ================================================= */
+
+                const response =
+                    await fetch(
+                        "http://localhost:5000/api/auth/login",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                identifier:
+                                    officerId,
+
+                                password:
+                                    passwordValue
+                            })
+                        }
+                    );
+
+
+                let result = {};
+
+                try {
+
+                    result =
+                        await response.json();
+
+                } catch (_) {
+
+                    result = {};
+
+                }
+
+
+                /* =================================================
+                   SERVER ERROR
+                ================================================= */
+
+                if (!response.ok) {
+
+                    loginMessage.textContent =
+                        result.message ||
+                        "Login failed.";
+
+                    loginMessage.className =
+                        "message error";
+
+                    return;
+
+                }
+
+
+                /* =================================================
+                   LOGIN RESPONSE VALIDATION
+                ================================================= */
+
+                if (
+                    result.success !== true ||
+                    !result.inspector
+                ) {
+
+                    loginMessage.textContent =
+                        result.message ||
+                        "Login failed.";
+
+                    loginMessage.className =
+                        "message error";
+
+                    return;
+
+                }
+
+
+                if (!result.token) {
+
+                    loginMessage.textContent =
+                        "Login succeeded, but authentication token was not received.";
+
+                    loginMessage.className =
+                        "message error";
+
+                    return;
+
+                }
+
+
+                /* =================================================
+                   CLEAR PREVIOUS ACCOUNT AUTH DATA
+                ================================================= */
+
+                localStorage.removeItem(
+                    "eParakhToken"
+                );
+
+                localStorage.removeItem(
+                    "eParakhUser"
+                );
+
+                localStorage.removeItem(
+                    "officerName"
+                );
+
+                localStorage.removeItem(
+                    "officerId"
+                );
+
+
+                /* =================================================
+                   CLEAR PREVIOUS INSPECTION SESSION
+                   
+                   IMPORTANT:
+                   This does NOT clear IndexedDB directly.
+                   camera.js will clear IndexedDB when the
+                   fresh Inspector scan page opens.
+                ================================================= */
+
+                localStorage.removeItem(
+                    "currentInspection"
+                );
+
+                localStorage.removeItem(
+                    "currentInspectionId"
+                );
+
+                localStorage.removeItem(
+                    "complianceResult"
+                );
+
+                localStorage.removeItem(
+                    "complianceAssessment"
+                );
+
+                localStorage.removeItem(
+                    "eParakhSavedInspectionMongoId"
+                );
+
+                localStorage.removeItem(
+                    "eParakhSavedInspectionId"
+                );
+
+
+                sessionStorage.removeItem(
+                    "inspectionStarted"
+                );
+
+                sessionStorage.removeItem(
+                    "eParakhEvidenceReady"
+                );
+
+                sessionStorage.removeItem(
+                    "eParakhScanSource"
+                );
+
+                sessionStorage.removeItem(
+                    "currentInspectionId"
+                );
+
+
+                /*
+                 * Reset any previous new-inspection flag.
+                 */
+                sessionStorage.removeItem(
+                    "eParakhStartNewInspection"
+                );
+
+
+                /* =================================================
+                   CURRENT ACCOUNT DATA
+                ================================================= */
+
+                const inspector =
+                    result.inspector;
+
+
+                const currentUser = {
+
+                    id:
+                        inspector.id,
+
+                    officerId:
+                        inspector.employeeId,
+
+                    name:
+                        inspector.fullName,
+
+                    email:
+                        inspector.officialEmail,
+
+                    role:
+                        inspector.role
+
+                };
+
+
+                /* =================================================
+                   SAVE AUTHENTICATION
+                ================================================= */
+
+                localStorage.setItem(
+                    "eParakhToken",
+                    result.token
+                );
+
+
+                localStorage.setItem(
+                    "eParakhUser",
+                    JSON.stringify(
+                        currentUser
+                    )
+                );
+
+
+                /* =================================================
+                   LEGACY KEYS
+                   Existing pages still use these.
+                ================================================= */
+
+                localStorage.setItem(
+                    "officerName",
+                    inspector.fullName
+                );
+
+
+                localStorage.setItem(
+                    "officerId",
+                    inspector.employeeId
+                );
+
+
+                /* =================================================
+                   VERIFY STORAGE
+                ================================================= */
+
+                const savedToken =
+                    localStorage.getItem(
+                        "eParakhToken"
+                    );
+
+
+                const savedUser =
+                    localStorage.getItem(
+                        "eParakhUser"
+                    );
+
+
+                if (
+                    !savedToken ||
+                    !savedUser
+                ) {
+
+                    throw new Error(
+                        "Authentication data could not be saved."
+                    );
+
+                }
+
+
+                /* =================================================
+                   SUCCESS
+                ================================================= */
+
+                loginMessage.textContent =
+                    "Login successful.";
+
+                loginMessage.className =
+                    "message success";
+
+
+                /* =================================================
+                   ROLE-BASED REDIRECTION
+                ================================================= */
+
+                if (
+                    inspector.role ===
+                    "SENIOR_OFFICER"
+                ) {
+
+                    /*
+                     * Senior Officer does not start
+                     * an Inspector scan.
+                     */
+                    window.location.href =
+                        "senior/dashboard.html";
+
+
+                } else if (
+                    inspector.role ===
+                    "ADMIN"
+                ) {
+
+                    /*
+                     * Admin does not start
+                     * an Inspector scan.
+                     */
+                    window.location.href =
+                        "admin/dashboard.html";
+
+
+                } else {
+
+                    /*
+                     * =============================================
+                     * INSPECTOR - START COMPLETELY FRESH INSPECTION
+                     * =============================================
+                     *
+                     * camera.js reads this flag.
+                     *
+                     * When scan.html opens:
+                     *
+                     * eParakhStartNewInspection = true
+                     *                 ↓
+                     * IndexedDB old evidence cleared
+                     *                 ↓
+                     * 0 / 4
+                     *
+                     * This fixes the old photos appearing
+                     * for a different Inspector account.
+                     */
+
+                    sessionStorage.setItem(
+                        "eParakhStartNewInspection",
+                        "true"
+                    );
+
+
+                    window.location.href =
+                        "scan.html";
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Login Error:",
+                    error
+                );
+
+
+                loginMessage.textContent =
+                    error.message ||
+                    "Cannot connect to the backend.";
+
+                loginMessage.className =
+                    "message error";
+
+            }
+
         }
     );
 
 
+    /* =====================================================
+       FORGOT PASSWORD
+    ====================================================== */
+
+    document
+        .getElementById("forgotPassword")
+        .addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
 
 
+                loginMessage.textContent =
+                    "Password recovery will be available after backend authentication is connected.";
 
-    
+                loginMessage.className =
+                    "message success";
+
+            }
+        );
 
 </script>
-
-
-</body>
-</html>

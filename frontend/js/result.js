@@ -13,6 +13,17 @@
    Current scanner storage format:
        key   = front / back / side / batch
        value = image DataURL string
+
+   FLOW:
+       inspection.js
+            ↓
+       compliance.js
+            ↓
+       complianceResult + currentInspection
+            ↓
+       result.js
+            ↓
+       MongoDB / Inspector History / Senior Dashboard
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -21,82 +32,118 @@ document.addEventListener("DOMContentLoaded", async () => {
        ELEMENT HELPER
     ===================================================== */
 
-    const $ = (id) => document.getElementById(id);
+    const $ = (id) =>
+        document.getElementById(id);
 
 
     /* =====================================================
        STORAGE HELPERS
     ===================================================== */
 
-    function getJSON(key, fallback = null) {
+    function getJSON(
+        key,
+        fallback = null
+    ) {
+
         try {
-            const value = localStorage.getItem(key);
+
+            const value =
+                localStorage.getItem(key);
+
 
             if (!value) {
+
                 return fallback;
+
             }
+
 
             return JSON.parse(value);
 
         } catch (error) {
+
             console.warn(
                 `Unable to read localStorage "${key}"`,
                 error
             );
 
             return fallback;
+
         }
+
     }
 
 
-    function getSessionJSON(key, fallback = null) {
+    function getSessionJSON(
+        key,
+        fallback = null
+    ) {
+
         try {
-            const value = sessionStorage.getItem(key);
+
+            const value =
+                sessionStorage.getItem(key);
+
 
             if (!value) {
+
                 return fallback;
+
             }
+
 
             return JSON.parse(value);
 
         } catch (error) {
+
             console.warn(
                 `Unable to read sessionStorage "${key}"`,
                 error
             );
 
             return fallback;
+
         }
+
     }
 
 
     /* =====================================================
        CURRENT INSPECTION
+       READ ONLY
     ===================================================== */
 
     const currentInspection =
-        getJSON("currentInspection", {}) || {};
+        getJSON(
+            "currentInspection",
+            {}
+        ) || {};
 
 
     /* =====================================================
        COMPLIANCE RESULT
-       DISPLAY ONLY
+       SINGLE SOURCE OF TRUTH = compliance.js
     ===================================================== */
 
     const complianceResult =
-        getJSON("complianceResult", null);
+        getJSON(
+            "complianceResult",
+            null
+        );
+
 
     const legacyComplianceResult =
-        getJSON("complianceAssessment", null);
+        getJSON(
+            "complianceAssessment",
+            null
+        );
 
-    /*
-     * complianceResult has priority.
-     * No calculation is performed here.
-     */
+
     const complianceData =
         complianceResult ||
         legacyComplianceResult ||
         {};
+
 
     console.log(
         "RESULT PAGE - COMPLIANCE RESULT:",
@@ -106,22 +153,53 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* =====================================================
        AI RESULT
-       DISPLAY FALLBACK ONLY
+       INSPECTION.JS USES:
+       aiAnalysisResult
     ===================================================== */
 
     const aiResult =
-        getSessionJSON("aiResult", null) ||
-        getJSON("aiResult", null) ||
-        getSessionJSON("aiExtraction", null) ||
-        getJSON("aiExtraction", null);
+        getSessionJSON(
+            "aiAnalysisResult",
+            null
+        ) ||
+        getJSON(
+            "aiAnalysisResult",
+            null
+        ) ||
+        getSessionJSON(
+            "aiResult",
+            null
+        ) ||
+        getJSON(
+            "aiResult",
+            null
+        ) ||
+        getSessionJSON(
+            "aiExtraction",
+            null
+        ) ||
+        getJSON(
+            "aiExtraction",
+            null
+        ) ||
+        currentInspection?.aiAnalysis ||
+        null;
+
 
     const aiProduct =
+        aiResult?.extracted_data ||
+        aiResult?.extractedData ||
         aiResult?.product ||
         aiResult?.data ||
-        aiResult?.extractedData ||
         aiResult?.extraction ||
         aiResult ||
         {};
+
+
+    console.log(
+        "RESULT PAGE - AI RESULT:",
+        aiResult
+    );
 
 
     /* =====================================================
@@ -132,48 +210,86 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function getCurrentInspectionId() {
 
+        /* 1. Primary localStorage value */
         const directId =
             localStorage.getItem(
                 "currentInspectionId"
             );
 
+
         if (directId) {
-            return String(directId);
+
+            return String(
+                directId
+            )
+                .trim()
+                .toUpperCase();
+
         }
 
 
-        if (currentInspection?.inspectionId) {
+        /* 2. currentInspection.inspectionId */
+        if (
+            currentInspection?.inspectionId
+        ) {
+
             return String(
                 currentInspection.inspectionId
-            );
+            )
+                .trim()
+                .toUpperCase();
+
         }
 
 
-        if (currentInspection?.id) {
+        /* 3. currentInspection.id */
+        if (
+            currentInspection?.id
+        ) {
+
             return String(
                 currentInspection.id
-            );
+            )
+                .trim()
+                .toUpperCase();
+
         }
 
 
-        if (complianceData?.inspectionId) {
+        /* 4. complianceData.inspectionId */
+        if (
+            complianceData?.inspectionId
+        ) {
+
             return String(
                 complianceData.inspectionId
-            );
+            )
+                .trim()
+                .toUpperCase();
+
         }
 
 
+        /* 5. sessionStorage fallback */
         const sessionId =
             sessionStorage.getItem(
                 "currentInspectionId"
             );
 
+
         if (sessionId) {
-            return String(sessionId);
+
+            return String(
+                sessionId
+            )
+                .trim()
+                .toUpperCase();
+
         }
 
 
         return "";
+
     }
 
 
@@ -192,9 +308,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     ===================================================== */
 
     const officer =
-        getJSON("loggedInUser", null) ||
-        getJSON("currentUser", null) ||
-        getJSON("user", null) ||
+        getJSON(
+            "loggedInUser",
+            null
+        ) ||
+        getJSON(
+            "currentUser",
+            null
+        ) ||
+        getJSON(
+            "eParakhUser",
+            null
+        ) ||
+        getJSON(
+            "user",
+            null
+        ) ||
         {};
 
 
@@ -206,6 +335,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         currentInspection.officerName ||
         currentInspection.inspectionOfficer ||
         complianceData.inspectionOfficer ||
+        complianceData?.officer?.name ||
         "Legal Metrology Officer";
 
 
@@ -219,6 +349,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         currentInspection.officer_id ||
         complianceData.officerId ||
         complianceData.officer_id ||
+        complianceData?.officer?.id ||
         "—";
 
 
@@ -228,18 +359,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function firstValue(...values) {
 
-        for (const value of values) {
+        for (
+            const value of values
+        ) {
 
             if (
                 value !== undefined &&
                 value !== null &&
                 String(value).trim() !== ""
             ) {
-                return String(value).trim();
+
+                return String(
+                    value
+                ).trim();
+
             }
+
         }
 
         return "";
+
     }
 
 
@@ -247,18 +386,25 @@ document.addEventListener("DOMContentLoaded", async () => {
        PRODUCT NAME
     ===================================================== */
 
-    function looksLikeWrongProductName(value) {
+    function looksLikeWrongProductName(
+        value
+    ) {
 
         if (!value) {
+
             return true;
+
         }
+
 
         const text =
             String(value)
                 .trim()
                 .toLowerCase();
 
+
         const blockedPhrases = [
+
             "for external use only",
             "for external use",
             "external use only",
@@ -280,29 +426,45 @@ document.addEventListener("DOMContentLoaded", async () => {
             "use before",
             "ingredients",
             "directions for use"
+
         ];
+
 
         return blockedPhrases.some(
             phrase =>
                 text === phrase ||
                 text.includes(phrase)
         );
+
     }
 
 
-    function firstValidProductName(...values) {
+    function firstValidProductName(
+        ...values
+    ) {
 
-        for (const value of values) {
+        for (
+            const value of values
+        ) {
 
             if (
                 value &&
-                !looksLikeWrongProductName(value)
+                !looksLikeWrongProductName(
+                    value
+                )
             ) {
-                return String(value).trim();
+
+                return String(
+                    value
+                ).trim();
+
             }
+
         }
 
+
         return "Packaged Commodity";
+
     }
 
 
@@ -339,7 +501,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             aiProduct?.product_title,
 
-            aiProduct?.productTitle
+            aiProduct?.productTitle,
+
+            aiProduct?.extracted_data?.product_name
+
         );
 
 
@@ -355,7 +520,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             value === null ||
             String(value).trim() === ""
         ) {
+
             return "";
+
         }
 
 
@@ -363,41 +530,60 @@ document.addEventListener("DOMContentLoaded", async () => {
             String(value)
                 .trim()
                 .replace(/₹/g, "")
-                .replace(/\b(rs|inr)\b/gi, "")
-                .replace(/\s+/g, "");
+                .replace(
+                    /\b(rs|inr)\b/gi,
+                    ""
+                )
+                .replace(
+                    /\s+/g,
+                    ""
+                );
 
 
-        if (/^0\d+$/.test(text)) {
+        if (
+            /^0\d+$/.test(text)
+        ) {
 
             text =
                 text.replace(
                     /^0+/,
                     ""
                 );
+
         }
 
 
         const numeric =
             Number(
-                text.replace(/,/g, "")
+                text.replace(
+                    /,/g,
+                    ""
+                )
             );
 
 
-        if (Number.isFinite(numeric)) {
+        if (
+            Number.isFinite(
+                numeric
+            )
+        ) {
 
             return (
                 "₹" +
                 numeric.toLocaleString(
                     "en-IN",
                     {
-                        maximumFractionDigits: 2
+                        maximumFractionDigits:
+                            2
                     }
                 )
             );
+
         }
 
 
         return String(value).trim();
+
     }
 
 
@@ -424,7 +610,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             aiProduct?.packer,
 
-            aiProduct?.importer
+            aiProduct?.packer_name,
+
+            aiProduct?.importer,
+
+            aiProduct?.importer_name
 
         ) || "Not provided";
 
@@ -444,11 +634,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             complianceData?.product?.net_quantity,
 
+            complianceData?.netQuantity,
+
+            complianceData?.net_quantity,
+
             aiProduct?.netQuantity,
 
             aiProduct?.net_quantity,
 
-            aiProduct?.quantity
+            aiProduct?.quantity,
+
+            aiProduct?.net_weight
 
         ) || "Not provided";
 
@@ -470,13 +666,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             aiProduct?.maximumRetailPrice,
 
-            aiProduct?.maximum_retail_price
+            aiProduct?.maximum_retail_price,
+
+            aiProduct?.max_retail_price
 
         );
 
 
     const mrp =
-        formatMRP(rawMRP) ||
+        formatMRP(
+            rawMRP
+        ) ||
         "Not provided";
 
 
@@ -509,7 +709,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             aiProduct?.manufacturingDate,
 
-            aiProduct?.manufacturing_date
+            aiProduct?.manufacturing_date,
+
+            aiProduct?.date_of_manufacture,
+
+            aiProduct?.date_of_manufacturing
 
         ) || "Not provided";
 
@@ -533,7 +737,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             aiProduct?.packerAddress,
 
-            aiProduct?.packer_address
+            aiProduct?.packer_address,
+
+            aiProduct?.registered_address,
+
+            aiProduct?.importer_address
 
         ) || "Not provided";
 
@@ -550,6 +758,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             currentInspection?.additional_declarations,
 
             complianceData?.product?.additionalDeclarations,
+
+            complianceData?.product?.additional_declarations,
 
             complianceData?.additionalDeclarations,
 
@@ -578,6 +788,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             currentInspection?.consumer_care,
 
             complianceData?.product?.consumerCare,
+
+            complianceData?.product?.consumer_care,
 
             complianceData?.consumerCare,
 
@@ -646,32 +858,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         consumerCare;
 
 
-    if (!finalConsumerCare) {
+    if (
+        !finalConsumerCare
+    ) {
 
         const parts = [];
 
 
-        if (consumerCarePhone) {
+        if (
+            consumerCarePhone
+        ) {
 
             parts.push(
                 `Phone: ${consumerCarePhone}`
             );
+
         }
 
 
-        if (consumerCareEmail) {
+        if (
+            consumerCareEmail
+        ) {
 
             parts.push(
                 `Email: ${consumerCareEmail}`
             );
+
         }
 
 
-        if (consumerCareWebsite) {
+        if (
+            consumerCareWebsite
+        ) {
 
             parts.push(
                 `Website: ${consumerCareWebsite}`
             );
+
         }
 
 
@@ -679,6 +902,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             parts.length
                 ? parts.join("; ")
                 : "Not provided";
+
     }
 
 
@@ -697,7 +921,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             complianceData?.inspection_date,
 
-            new Date().toLocaleDateString("en-IN")
+            currentInspection?.inspectedAt,
+
+            complianceData?.generatedAt,
+
+            new Date().toLocaleDateString(
+                "en-IN"
+            )
 
         );
 
@@ -706,17 +936,26 @@ document.addEventListener("DOMContentLoaded", async () => {
        BASIC DISPLAY
     ===================================================== */
 
-    function setText(id, value) {
+    function setText(
+        id,
+        value
+    ) {
 
-        const element = $(id);
+        const element =
+            $(id);
+
 
         if (!element) {
+
             return;
+
         }
+
 
         element.textContent =
             value ||
             "Not provided";
+
     }
 
 
@@ -805,6 +1044,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const officerAvatar =
         $("officerAvatar");
 
+
     if (officerAvatar) {
 
         const initials =
@@ -814,13 +1054,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 .slice(0, 2)
                 .map(
                     name =>
-                        name.charAt(0)
+                        name
+                            .charAt(0)
                             .toUpperCase()
                 )
                 .join("");
 
+
         officerAvatar.textContent =
-            initials || "LM";
+            initials ||
+            "LM";
+
     }
 
 
@@ -830,65 +1074,71 @@ document.addEventListener("DOMContentLoaded", async () => {
        NO CALCULATION
     ===================================================== */
 
-    /*
-     * These values come directly from compliance.js.
-     *
-     * IMPORTANT:
-     * Do NOT calculate:
-     * passed / total
-     * score
-     * failed
-     * status
-     */
-
     const score =
         Number.isFinite(
-            Number(complianceData?.score)
+            Number(
+                complianceData?.score
+            )
         )
-            ? Number(complianceData.score)
+            ? Number(
+                complianceData.score
+            )
             : 0;
 
 
     const total =
         Number.isFinite(
-            Number(complianceData?.total)
+            Number(
+                complianceData?.total
+            )
         )
-            ? Number(complianceData.total)
+            ? Number(
+                complianceData.total
+            )
             : 0;
 
 
     const passed =
         Number.isFinite(
-            Number(complianceData?.passed)
+            Number(
+                complianceData?.passed
+            )
         )
-            ? Number(complianceData.passed)
+            ? Number(
+                complianceData.passed
+            )
             : 0;
 
 
     const failed =
         Number.isFinite(
-            Number(complianceData?.failed)
+            Number(
+                complianceData?.failed
+            )
         )
-            ? Number(complianceData.failed)
+            ? Number(
+                complianceData.failed
+            )
             : 0;
 
 
     const pending =
         Number.isFinite(
-            Number(complianceData?.pending)
+            Number(
+                complianceData?.pending
+            )
         )
-            ? Number(complianceData.pending)
+            ? Number(
+                complianceData.pending
+            )
             : 0;
 
 
-    /*
-     * Status MUST come from compliance.js.
-     * We do not infer it from failed/passed.
-     */
     const savedStatus =
         firstValue(
             complianceData?.status
-        ) || "NOT AVAILABLE";
+        ) ||
+        "NOT AVAILABLE";
 
 
     console.log(
@@ -899,7 +1149,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             passed,
             failed,
             pending,
-            status: savedStatus
+            status:
+                savedStatus
         }
     );
 
@@ -917,42 +1168,56 @@ document.addEventListener("DOMContentLoaded", async () => {
     const resultIcon =
         $("resultIcon");
 
+
     const resultTitle =
         $("resultTitle");
+
 
     const resultDescription =
         $("resultDescription");
 
 
     const normalizedStatus =
-        String(savedStatus)
+        String(
+            savedStatus
+        )
             .trim()
             .toUpperCase();
 
 
     const isCompliant =
-        normalizedStatus === "COMPLIANT";
+        normalizedStatus ===
+        "COMPLIANT";
 
 
     const isNonCompliant =
-        normalizedStatus === "NON-COMPLIANT" ||
-        normalizedStatus === "NON COMPLIANT";
+        normalizedStatus ===
+            "NON-COMPLIANT" ||
+        normalizedStatus ===
+            "NON COMPLIANT" ||
+        normalizedStatus ===
+            "NON_COMPLIANT";
 
 
     if (resultIcon) {
 
         if (isCompliant) {
 
-            resultIcon.textContent = "✓";
+            resultIcon.textContent =
+                "✓";
 
         } else if (isNonCompliant) {
 
-            resultIcon.textContent = "!";
+            resultIcon.textContent =
+                "!";
 
         } else {
 
-            resultIcon.textContent = "—";
+            resultIcon.textContent =
+                "—";
+
         }
+
     }
 
 
@@ -972,7 +1237,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             resultTitle.textContent =
                 "Assessment Unavailable";
+
         }
+
     }
 
 
@@ -992,7 +1259,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             resultDescription.textContent =
                 "Compliance assessment data is not available.";
+
         }
+
     }
 
 
@@ -1003,10 +1272,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const checkCount =
         $("checkCount");
 
+
     if (checkCount) {
 
         checkCount.textContent =
             `${passed} / ${total} PASSED`;
+
     }
 
 
@@ -1014,14 +1285,34 @@ document.addEventListener("DOMContentLoaded", async () => {
        HTML ESCAPE
     ===================================================== */
 
-    function escapeHtml(value) {
+    function escapeHtml(
+        value
+    ) {
 
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
     }
 
 
@@ -1035,8 +1326,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         const container =
             $("checksList");
 
+
         if (!container) {
+
             return;
+
         }
 
 
@@ -1048,10 +1342,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 : [];
 
 
-        container.innerHTML = "";
+        container.innerHTML =
+            "";
 
 
-        if (checks.length === 0) {
+        if (
+            checks.length === 0
+        ) {
 
             container.innerHTML = `
                 <div class="empty-state">
@@ -1059,21 +1356,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
             `;
 
+
             return;
+
         }
 
 
         checks.forEach(
-            (check, index) => {
+            (
+                check,
+                index
+            ) => {
+
+                let isPassed =
+                    false;
+
 
                 /*
-                 * We only READ the saved passed value.
-                 * No compliance calculation.
+                 * Primary format.
                  */
-
-                let isPassed = false;
-
-
                 if (
                     typeof check?.passed ===
                     "boolean"
@@ -1082,7 +1383,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                     isPassed =
                         check.passed;
 
-                } else if (
+                }
+
+
+                /*
+                 * Alternative format.
+                 */
+                else if (
                     typeof check?.pass ===
                     "boolean"
                 ) {
@@ -1090,19 +1397,34 @@ document.addEventListener("DOMContentLoaded", async () => {
                     isPassed =
                         check.pass;
 
-                } else {
+                }
+
+
+                /*
+                 * Saved compliance.js format:
+                 * status = pass / fail / pending
+                 */
+                else {
 
                     const status =
                         String(
                             check?.status ||
                             ""
-                        ).toLowerCase();
+                        )
+                            .trim()
+                            .toLowerCase();
+
 
                     isPassed =
-                        status === "pass" ||
-                        status === "passed" ||
-                        status === "compliant" ||
-                        status === "true";
+                        status ===
+                            "pass" ||
+                        status ===
+                            "passed" ||
+                        status ===
+                            "compliant" ||
+                        status ===
+                            "true";
+
                 }
 
 
@@ -1111,7 +1433,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     check?.label ||
                     check?.requirement ||
                     check?.title ||
-                    `Requirement ${index + 1}`;
+                    `Requirement ${
+                        index + 1
+                    }`;
 
 
                 const message =
@@ -1126,7 +1450,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
                 const item =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
 
                 item.className =
@@ -1143,7 +1469,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                             ? "pass"
                             : "fail"
                     }">
-                        ${isPassed ? "✓" : "✕"}
+                        ${
+                            isPassed
+                                ? "✓"
+                                : "✕"
+                        }
                     </div>
 
                     <div class="check-content">
@@ -1174,9 +1504,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 `;
 
 
-                container.appendChild(item);
+                container.appendChild(
+                    item
+                );
+
             }
         );
+
     }
 
 
@@ -1190,8 +1524,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         const container =
             $("violationsList");
 
+
         if (!container) {
+
             return;
+
         }
 
 
@@ -1203,10 +1540,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 : [];
 
 
-        container.innerHTML = "";
+        container.innerHTML =
+            "";
 
 
-        if (violations.length === 0) {
+        if (
+            violations.length === 0
+        ) {
 
             container.innerHTML = `
                 <div class="no-violations">
@@ -1214,12 +1554,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
             `;
 
+
             return;
+
         }
 
 
         violations.forEach(
-            (violation, index) => {
+            (
+                violation,
+                index
+            ) => {
 
                 const title =
                     violation?.title ||
@@ -1237,7 +1582,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
                 const item =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
 
                 item.className =
@@ -1246,7 +1593,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 item.innerHTML = `
                     <div class="violation-icon">
-                        ${String(index + 1).padStart(2, "0")}
+                        ${String(
+                            index + 1
+                        ).padStart(
+                            2,
+                            "0"
+                        )}
                     </div>
 
                     <div class="violation-content">
@@ -1256,16 +1608,22 @@ document.addEventListener("DOMContentLoaded", async () => {
                         </strong>
 
                         <p>
-                            ${escapeHtml(description)}
+                            ${escapeHtml(
+                                description
+                            )}
                         </p>
 
                     </div>
                 `;
 
 
-                container.appendChild(item);
+                container.appendChild(
+                    item
+                );
+
             }
         );
+
     }
 
 
@@ -1275,6 +1633,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const EVIDENCE_DB_NAME =
         "eParakhEvidenceDB";
+
 
     const EVIDENCE_STORE_NAME =
         "inspectionEvidence";
@@ -1287,9 +1646,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     function openEvidenceDB() {
 
         return new Promise(
-            (resolve, reject) => {
+            (
+                resolve,
+                reject
+            ) => {
 
-                if (!window.indexedDB) {
+                if (
+                    !window.indexedDB
+                ) {
 
                     reject(
                         new Error(
@@ -1297,14 +1661,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                         )
                     );
 
+
                     return;
+
                 }
 
 
                 /*
-                 * Do NOT force DB version.
-                 *
-                 * camera.js created the DB.
+                 * Do not force a version.
+                 * camera.js owns the DB version.
                  */
                 const request =
                     indexedDB.open(
@@ -1312,53 +1677,48 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
 
 
-                request.onsuccess = () => {
+                request.onsuccess =
+                    () => {
 
-                    resolve(
-                        request.result
-                    );
-                };
+                        resolve(
+                            request.result
+                        );
 
-
-                request.onerror = () => {
-
-                    reject(
-                        request.error
-                    );
-                };
+                    };
 
 
-                request.onblocked = () => {
+                request.onerror =
+                    () => {
 
-                    reject(
-                        new Error(
-                            "IndexedDB request was blocked."
-                        )
-                    );
-                };
+                        reject(
+                            request.error ||
+                            new Error(
+                                "Unable to open evidence database."
+                            )
+                        );
+
+                    };
+
+
+                request.onblocked =
+                    () => {
+
+                        reject(
+                            new Error(
+                                "IndexedDB request was blocked."
+                            )
+                        );
+
+                    };
+
             }
         );
+
     }
 
 
     /* =====================================================
        GET EVIDENCE
-       
-       IMPORTANT:
-       camera.js stores:
-
-       key:
-           front
-           back
-           side
-           batch
-
-       value:
-           "data:image/jpeg;base64,..."
-
-       Therefore:
-       - getAll() is NOT enough because it loses keys.
-       - cursor gives us both key + value.
     ===================================================== */
 
     async function getEvidenceImages() {
@@ -1382,15 +1742,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "Evidence store not found."
                 );
 
+
                 db.close();
 
+
                 return [];
+
             }
 
 
             const images =
                 await new Promise(
-                    (resolve, reject) => {
+                    (
+                        resolve,
+                        reject
+                    ) => {
 
                         const transaction =
                             db.transaction(
@@ -1409,98 +1775,144 @@ document.addEventListener("DOMContentLoaded", async () => {
                             store.openCursor();
 
 
-                        const results = [];
+                        const results =
+                            [];
 
 
-                        request.onsuccess = () => {
+                        request.onsuccess =
+                            () => {
 
-                            const cursor =
-                                request.result;
-
-
-                            if (!cursor) {
-
-                                resolve(results);
-
-                                return;
-                            }
+                                const cursor =
+                                    request.result;
 
 
-                            const key =
-                                cursor.key;
+                                if (
+                                    !cursor
+                                ) {
 
-                            const value =
-                                cursor.value;
+                                    resolve(
+                                        results
+                                    );
 
 
-                            /*
-                             * CURRENT FORMAT:
-                             *
-                             * value is directly
-                             * a DataURL string.
-                             */
-                            if (
-                                typeof value ===
-                                "string" &&
-                                value.trim()
-                            ) {
+                                    return;
 
-                                results.push({
+                                }
 
-                                    panel:
-                                        String(key),
 
-                                    dataUrl:
-                                        value.trim(),
+                                const key =
+                                    cursor.key;
 
-                                    createdAt:
-                                        Date.now()
 
-                                });
+                                const value =
+                                    cursor.value;
 
-                            }
 
-                            /*
-                             * FUTURE / LEGACY OBJECT FORMAT
-                             */
-                            else if (
-                                value &&
-                                typeof value ===
-                                "object"
-                            ) {
+                                /*
+                                 * CURRENT FORMAT:
+                                 *
+                                 * key:
+                                 * front/back/side/batch
+                                 *
+                                 * value:
+                                 * DataURL string
+                                 */
+                                if (
+                                    typeof value ===
+                                        "string" &&
+                                    value.trim()
+                                ) {
 
-                                results.push({
+                                    results.push({
 
-                                    ...value,
+                                        panel:
+                                            String(
+                                                key
+                                            ),
 
-                                    panel:
+                                        dataUrl:
+                                            value.trim(),
+
+                                        name:
+                                            String(
+                                                key
+                                            )
+                                                .trim()
+                                                .toUpperCase() +
+                                            " evidence",
+
+                                        createdAt:
+                                            Date.now()
+
+                                    });
+
+                                }
+
+
+                                /*
+                                 * Legacy/future object format.
+                                 */
+                                else if (
+                                    value &&
+                                    typeof value ===
+                                        "object"
+                                ) {
+
+                                    const panel =
                                         value.panel ||
                                         value.category ||
                                         value.type ||
-                                        String(key)
-
-                                });
-                            }
-
-
-                            cursor.continue();
-                        };
+                                        String(
+                                            key
+                                        );
 
 
-                        request.onerror = () => {
+                                    results.push({
 
-                            reject(
-                                request.error
-                            );
-                        };
+                                        ...value,
+
+                                        panel:
+                                            panel,
+
+                                        createdAt:
+                                            value.createdAt ||
+                                            Date.now()
+
+                                    });
+
+                                }
 
 
-                        transaction.onerror = () => {
+                                cursor.continue();
 
-                            reject(
-                                transaction.error
-                            );
-                        };
+                            };
+
+
+                        request.onerror =
+                            () => {
+
+                                reject(
+                                    request.error ||
+                                    new Error(
+                                        "Unable to read evidence."
+                                    )
+                                );
+
+                            };
+
+
+                        transaction.onerror =
+                            () => {
+
+                                reject(
+                                    transaction.error ||
+                                    new Error(
+                                        "Evidence transaction failed."
+                                    )
+                                );
+
+                            };
+
                     }
                 );
 
@@ -1514,18 +1926,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
 
-            /*
-             * Sort into:
-             *
-             * FRONT
-             * BACK
-             * SIDE
-             * BATCH
-             */
             return sortEvidence(
                 images
             );
-
 
         } catch (error) {
 
@@ -1538,13 +1941,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (db) {
 
                 try {
+
                     db.close();
+
                 } catch (_) {}
+
             }
 
 
             return [];
+
         }
+
     }
 
 
@@ -1552,33 +1960,32 @@ document.addEventListener("DOMContentLoaded", async () => {
        EVIDENCE SORT
     ===================================================== */
 
-    function sortEvidence(images) {
+    function sortEvidence(
+        images
+    ) {
 
         const order = {
 
             FRONT: 1,
-
             BACK: 2,
-
             SIDE: 3,
-
             BATCH: 4,
-
             MRP: 4,
-
             MRP_PANEL: 4,
-
             TOP: 5,
-
             BOTTOM: 6,
-
             OTHER: 99
 
         };
 
 
-        return [...images].sort(
-            (a, b) => {
+        return [
+            ...images
+        ].sort(
+            (
+                a,
+                b
+            ) => {
 
                 const panelA =
                     String(
@@ -1603,33 +2010,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
                 const orderA =
-                    order[panelA] || 99;
+                    order[panelA] ||
+                    99;
 
 
                 const orderB =
-                    order[panelB] || 99;
+                    order[panelB] ||
+                    99;
 
 
                 if (
-                    orderA !== orderB
+                    orderA !==
+                    orderB
                 ) {
 
                     return (
                         orderA -
                         orderB
                     );
+
                 }
 
 
                 const dateA =
                     new Date(
-                        a?.createdAt || 0
+                        a?.createdAt ||
+                        0
                     ).getTime();
 
 
                 const dateB =
                     new Date(
-                        b?.createdAt || 0
+                        b?.createdAt ||
+                        0
                     ).getTime();
 
 
@@ -1637,8 +2050,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     dateA -
                     dateB
                 );
+
             }
         );
+
     }
 
 
@@ -1646,18 +2061,19 @@ document.addEventListener("DOMContentLoaded", async () => {
        EVIDENCE SOURCE
     ===================================================== */
 
-    function getEvidenceSource(image) {
+    function getEvidenceSource(
+        image
+    ) {
 
         if (!image) {
+
             return "";
+
         }
 
 
         /*
-         * IMPORTANT:
-         *
-         * Current camera.js may pass
-         * a direct DataURL string.
+         * Direct DataURL.
          */
         if (
             typeof image ===
@@ -1665,11 +2081,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         ) {
 
             return image.trim();
+
         }
 
 
         /*
-         * Object-based format support.
+         * Object-based source.
          */
         const directSource =
             image.dataUrl ||
@@ -1682,16 +2099,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (
             typeof directSource ===
-            "string" &&
+                "string" &&
             directSource.trim()
         ) {
 
             return directSource.trim();
+
         }
 
 
         /*
-         * Blob-based format support.
+         * Blob support.
          */
         const blob =
             image.blob ||
@@ -1716,11 +2134,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "Unable to create image URL:",
                     error
                 );
+
             }
+
         }
 
 
         return "";
+
     }
 
 
@@ -1728,7 +2149,9 @@ document.addEventListener("DOMContentLoaded", async () => {
        EVIDENCE LABEL
     ===================================================== */
 
-    function formatEvidenceLabel(image) {
+    function formatEvidenceLabel(
+        image
+    ) {
 
         const panel =
             String(
@@ -1769,13 +2192,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             OTHER:
                 "EVIDENCE"
+
         };
 
 
         return (
             labels[panel] ||
-            panel.replace(/_/g, " ")
+            panel.replace(
+                /_/g,
+                " "
+            )
         );
+
     }
 
 
@@ -1783,35 +2211,40 @@ document.addEventListener("DOMContentLoaded", async () => {
        RENDER EVIDENCE GALLERY
     ===================================================== */
 
-    function renderEvidenceGallery(images) {
+    function renderEvidenceGallery(
+        images
+    ) {
 
         const gallery =
             $("evidenceGallery");
 
+
         const evidenceSection =
             $("evidenceSection");
+
 
         const evidenceCount =
             $("evidenceCount");
 
 
         if (!gallery) {
+
             return;
+
         }
 
 
-        gallery.innerHTML = "";
+        gallery.innerHTML =
+            "";
 
 
         const evidenceImages =
-            Array.isArray(images)
+            Array.isArray(
+                images
+            )
                 ? images
                 : [];
 
-
-        /* =================================================
-           COUNT
-        ================================================= */
 
         if (evidenceCount) {
 
@@ -1821,12 +2254,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ? "Photo"
                         : "Photos"
                 }`;
+
         }
 
-
-        /* =================================================
-           EMPTY STATE
-        ================================================= */
 
         if (
             evidenceImages.length === 0
@@ -1844,10 +2274,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 evidenceSection.classList.add(
                     "no-evidence"
                 );
+
             }
 
 
             return;
+
         }
 
 
@@ -1856,15 +2288,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             evidenceSection.classList.remove(
                 "no-evidence"
             );
+
         }
 
 
-        /* =================================================
-           RENDER EACH PHOTO
-        ================================================= */
-
         evidenceImages.forEach(
-            (image, index) => {
+            (
+                image,
+                index
+            ) => {
 
                 const source =
                     getEvidenceSource(
@@ -1873,7 +2305,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
                 if (!source) {
+
                     return;
+
                 }
 
 
@@ -1886,10 +2320,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 card.className =
                     "evidence-card";
 
-
-                /* -----------------------------------------
-                   HEADER
-                ----------------------------------------- */
 
                 const header =
                     document.createElement(
@@ -1927,14 +2357,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     label
                 );
 
+
                 header.appendChild(
                     number
                 );
 
-
-                /* -----------------------------------------
-                   IMAGE
-                ----------------------------------------- */
 
                 const img =
                     document.createElement(
@@ -1951,7 +2378,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
                 img.alt =
-                    `${formatEvidenceLabel(image)} evidence`;
+                    `${formatEvidenceLabel(
+                        image
+                    )} evidence`;
 
 
                 img.loading =
@@ -1961,10 +2390,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 img.decoding =
                     "async";
 
-
-                /* -----------------------------------------
-                   IMAGE NAME
-                ----------------------------------------- */
 
                 const name =
                     document.createElement(
@@ -1983,17 +2408,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
 
 
-                /* -----------------------------------------
-                   CARD APPEND
-                ----------------------------------------- */
-
                 card.appendChild(
                     header
                 );
 
+
                 card.appendChild(
                     img
                 );
+
 
                 card.appendChild(
                     name
@@ -2003,8 +2426,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 gallery.appendChild(
                     card
                 );
+
             }
         );
+
     }
 
 
@@ -2027,6 +2452,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ) {
 
             return Promise.resolve();
+
         }
 
 
@@ -2039,6 +2465,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ) {
 
                         return Promise.resolve();
+
                     }
 
 
@@ -2061,11 +2488,823 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     once: true
                                 }
                             );
+
                         }
                     );
+
                 }
             )
         );
+
+    }
+
+
+    /* =====================================================
+       BACKEND CONFIG
+    ===================================================== */
+
+    const API_BASE_URL =
+        "http://localhost:5000/api";
+
+
+    let inspectionSavePromise =
+        null;
+
+
+    /*
+     * Holds evidence sources loaded during
+     * result page initialization.
+     *
+     * This is deliberately stored in a
+     * variable available to saveCompletedInspection().
+     */
+    let evidenceImagesForMongo =
+        [];
+
+
+    /* =====================================================
+       GET AUTHENTICATED USER
+    ===================================================== */
+
+    async function getAuthenticatedUser() {
+
+        const token =
+            localStorage.getItem(
+                "eParakhToken"
+            );
+
+
+        if (!token) {
+
+            throw new Error(
+                "Your login session has expired. Please login again."
+            );
+
+        }
+
+
+        const response =
+            await fetch(
+                `${API_BASE_URL}/auth/me`,
+                {
+                    method:
+                        "GET",
+
+                    headers: {
+
+                        "Authorization":
+                            `Bearer ${token}`
+
+                    }
+
+                }
+            );
+
+
+        let data = {};
+
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch (_) {
+
+            data = {};
+
+        }
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to verify your login session."
+            );
+
+        }
+
+
+        return (
+            data.inspector ||
+            data.user ||
+            data.data ||
+            {}
+        );
+
+    }
+
+
+    /* =====================================================
+       BUILD PRODUCT PAYLOAD
+    ===================================================== */
+
+    function buildProductPayload() {
+
+        return {
+
+            productName:
+                productName !==
+                    "Packaged Commodity"
+                    ? productName
+                    : "Packaged Commodity",
+
+
+            manufacturer:
+                manufacturer !==
+                    "Not provided"
+                    ? manufacturer
+                    : "Not provided",
+
+
+            netQuantity:
+                netQuantity !==
+                    "Not provided"
+                    ? netQuantity
+                    : "",
+
+
+            mrp:
+                rawMRP ||
+                "",
+
+
+            packingDate:
+                packingDate !==
+                    "Not provided"
+                    ? packingDate
+                    : "",
+
+
+            consumerCare:
+                finalConsumerCare !==
+                    "Not provided"
+                    ? finalConsumerCare
+                    : "",
+
+
+            address:
+                address !==
+                    "Not provided"
+                    ? address
+                    : "",
+
+
+            additionalDeclarations:
+                additionalDeclarations !==
+                    "Not provided"
+                    ? additionalDeclarations
+                    : "",
+
+
+            
+                source:
+    "SCAN",
+
+
+            aiConfidence:
+                Number.isFinite(
+                    Number(
+                        aiResult?.confidence
+                    )
+                )
+                    ? Number(
+                        aiResult.confidence
+                    )
+                    : null
+
+        };
+
+    }
+
+
+    /* =====================================================
+       NORMALIZE COMPLIANCE STATUS
+       READ ONLY
+    ===================================================== */
+
+    function getSavedComplianceStatus() {
+
+        const normalized =
+            String(
+                savedStatus ||
+                ""
+            )
+                .trim()
+                .toUpperCase();
+
+
+        if (
+            normalized ===
+            "COMPLIANT"
+        ) {
+
+            return "COMPLIANT";
+
+        }
+
+
+        if (
+            normalized ===
+                "NON-COMPLIANT" ||
+            normalized ===
+                "NON COMPLIANT" ||
+            normalized ===
+                "NON_COMPLIANT"
+        ) {
+
+            return "NON_COMPLIANT";
+
+        }
+
+
+        if (
+            normalized ===
+            "WARNING"
+        ) {
+
+            return "WARNING";
+
+        }
+
+
+        return "PENDING";
+
+    }
+
+
+    /* =====================================================
+       BUILD VIOLATIONS
+       READ ONLY
+    ===================================================== */
+
+    function getSavedViolations() {
+
+        const violations =
+            Array.isArray(
+                complianceData?.violations
+            )
+                ? complianceData.violations
+                : [];
+
+
+        return violations.map(
+            violation => {
+
+                const severityValue =
+                    String(
+                        violation?.severity ||
+                        "MEDIUM"
+                    )
+                        .trim()
+                        .toUpperCase();
+
+
+                const allowedSeverity = [
+
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "CRITICAL"
+
+                ];
+
+
+                return {
+
+                    ruleCode:
+                        String(
+                            violation?.ruleCode ||
+                            violation?.code ||
+                            violation?.rule ||
+                            ""
+                        ).trim(),
+
+
+                    title:
+                        String(
+                            violation?.title ||
+                            violation?.name ||
+                            violation?.requirement ||
+                            violation?.rule ||
+                            "Compliance Violation"
+                        ).trim(),
+
+
+                    description:
+                        String(
+                            violation?.description ||
+                            violation?.message ||
+                            violation?.details ||
+                            "Mandatory requirement not satisfied."
+                        ).trim(),
+
+
+                    severity:
+                        allowedSeverity.includes(
+                            severityValue
+                        )
+                            ? severityValue
+                            : "MEDIUM"
+
+                };
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       SAVE COMPLETED INSPECTION
+    ===================================================== */
+
+    async function saveCompletedInspection() {
+
+        if (
+            inspectionSavePromise
+        ) {
+
+            return inspectionSavePromise;
+
+        }
+
+
+        inspectionSavePromise =
+            (async () => {
+
+                /* ---------------------------------------------
+                   TOKEN
+                --------------------------------------------- */
+
+                const token =
+                    localStorage.getItem(
+                        "eParakhToken"
+                    );
+
+
+                if (!token) {
+
+                    throw new Error(
+                        "Login session not found."
+                    );
+
+                }
+
+
+                /* ---------------------------------------------
+                   INSPECTION ID
+                --------------------------------------------- */
+
+                if (!inspectionId) {
+
+                    throw new Error(
+                        "Inspection ID is missing."
+                    );
+
+                }
+
+
+                const normalizedInspectionId =
+                    String(
+                        inspectionId
+                    )
+                        .trim()
+                        .toUpperCase();
+
+
+                /* ---------------------------------------------
+                   PREVENT DUPLICATE SAVE FOR SAME INSPECTION
+                --------------------------------------------- */
+
+                const previouslySavedInspectionId =
+                    localStorage.getItem(
+                        "eParakhSavedInspectionId"
+                    );
+
+
+                const previouslySavedMongoId =
+                    localStorage.getItem(
+                        "eParakhSavedInspectionMongoId"
+                    );
+
+
+                if (
+                    previouslySavedMongoId &&
+                    previouslySavedInspectionId &&
+                    String(
+                        previouslySavedInspectionId
+                    )
+                        .trim()
+                        .toUpperCase() ===
+                    normalizedInspectionId
+                ) {
+
+                    console.log(
+                        "Inspection already saved:",
+                        normalizedInspectionId,
+                        previouslySavedMongoId
+                    );
+
+
+                    return {
+
+                        _id:
+                            previouslySavedMongoId,
+
+                        inspectionId:
+                            previouslySavedInspectionId,
+
+                        status:
+                            "COMPLETED",
+
+                        alreadySaved:
+                            true
+
+                    };
+
+                }
+
+
+                /* ---------------------------------------------
+                   VERIFY USER
+                --------------------------------------------- */
+
+                const authenticatedUser =
+                    await getAuthenticatedUser();
+
+
+                if (
+                    authenticatedUser.role &&
+                    authenticatedUser.role !==
+                        "INSPECTOR"
+                ) {
+
+                    throw new Error(
+                        "Only an Inspector can complete an inspection."
+                    );
+
+                }
+
+
+                /* ---------------------------------------------
+                   PRODUCT
+                --------------------------------------------- */
+
+                let productId =
+                    currentInspection?.product?._id ||
+                    currentInspection?.productId ||
+                    currentInspection?.product_id ||
+                    null;
+
+
+                /*
+                 * Create Product if there is no MongoDB Product ID.
+                 */
+                if (!productId) {
+
+                    console.log(
+                        "Creating product record..."
+                    );
+
+
+                    const productPayload =
+                        buildProductPayload();
+
+
+                    const productResponse =
+                        await fetch(
+                            `${API_BASE_URL}/products`,
+                            {
+                                method:
+                                    "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Authorization":
+                                        `Bearer ${token}`
+
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        productPayload
+                                    )
+
+                            }
+                        );
+
+
+                    let productData =
+                        {};
+
+
+                    try {
+
+                        productData =
+                            await productResponse.json();
+
+                    } catch (_) {
+
+                        productData =
+                            {};
+
+                    }
+
+
+                    if (
+                        !productResponse.ok
+                    ) {
+
+                        throw new Error(
+                            productData.message ||
+                            "Unable to save product."
+                        );
+
+                    }
+
+
+                    productId =
+                        productData?.product?._id ||
+                        productData?.data?._id ||
+                        productData?._id ||
+                        null;
+
+
+                    if (!productId) {
+
+                        throw new Error(
+                            "Product was created but its ID was not returned."
+                        );
+
+                    }
+
+
+                    console.log(
+                        "Product saved:",
+                        productId
+                    );
+
+                }
+
+
+                /* ---------------------------------------------
+                   EVIDENCE
+                --------------------------------------------- */
+
+                const evidenceImages =
+                    Array.isArray(
+                        evidenceImagesForMongo
+                    )
+                        ? evidenceImagesForMongo
+                        : [];
+
+
+                /* ---------------------------------------------
+                   FINAL INSPECTION PAYLOAD
+                --------------------------------------------- */
+
+                const inspectionPayload = {
+
+                    inspectionId:
+                        normalizedInspectionId,
+
+
+                    product:
+                        productId,
+
+
+                    status:
+                        "COMPLETED",
+
+
+                    /*
+                     * Taken directly from compliance.js result.
+                     */
+                    complianceStatus:
+                        getSavedComplianceStatus(),
+
+
+                    complianceScore:
+                        score,
+
+
+                    evidenceImages:
+                        evidenceImages,
+
+
+                    observations:
+                        String(
+                            currentInspection?.observations ||
+                            currentInspection?.observation ||
+                            complianceData?.observation ||
+                            ""
+                        ),
+
+
+                    violations:
+                        getSavedViolations(),
+
+
+                    remarks:
+                        String(
+                            currentInspection?.remarks ||
+                            complianceData?.remarks ||
+                            ""
+                        ),
+
+
+                    inspectedAt:
+                        new Date().toISOString()
+
+                };
+
+
+                console.log(
+                    "================================="
+                );
+
+
+                console.log(
+                    "Saving completed inspection:"
+                );
+
+
+                console.log(
+                    inspectionPayload
+                );
+
+
+                console.log(
+                    "Evidence count:",
+                    evidenceImages.length
+                );
+
+
+                console.log(
+                    "================================="
+                );
+
+
+                /* ---------------------------------------------
+                   SAVE INSPECTION
+                --------------------------------------------- */
+
+                const inspectionResponse =
+                    await fetch(
+                        `${API_BASE_URL}/inspections`,
+                        {
+                            method:
+                                "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "Authorization":
+                                    `Bearer ${token}`
+
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    inspectionPayload
+                                )
+
+                        }
+                    );
+
+
+                let inspectionData =
+                    {};
+
+
+                try {
+
+                    inspectionData =
+                        await inspectionResponse.json();
+
+                } catch (_) {
+
+                    inspectionData =
+                        {};
+
+                }
+
+
+                if (
+                    !inspectionResponse.ok
+                ) {
+
+                    throw new Error(
+                        inspectionData.message ||
+                        "Unable to save completed inspection."
+                    );
+
+                }
+
+
+                const savedInspection =
+                    inspectionData?.inspection ||
+                    inspectionData?.data ||
+                    inspectionData;
+
+
+                if (
+                    !savedInspection?._id
+                ) {
+
+                    throw new Error(
+                        "Inspection was saved but no database ID was returned."
+                    );
+
+                }
+
+
+                /* ---------------------------------------------
+                   SAVE LOCAL REFERENCE
+                --------------------------------------------- */
+
+                localStorage.setItem(
+                    "eParakhSavedInspectionMongoId",
+                    String(
+                        savedInspection._id
+                    )
+                );
+
+
+                localStorage.setItem(
+                    "eParakhSavedInspectionId",
+                    String(
+                        savedInspection.inspectionId ||
+                        normalizedInspectionId
+                    )
+                );
+
+
+                console.log(
+                    "================================="
+                );
+
+
+                console.log(
+                    "e-PARAKH INSPECTION SAVED"
+                );
+
+
+                console.log(
+                    "Mongo ID:",
+                    savedInspection._id
+                );
+
+
+                console.log(
+                    "Inspection ID:",
+                    savedInspection.inspectionId ||
+                    normalizedInspectionId
+                );
+
+
+                console.log(
+                    "Status:",
+                    savedInspection.status
+                );
+
+
+                console.log(
+                    "Senior Officer:",
+                    savedInspection.seniorOfficer
+                );
+
+
+                console.log(
+                    "================================="
+                );
+
+
+                return savedInspection;
+
+            })();
+
+
+        try {
+
+            return await inspectionSavePromise;
+
+        } finally {
+
+            inspectionSavePromise =
+                null;
+
+        }
+
     }
 
 
@@ -2078,11 +3317,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         const newInspectionBtn =
             $("newInspectionBtn");
 
+
         const dashboardBtn =
             $("dashboardBtn");
 
+
         const reportBtn =
             $("reportBtn");
+
 
         const logoutBtn =
             $("logoutBtn");
@@ -2092,31 +3334,36 @@ document.addEventListener("DOMContentLoaded", async () => {
            NEW INSPECTION
         ================================================= */
 
-        if (newInspectionBtn) {
+        if (
+            newInspectionBtn
+        ) {
 
             newInspectionBtn.addEventListener(
                 "click",
                 () => {
 
                     /*
-                     * IMPORTANT:
+                     * Do not clear IndexedDB here.
                      *
-                     * Do NOT clear IndexedDB here.
-                     *
-                     * Old evidence remains saved.
+                     * camera.js will clear the old
+                     * evidence when the new-inspection
+                     * flag is detected.
                      */
 
                     sessionStorage.removeItem(
                         "inspectionStarted"
                     );
 
+
                     sessionStorage.removeItem(
                         "eParakhEvidenceReady"
                     );
 
+
                     sessionStorage.removeItem(
                         "eParakhScanSource"
                     );
+
 
                     sessionStorage.removeItem(
                         "currentInspectionId"
@@ -2127,30 +3374,48 @@ document.addEventListener("DOMContentLoaded", async () => {
                         "currentInspection"
                     );
 
+
                     localStorage.removeItem(
                         "currentInspectionId"
                     );
 
+
                     localStorage.removeItem(
                         "complianceResult"
                     );
+
 
                     localStorage.removeItem(
                         "complianceAssessment"
                     );
 
 
+                    localStorage.removeItem(
+                        "eParakhSavedInspectionMongoId"
+                    );
+
+
+                    localStorage.removeItem(
+                        "eParakhSavedInspectionId"
+                    );
+
+
                     /*
-                     * Result page is:
-                     * frontend/pages/result.html
-                     *
-                     * scan.html is:
-                     * frontend/pages/scan.html
+                     * Tell camera.js:
+                     * this is a completely new inspection.
                      */
+                    sessionStorage.setItem(
+                        "eParakhStartNewInspection",
+                        "true"
+                    );
+
+
                     window.location.href =
                         "scan.html";
+
                 }
             );
+
         }
 
 
@@ -2158,7 +3423,9 @@ document.addEventListener("DOMContentLoaded", async () => {
            DASHBOARD
         ================================================= */
 
-        if (dashboardBtn) {
+        if (
+            dashboardBtn
+        ) {
 
             dashboardBtn.addEventListener(
                 "click",
@@ -2166,8 +3433,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     window.location.href =
                         "dashboard.html";
+
                 }
             );
+
         }
 
 
@@ -2175,33 +3444,35 @@ document.addEventListener("DOMContentLoaded", async () => {
            LOGOUT
         ================================================= */
 
-        if (logoutBtn) {
+        if (
+            logoutBtn
+        ) {
 
             logoutBtn.addEventListener(
                 "click",
                 () => {
 
-                    /*
-                     * Keep this conservative.
-                     * Do not clear evidence database.
-                     */
-
                     localStorage.removeItem(
                         "loggedInUser"
                     );
+
 
                     localStorage.removeItem(
                         "currentUser"
                     );
 
+
                     localStorage.removeItem(
                         "user"
                     );
 
+
                     window.location.href =
                         "login.html";
+
                 }
             );
+
         }
 
 
@@ -2209,7 +3480,9 @@ document.addEventListener("DOMContentLoaded", async () => {
            GENERATE REPORT
         ================================================= */
 
-        if (reportBtn) {
+        if (
+            reportBtn
+        ) {
 
             reportBtn.addEventListener(
                 "click",
@@ -2219,11 +3492,32 @@ document.addEventListener("DOMContentLoaded", async () => {
                         true;
 
 
+                    const originalText =
+                        reportBtn.textContent;
+
+
+                    reportBtn.textContent =
+                        "Saving Report...";
+
+
                     try {
 
+                        /*
+                         * Wait for evidence image rendering.
+                         */
                         await waitForEvidenceImages();
 
 
+                        /*
+                         * Save completed inspection
+                         * to MongoDB.
+                         */
+                        await saveCompletedInspection();
+
+
+                        /*
+                         * Give browser one render cycle.
+                         */
                         await new Promise(
                             resolve =>
                                 requestAnimationFrame(
@@ -2232,24 +3526,44 @@ document.addEventListener("DOMContentLoaded", async () => {
                         );
 
 
+                        /*
+                         * Existing print behaviour.
+                         */
                         window.print();
 
+                    } catch (
+                        error
+                    ) {
+
+                        console.error(
+                            "Unable to save completed inspection:",
+                            error
+                        );
+
+
+                        alert(
+                            `Inspection report could not be saved.\n\n${
+                                error.message ||
+                                "Please try again."
+                            }`
+                        );
 
                     } finally {
 
-                        setTimeout(
-                            () => {
+                        reportBtn.disabled =
+                            false;
 
-                                reportBtn.disabled =
-                                    false;
 
-                            },
-                            500
-                        );
+                        reportBtn.textContent =
+                            originalText;
+
                     }
+
                 }
             );
+
         }
+
     }
 
 
@@ -2263,8 +3577,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             document.title =
                 `e-PARAKH Inspection Report - ${
-                    inspectionId || "Report"
+                    inspectionId ||
+                    "Report"
                 }`;
+
         }
     );
 
@@ -2279,6 +3595,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             document.title =
                 "e-PARAKH";
+
         }
     );
 
@@ -2287,95 +3604,186 @@ document.addEventListener("DOMContentLoaded", async () => {
        INITIAL RENDER
     ===================================================== */
 
-    renderChecks();
+    async function initializeResultPage() {
 
-    renderViolations();
+        try {
 
-
-    /*
-     * Load evidence from IndexedDB.
-     */
-    const evidenceImages =
-        await getEvidenceImages();
+            /*
+             * Render saved compliance result.
+             */
+            renderChecks();
 
 
-    renderEvidenceGallery(
-        evidenceImages
-    );
+            renderViolations();
 
 
-    setupButtons();
+            /*
+             * Load evidence from IndexedDB.
+             */
+            const evidenceImages =
+                await getEvidenceImages();
+
+
+            /*
+             * Convert evidence to DataURL/source
+             * for MongoDB persistence.
+             */
+            evidenceImagesForMongo =
+                evidenceImages
+                    .map(
+                        image =>
+                            getEvidenceSource(
+                                image
+                            )
+                    )
+                    .filter(Boolean);
+
+
+            /*
+             * Render evidence gallery.
+             */
+            renderEvidenceGallery(
+                evidenceImages
+            );
+
+
+            /*
+             * Setup buttons only after
+             * all result data is ready.
+             */
+            setupButtons();
+
+
+            /* =================================================
+               FINAL DEBUG
+            ================================================= */
+
+            console.log(
+                "================================="
+            );
+
+
+            console.log(
+                "e-PARAKH RESULT PAGE READY"
+            );
+
+
+            console.log(
+                "Inspection ID:",
+                inspectionId
+            );
+
+
+            console.log(
+                "Officer:",
+                officerName
+            );
+
+
+            console.log(
+                "Officer ID:",
+                officerId
+            );
+
+
+            console.log(
+                "Product:",
+                productName
+            );
+
+
+            console.log(
+                "Compliance:",
+                `${score}%`
+            );
+
+
+            console.log(
+                "Total:",
+                total
+            );
+
+
+            console.log(
+                "Passed:",
+                passed
+            );
+
+
+            console.log(
+                "Failed:",
+                failed
+            );
+
+
+            console.log(
+                "Pending:",
+                pending
+            );
+
+
+            console.log(
+                "Status:",
+                savedStatus
+            );
+
+
+            console.log(
+                "Evidence Photos:",
+                evidenceImages.length
+            );
+
+
+            console.log(
+                "Evidence Sources:",
+                evidenceImagesForMongo.length
+            );
+
+
+            console.log(
+                "================================="
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Result page initialization failed:",
+                error
+            );
+
+
+            /*
+             * Make sure the page does not
+             * remain stuck on "Loading evidence".
+             */
+            const gallery =
+                $("evidenceGallery");
+
+
+            if (gallery) {
+
+                gallery.innerHTML = `
+                    <div class="empty-state evidence-missing">
+                        Unable to load inspection evidence.
+                    </div>
+                `;
+
+            }
+
+
+            setupButtons();
+
+        }
+
+    }
 
 
     /* =====================================================
-       FINAL DEBUG
+       START RESULT PAGE
     ===================================================== */
 
-    console.log(
-        "================================="
-    );
+    await initializeResultPage();
 
-    console.log(
-        "e-PARAKH RESULT PAGE READY"
-    );
-
-    console.log(
-        "Inspection ID:",
-        inspectionId
-    );
-
-    console.log(
-        "Officer:",
-        officerName
-    );
-
-    console.log(
-        "Officer ID:",
-        officerId
-    );
-
-    console.log(
-        "Product:",
-        productName
-    );
-
-    console.log(
-        "Compliance:",
-        `${score}%`
-    );
-
-    console.log(
-        "Total:",
-        total
-    );
-
-    console.log(
-        "Passed:",
-        passed
-    );
-
-    console.log(
-        "Failed:",
-        failed
-    );
-
-    console.log(
-        "Pending:",
-        pending
-    );
-
-    console.log(
-        "Status:",
-        savedStatus
-    );
-
-    console.log(
-        "Evidence Photos:",
-        evidenceImages.length
-    );
-
-    console.log(
-        "================================="
-    );
 
 });

@@ -1,86 +1,236 @@
+/* =========================================================
+   e-PARAKH — COMPLIANCE MODULE
+   MASTER CORRECTED VERSION
+
+   ARCHITECTURE
+   ---------------------------------------------------------
+   scan / camera.js
+          ↓
+   inspection.js
+          ↓
+   currentInspection + aiAnalysisResult
+          ↓
+   compliance.js
+          ↓
+   complianceResult
+          ↓
+   result.js
+          ↓
+   MongoDB / Inspector History / Senior Dashboard
+
+   IMPORTANT RULES
+   ---------------------------------------------------------
+   - compliance.js is the SINGLE SOURCE OF TRUTH for compliance.
+   - compliance.js does NOT generate Inspection ID.
+   - Inspection ID is generated ONLY by inspection.js.
+   - Product data comes from currentInspection / AI result.
+   - Evidence comes from the CURRENT scanner IndexedDB.
+   - ALL scanned images are loaded as evidence.
+   - Final complianceResult is saved ONLY on Generate Result.
+   - No artificial score is inserted.
+========================================================= */
+
 
 document.addEventListener("DOMContentLoaded", async () => {
-
-    /* =====================================================
-       e-PARAKH COMPLIANCE MODULE
-       N-IMAGE + AI + RULE ENGINE + EVIDENCE
-    ===================================================== */
 
     console.log("======================================");
     console.log("e-PARAKH COMPLIANCE MODULE STARTED");
     console.log("======================================");
 
+
     /* =====================================================
        ELEMENTS
     ===================================================== */
 
-    const inspectionIdElement = document.getElementById("inspectionId");
-    const officerNameElement = document.getElementById("officerName");
-    const officerIdElement = document.getElementById("officerId");
-    const officerAvatar = document.getElementById("officerAvatar");
+    const inspectionIdElement =
+        document.getElementById("inspectionId");
 
-    const summaryManufacturer = document.getElementById("summaryManufacturer");
-    const summaryProductName = document.getElementById("summaryProductName");
-    const summaryQuantity = document.getElementById("summaryQuantity");
-    const summaryMrp = document.getElementById("summaryMrp");
-    const summaryPackingDate = document.getElementById("summaryPackingDate");
-    const summaryConsumerCare = document.getElementById("summaryConsumerCare");
-    const summaryStatus = document.getElementById("summaryStatus");
+    const officerNameElement =
+        document.getElementById("officerName");
 
-    const complianceScore = document.getElementById("complianceScore");
-    const scoreBadge = document.getElementById("scoreBadge");
-    const scoreCircle = document.getElementById("scoreCircle");
-    const scoreMessage = document.getElementById("scoreMessage");
-    const verificationCount = document.getElementById("verificationCount");
-    const observation = document.getElementById("observation");
-    const decisionText = document.getElementById("decisionText");
+    const officerIdElement =
+        document.getElementById("officerId");
 
-    const generateBtn = document.getElementById("generateBtn");
-    const backBtn = document.getElementById("backBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
+    const officerAvatar =
+        document.getElementById("officerAvatar");
+
+    const summaryManufacturer =
+        document.getElementById("summaryManufacturer");
+
+    const summaryProductName =
+        document.getElementById("summaryProductName");
+
+    const summaryQuantity =
+        document.getElementById("summaryQuantity");
+
+    const summaryMrp =
+        document.getElementById("summaryMrp");
+
+    const summaryPackingDate =
+        document.getElementById("summaryPackingDate");
+
+    const summaryConsumerCare =
+        document.getElementById("summaryConsumerCare");
+
+    const summaryStatus =
+        document.getElementById("summaryStatus");
+
+    const complianceScore =
+        document.getElementById("complianceScore");
+
+    const scoreBadge =
+        document.getElementById("scoreBadge");
+
+    const scoreCircle =
+        document.getElementById("scoreCircle");
+
+    const scoreMessage =
+        document.getElementById("scoreMessage");
+
+    const verificationCount =
+        document.getElementById("verificationCount");
+
+    const observation =
+        document.getElementById("observation");
+
+    const decisionText =
+        document.getElementById("decisionText");
+
+    const generateBtn =
+        document.getElementById("generateBtn");
+
+    const backBtn =
+        document.getElementById("backBtn");
+
+    const logoutBtn =
+        document.getElementById("logoutBtn");
+
+
+    /* =====================================================
+       STORAGE HELPERS
+    ===================================================== */
+
+    function getStorageJSON(
+        storage,
+        key,
+        fallback = null
+    ) {
+
+        try {
+
+            const raw =
+                storage.getItem(key);
+
+            if (!raw) {
+                return fallback;
+            }
+
+            return JSON.parse(raw);
+
+        } catch (error) {
+
+            console.warn(
+                `Unable to parse ${key}:`,
+                error
+            );
+
+            return fallback;
+        }
+    }
+
+
+    function safeSetStorageJSON(
+        storage,
+        key,
+        value
+    ) {
+
+        try {
+
+            storage.setItem(
+                key,
+                JSON.stringify(value)
+            );
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                `Unable to save ${key}:`,
+                error
+            );
+
+            return false;
+        }
+    }
+
 
     /* =====================================================
        OFFICER
     ===================================================== */
 
     const savedOfficerName =
-        localStorage.getItem("officerName") ||
+        localStorage.getItem(
+            "officerName"
+        ) ||
         "Authorized Officer";
 
+
     const savedOfficerId =
-        localStorage.getItem("officerId") ||
+        localStorage.getItem(
+            "officerId"
+        ) ||
         "Officer ID";
 
+
     if (officerNameElement) {
-        officerNameElement.textContent = savedOfficerName;
+
+        officerNameElement.textContent =
+            savedOfficerName;
     }
 
+
     if (officerIdElement) {
-        officerIdElement.textContent = savedOfficerId;
+
+        officerIdElement.textContent =
+            savedOfficerId;
     }
+
 
     if (officerAvatar) {
 
-        const words = savedOfficerName
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
+        const words =
+            String(savedOfficerName)
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+
 
         let initials = "AO";
 
+
         if (words.length === 1) {
-            initials = words[0]
-                .substring(0, 2)
-                .toUpperCase();
+
+            initials =
+                words[0]
+                    .substring(0, 2)
+                    .toUpperCase();
+
         } else if (words.length > 1) {
-            initials = (
-                words[0][0] +
-                words[words.length - 1][0]
-            ).toUpperCase();
+
+            initials =
+                (
+                    words[0][0] +
+                    words[words.length - 1][0]
+                ).toUpperCase();
         }
 
-        officerAvatar.textContent = initials;
+
+        officerAvatar.textContent =
+            initials;
     }
+
 
     /* =====================================================
        LOAD CURRENT INSPECTION
@@ -88,15 +238,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let inspectionData = {};
 
+
     try {
 
         const savedInspection =
-            localStorage.getItem("currentInspection");
+            localStorage.getItem(
+                "currentInspection"
+            );
+
 
         if (savedInspection) {
 
             inspectionData =
-                JSON.parse(savedInspection);
+                JSON.parse(
+                    savedInspection
+                );
+
+
+            if (
+                !inspectionData ||
+                typeof inspectionData !== "object" ||
+                Array.isArray(inspectionData)
+            ) {
+
+                inspectionData = {};
+            }
+
 
             console.log(
                 "CURRENT INSPECTION:",
@@ -108,7 +275,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.warn(
                 "currentInspection not found."
             );
-
         }
 
     } catch (error) {
@@ -118,7 +284,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             error
         );
 
+        inspectionData = {};
     }
+
 
     /* =====================================================
        LOAD AI ANALYSIS
@@ -126,18 +294,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let aiAnalysis = {};
 
+
     try {
 
         const sessionAI =
-            sessionStorage.getItem("aiAnalysisResult");
+            sessionStorage.getItem(
+                "aiAnalysisResult"
+            );
+
 
         const localAI =
-            localStorage.getItem("aiAnalysisResult");
+            localStorage.getItem(
+                "aiAnalysisResult"
+            );
+
 
         let savedAI =
             sessionAI ||
             localAI ||
             null;
+
+
+        /*
+         * currentInspection may already contain
+         * the AI result copied by inspection.js.
+         */
 
         if (
             !savedAI &&
@@ -147,8 +328,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             savedAI =
                 inspectionData.aiAnalysis;
-
         }
+
 
         if (savedAI) {
 
@@ -156,6 +337,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 typeof savedAI === "string"
                     ? JSON.parse(savedAI)
                     : savedAI;
+
+
+            if (
+                !aiAnalysis ||
+                typeof aiAnalysis !== "object" ||
+                Array.isArray(aiAnalysis)
+            ) {
+
+                aiAnalysis = {};
+            }
+
 
             console.log(
                 "AI ANALYSIS LOADED:",
@@ -167,7 +359,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.warn(
                 "NO AI ANALYSIS FOUND."
             );
-
         }
 
     } catch (error) {
@@ -177,13 +368,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             error
         );
 
+        aiAnalysis = {};
     }
+
 
     /* =====================================================
        NORMALIZE AI DATA
     ===================================================== */
 
     let aiData = {};
+
 
     if (
         aiAnalysis &&
@@ -196,48 +390,73 @@ document.addEventListener("DOMContentLoaded", async () => {
             aiAnalysis.product ||
             aiAnalysis.data ||
             {};
-
     }
 
+
     if (
-        Object.keys(aiData).length === 0 &&
+        (
+            !aiData ||
+            typeof aiData !== "object" ||
+            Array.isArray(aiData) ||
+            Object.keys(aiData).length === 0
+        ) &&
         aiAnalysis &&
         aiAnalysis.result
     ) {
 
-        const result =
+        const nestedResult =
             aiAnalysis.result;
 
-        aiData =
-            result.extracted_data ||
-            result.extractedData ||
-            result.product ||
-            result.data ||
-            result ||
-            {};
 
+        if (
+            nestedResult &&
+            typeof nestedResult === "object"
+        ) {
+
+            aiData =
+                nestedResult.extracted_data ||
+                nestedResult.extractedData ||
+                nestedResult.product ||
+                nestedResult.data ||
+                nestedResult;
+        }
     }
+
+
+    if (
+        !aiData ||
+        typeof aiData !== "object" ||
+        Array.isArray(aiData)
+    ) {
+
+        aiData = {};
+    }
+
 
     console.log(
         "NORMALIZED AI DATA:",
         aiData
     );
 
+
     /* =====================================================
        RAW OCR
     ===================================================== */
 
     const rawOCR =
-        aiAnalysis.raw_ocr_text ||
-        aiAnalysis.rawOCRText ||
-        aiAnalysis.ocr_text ||
-        aiAnalysis.ocrText ||
+        aiAnalysis?.raw_ocr_text ||
+        aiAnalysis?.rawOcrText ||
+        aiAnalysis?.rawOCRText ||
+        aiAnalysis?.ocr_text ||
+        aiAnalysis?.ocrText ||
         "";
+
 
     console.log(
         "RAW OCR TEXT:",
         rawOCR
     );
+
 
     /* =====================================================
        HELPERS
@@ -249,17 +468,34 @@ document.addEventListener("DOMContentLoaded", async () => {
             value === undefined ||
             value === null
         ) {
+
             return false;
         }
+
 
         if (
             typeof value === "object"
         ) {
-            return Object.keys(value).length > 0;
+
+            if (Array.isArray(value)) {
+
+                return value.length > 0;
+            }
+
+
+            return (
+                Object.keys(value).length > 0
+            );
         }
 
-        return String(value).trim().length > 0;
+
+        return (
+            String(value)
+                .trim()
+                .length > 0
+        );
     }
+
 
     function cleanValue(value) {
 
@@ -267,36 +503,59 @@ document.addEventListener("DOMContentLoaded", async () => {
             value === undefined ||
             value === null
         ) {
+
             return "";
         }
+
 
         if (
             typeof value === "object"
         ) {
 
             try {
+
+                if (Array.isArray(value)) {
+
+                    return value
+                        .map(item => cleanValue(item))
+                        .filter(Boolean)
+                        .join(", ");
+                }
+
+
                 return JSON.stringify(value);
-            } catch (error) {
+
+            } catch (_) {
+
                 return "";
             }
-
         }
+
 
         return String(value).trim();
     }
 
+
     function firstValue(...values) {
 
-        for (const value of values) {
+        for (
+            const value of values
+        ) {
 
-            if (valueExists(value)) {
-                return cleanValue(value);
+            if (
+                valueExists(value)
+            ) {
+
+                return cleanValue(
+                    value
+                );
             }
-
         }
+
 
         return "";
     }
+
 
     function setText(
         element,
@@ -308,50 +567,102 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        if (valueExists(value)) {
+
+        if (
+            valueExists(value)
+        ) {
+
             element.textContent =
                 cleanValue(value);
+
         } else {
+
             element.textContent =
                 fallback;
         }
     }
 
+
     /* =====================================================
        ADDITIONAL DECLARATIONS
     ===================================================== */
 
-    function buildAdditionalDeclarations(data) {
+    function buildAdditionalDeclarations(
+        data
+    ) {
 
         const additional = [];
 
+
         const fields = [
-            ["brand_name", "Brand"],
-            ["brand_owner", "Brand Owner"],
-            ["country_of_origin", "Country of Origin"],
-            ["fssai_license", "FSSAI License"],
-            ["epr_registration", "EPR Registration"],
-            ["batch_number", "Batch No."],
-            ["use_by", "Use By"],
-            ["ingredients", "Ingredients"]
+
+            [
+                "brand_name",
+                "Brand"
+            ],
+
+            [
+                "brand_owner",
+                "Brand Owner"
+            ],
+
+            [
+                "country_of_origin",
+                "Country of Origin"
+            ],
+
+            [
+                "fssai_license",
+                "FSSAI License"
+            ],
+
+            [
+                "epr_registration",
+                "EPR Registration"
+            ],
+
+            [
+                "batch_number",
+                "Batch No."
+            ],
+
+            [
+                "use_by",
+                "Use By"
+            ],
+
+            [
+                "ingredients",
+                "Ingredients"
+            ]
+
         ];
 
-        fields.forEach(([key, label]) => {
 
-            if (valueExists(data[key])) {
+        fields.forEach(
+            ([key, label]) => {
 
-                additional.push(
-                    label +
-                    ": " +
-                    cleanValue(data[key])
-                );
+                if (
+                    valueExists(
+                        data?.[key]
+                    )
+                ) {
 
+                    additional.push(
+                        `${label}: ${cleanValue(
+                            data[key]
+                        )}`
+                    );
+                }
             }
+        );
 
-        });
 
-        return additional.join("\n");
+        return additional.join(
+            "\n"
+        );
     }
+
 
     /* =====================================================
        PRODUCT DATA
@@ -361,131 +672,246 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         manufacturer:
             firstValue(
+
                 inspectionData.manufacturer,
+
                 inspectionData.manufacturerName,
+
+                inspectionData.product?.manufacturer,
+
                 aiData.manufacturer,
+
                 aiData.manufacturer_name,
+
                 aiData.manufacturerName,
+
                 aiData.packer,
+
                 aiData.packer_name,
+
                 aiData.importer,
+
                 aiData.importer_name
             ),
 
+
         productName:
             firstValue(
+
                 inspectionData.productName,
+
                 inspectionData.product_name,
+
+                inspectionData.product?.productName,
+
+                inspectionData.product?.product_name,
+
                 aiData.product_name,
+
                 aiData.productName,
+
                 aiData.name,
-                aiData.commodity_name
+
+                aiData.commodity_name,
+
+                aiData.commodityName
             ),
+
 
         netQuantity:
             firstValue(
+
                 inspectionData.netQuantity,
+
                 inspectionData.net_quantity,
+
+                inspectionData.product?.netQuantity,
+
+                inspectionData.product?.net_quantity,
+
                 aiData.net_quantity,
+
                 aiData.netQuantity,
+
                 aiData.quantity,
+
                 aiData.net_weight
             ),
 
+
         mrp:
             firstValue(
+
                 inspectionData.mrp,
+
+                inspectionData.product?.mrp,
+
                 aiData.mrp,
+
                 aiData.maximum_retail_price,
+
+                aiData.maximumRetailPrice,
+
                 aiData.max_retail_price
             ),
 
+
         packingDate:
             firstValue(
+
                 inspectionData.packingDate,
+
                 inspectionData.packing_date,
+
+                inspectionData.product?.packingDate,
+
+                inspectionData.product?.packing_date,
+
                 aiData.date_of_manufacture,
+
                 aiData.date_of_packing,
+
                 aiData.packing_date,
+
+                aiData.packingDate,
+
                 aiData.manufacturing_date,
+
                 aiData.manufacture_date,
+
                 aiData.date_of_manufacturing
             ),
 
+
         consumerCare:
             firstValue(
+
                 inspectionData.consumerCare,
+
                 inspectionData.customerCare,
+
+                inspectionData.product?.consumerCare,
+
+                inspectionData.product?.consumer_care,
+
                 aiData.customer_care,
+
                 aiData.consumer_care,
+
                 aiData.consumerCare,
+
                 aiData.customer_care_details,
+
                 aiData.consumer_care_details
             ),
 
+
         address:
             firstValue(
+
                 inspectionData.address,
+
                 inspectionData.manufacturerAddress,
+
+                inspectionData.product?.address,
+
                 aiData.manufacturer_address,
+
                 aiData.manufacturerAddress,
+
                 aiData.address,
+
                 aiData.registered_address,
+
                 aiData.packer_address,
+
                 aiData.importer_address
             ),
 
+
         additionalDeclarations:
             firstValue(
+
                 inspectionData.additionalDeclarations,
-                buildAdditionalDeclarations(aiData)
+
+                inspectionData.additional_declarations,
+
+                inspectionData.product?.additionalDeclarations,
+
+                inspectionData.product?.additional_declarations,
+
+                buildAdditionalDeclarations(
+                    aiData
+                )
             )
+
     };
+
 
     console.log(
         "FINAL NORMALIZED PRODUCT DATA:",
         productData
     );
 
+
     /* =====================================================
        INSPECTION ID
+       READ ONLY
+       DO NOT GENERATE
     ===================================================== */
 
     let inspectionId =
+        localStorage.getItem(
+            "currentInspectionId"
+        ) ||
         inspectionData.inspectionId ||
         inspectionData.inspection_id ||
-        localStorage.getItem("currentInspectionId");
+        "";
 
-    if (
-        !inspectionId ||
-        inspectionId === "EP-2026-000000"
-    ) {
 
-        const year =
-            new Date().getFullYear();
+    inspectionId =
+        String(
+            inspectionId || ""
+        )
+            .trim()
+            .toUpperCase();
 
-        const random =
-            String(Date.now()).slice(-6);
 
-        inspectionId =
-            "EP-" +
-            year +
-            "-" +
-            random;
+    /*
+     * compliance.js NEVER creates an Inspection ID.
+     */
+
+    if (!inspectionId) {
+
+        console.error(
+            "Inspection ID is missing. inspection.js should have generated it."
+        );
+
+    } else {
+
+        localStorage.setItem(
+            "currentInspectionId",
+            inspectionId
+        );
     }
 
-    localStorage.setItem(
-        "currentInspectionId",
+
+    if (inspectionIdElement) {
+
+        inspectionIdElement.textContent =
+            inspectionId ||
+            "—";
+    }
+
+
+    console.log(
+        "COMPLIANCE INSPECTION ID:",
         inspectionId
     );
 
-    if (inspectionIdElement) {
-        inspectionIdElement.textContent =
-            inspectionId;
-    }
 
     /* =====================================================
-       DISPLAY PRODUCT
+       DISPLAY PRODUCT SUMMARY
     ===================================================== */
 
     setText(
@@ -493,128 +919,202 @@ document.addEventListener("DOMContentLoaded", async () => {
         productData.manufacturer
     );
 
+
     setText(
         summaryProductName,
         productData.productName
     );
+
 
     setText(
         summaryQuantity,
         productData.netQuantity
     );
 
+
     setText(
         summaryMrp,
         productData.mrp
     );
+
 
     setText(
         summaryPackingDate,
         productData.packingDate
     );
 
+
     setText(
         summaryConsumerCare,
         productData.consumerCare
     );
 
+
     if (summaryStatus) {
 
+        const dataLoaded =
+            valueExists(
+                productData.productName
+            ) ||
+            valueExists(
+                productData.manufacturer
+            ) ||
+            Object.keys(aiData).length > 0;
+
+
         summaryStatus.textContent =
-            (
-                valueExists(productData.productName) ||
-                valueExists(productData.manufacturer) ||
-                Object.keys(aiData).length > 0
-            )
+            dataLoaded
                 ? "DATA LOADED"
                 : "NO AI DATA";
-
     }
 
+
     /* =====================================================
-       INDEXEDDB
+       INDEXEDDB CONFIGURATION
+       CURRENT SCANNER STORAGE
+
+       IMPORTANT:
+       scanner.js uses:
+
+       DB:
+       eParakhScannerDB
+
+       VERSION:
+       3
+
+       STORE:
+       panelImages
     ===================================================== */
 
-    const PANEL_DB_NAME =
+    const EVIDENCE_DB_NAME =
         "eParakhScannerDB";
 
-    const PANEL_DB_VERSION =
+
+    const EVIDENCE_DB_VERSION =
         3;
 
-    const PANEL_STORE_NAME =
+
+    const EVIDENCE_STORE_NAME =
         "panelImages";
 
-    function openPanelDB() {
+
+    /* =====================================================
+       OPEN CURRENT SCANNER DATABASE
+    ===================================================== */
+
+    function openEvidenceDB() {
 
         return new Promise(
             (resolve, reject) => {
 
-                const request =
-                    indexedDB.open(
-                        PANEL_DB_NAME,
-                        PANEL_DB_VERSION
+                if (
+                    !window.indexedDB
+                ) {
+
+                    reject(
+                        new Error(
+                            "IndexedDB is not supported."
+                        )
                     );
 
-                request.onupgradeneeded =
-                    event => {
+                    return;
+                }
+
+
+                const request =
+                    indexedDB.open(
+                        EVIDENCE_DB_NAME,
+                        EVIDENCE_DB_VERSION
+                    );
+
+
+                request.onsuccess =
+                    () => {
 
                         const db =
-                            event.target.result;
+                            request.result;
+
 
                         if (
                             !db.objectStoreNames.contains(
-                                PANEL_STORE_NAME
+                                EVIDENCE_STORE_NAME
                             )
                         ) {
 
-                            const store =
-                                db.createObjectStore(
-                                    PANEL_STORE_NAME,
-                                    {
-                                        keyPath: "id"
-                                    }
-                                );
+                            db.close();
 
-                            store.createIndex(
-                                "panel",
-                                "panel",
-                                {
-                                    unique: false
-                                }
+
+                            reject(
+                                new Error(
+                                    "Scanner evidence store not found."
+                                )
                             );
 
+
+                            return;
                         }
 
+
+                        resolve(db);
                     };
 
-                request.onsuccess =
-                    event => {
-
-                        resolve(
-                            event.target.result
-                        );
-
-                    };
 
                 request.onerror =
                     () => {
 
                         reject(
-                            request.error
+                            request.error ||
+                            new Error(
+                                "Unable to open scanner evidence database."
+                            )
                         );
+                    };
 
+
+                request.onblocked =
+                    () => {
+
+                        reject(
+                            new Error(
+                                "Scanner evidence database request was blocked."
+                            )
+                        );
                     };
 
             }
         );
     }
 
+
+    /* =====================================================
+       LOAD ALL CURRENT SCANNER EVIDENCE
+
+       Supports:
+
+       {
+          id,
+          panel,
+          name,
+          type,
+          file,
+          dataUrl,
+          source,
+          createdAt
+       }
+
+       This matches scanner.js.
+    ===================================================== */
+
     async function getAllEvidence() {
+
+        let db = null;
+
 
         try {
 
-            const db =
-                await openPanelDB();
+            db =
+                await openEvidenceDB();
+
 
             const records =
                 await new Promise(
@@ -622,42 +1122,293 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         const transaction =
                             db.transaction(
-                                PANEL_STORE_NAME,
+                                EVIDENCE_STORE_NAME,
                                 "readonly"
                             );
 
+
                         const store =
                             transaction.objectStore(
-                                PANEL_STORE_NAME
+                                EVIDENCE_STORE_NAME
                             );
 
+
                         const request =
-                            store.getAll();
+                            store.openCursor();
+
+
+                        const results = [];
+
 
                         request.onsuccess =
                             () => {
 
-                                resolve(
-                                    request.result || []
-                                );
+                                const cursor =
+                                    request.result;
 
+
+                                if (!cursor) {
+
+                                    resolve(
+                                        results
+                                    );
+
+                                    return;
+                                }
+
+
+                                const value =
+                                    cursor.value;
+
+
+                                if (
+                                    value &&
+                                    typeof value === "object"
+                                ) {
+
+                                    const panel =
+                                        value.panel ||
+                                        value.category ||
+                                        "OTHER";
+
+
+                                    const dataUrl =
+                                        value.dataUrl ||
+                                        value.data ||
+                                        value.imageData ||
+                                        value.src ||
+                                        value.url ||
+                                        "";
+
+
+                                    if (
+                                        dataUrl
+                                    ) {
+
+                                        results.push({
+
+                                            id:
+                                                value.id ||
+                                                String(
+                                                    cursor.key
+                                                ),
+
+                                            panel:
+                                                String(
+                                                    panel
+                                                )
+                                                    .trim()
+                                                    .toUpperCase(),
+
+                                            name:
+                                                value.name ||
+                                                `${String(
+                                                    panel
+                                                )
+                                                    .trim()
+                                                    .toUpperCase()} evidence`,
+
+                                            type:
+                                                value.type ||
+                                                "image/jpeg",
+
+                                            source:
+                                                value.source ||
+                                                "camera",
+
+                                            createdAt:
+                                                value.createdAt ||
+                                                null,
+
+                                            dataUrl:
+                                                String(
+                                                    dataUrl
+                                                ).trim()
+
+                                        });
+                                    }
+
+                                } else if (
+                                    typeof value === "string" &&
+                                    value.trim()
+                                ) {
+
+                                    /*
+                                     * Legacy string support.
+                                     */
+
+                                    results.push({
+
+                                        id:
+                                            String(
+                                                cursor.key
+                                            ),
+
+                                        panel:
+                                            String(
+                                                cursor.key
+                                            )
+                                                .trim()
+                                                .toUpperCase(),
+
+                                        name:
+                                            `${String(
+                                                cursor.key
+                                            )
+                                                .trim()
+                                                .toUpperCase()} evidence`,
+
+                                        type:
+                                            "image/jpeg",
+
+                                        source:
+                                            "camera",
+
+                                        createdAt:
+                                            null,
+
+                                        dataUrl:
+                                            value.trim()
+                                    });
+                                }
+
+
+                                cursor.continue();
                             };
+
 
                         request.onerror =
                             () => {
 
                                 reject(
-                                    request.error
+                                    request.error ||
+                                    new Error(
+                                        "Unable to read scanner evidence."
+                                    )
                                 );
+                            };
 
+
+                        transaction.onerror =
+                            () => {
+
+                                reject(
+                                    transaction.error ||
+                                    new Error(
+                                        "Scanner evidence transaction failed."
+                                    )
+                                );
                             };
 
                     }
                 );
 
-            db.close();
 
-            return records;
+            /* =================================================
+               PREDICTABLE PANEL ORDER
+            ================================================= */
+
+            const order = {
+
+                FRONT: 1,
+
+                BACK: 2,
+
+                SIDE: 3,
+
+                TOP: 4,
+
+                BOTTOM: 5,
+
+                MRP_PANEL: 6,
+
+                BATCH: 7,
+
+                MRP: 8,
+
+                OTHER: 99
+
+            };
+
+
+            results.sort(
+                (a, b) => {
+
+                    const orderA =
+                        order[
+                            String(
+                                a.panel ||
+                                "OTHER"
+                            )
+                                .trim()
+                                .toUpperCase()
+                        ] || 99;
+
+
+                    const orderB =
+                        order[
+                            String(
+                                b.panel ||
+                                "OTHER"
+                            )
+                                .trim()
+                                .toUpperCase()
+                        ] || 99;
+
+
+                    if (
+                        orderA !== orderB
+                    ) {
+
+                        return (
+                            orderA -
+                            orderB
+                        );
+                    }
+
+
+                    /*
+                     * Same panel:
+                     * sort by creation time.
+                     */
+
+                    const timeA =
+                        a.createdAt
+                            ? new Date(
+                                a.createdAt
+                            ).getTime()
+                            : 0;
+
+
+                    const timeB =
+                        b.createdAt
+                            ? new Date(
+                                b.createdAt
+                            ).getTime()
+                            : 0;
+
+
+                    return (
+                        timeA -
+                        timeB
+                    );
+                }
+            );
+
+
+            console.log(
+                "ALL SCANNED EVIDENCE:",
+                results
+            );
+
+
+            console.log(
+                "TOTAL EVIDENCE IMAGES:",
+                results.length
+            );
+
+
+            return results;
 
         } catch (error) {
 
@@ -666,26 +1417,34 @@ document.addEventListener("DOMContentLoaded", async () => {
                 error
             );
 
+
             return [];
+
+        } finally {
+
+            if (db) {
+
+                try {
+
+                    db.close();
+
+                } catch (_) {}
+            }
         }
     }
 
+
     /* =====================================================
-       LOAD ALL N IMAGES
+       LOAD EVIDENCE
     ===================================================== */
 
     const evidenceRecords =
         await getAllEvidence();
 
-    console.log(
-        "ALL SCANNED EVIDENCE:",
-        evidenceRecords
-    );
 
-    console.log(
-        "TOTAL EVIDENCE IMAGES:",
-        evidenceRecords.length
-    );
+    /* =====================================================
+       EVIDENCE INFORMATION
+    ===================================================== */
 
     const evidenceInformation = {
 
@@ -696,28 +1455,47 @@ document.addEventListener("DOMContentLoaded", async () => {
             evidenceRecords.length,
 
         evidenceSource:
-            "IndexedDB",
+            "eParakhScannerDB",
 
         panels:
             evidenceRecords.map(
                 item => ({
-                    id: item.id,
+
+                    id:
+                        item.id,
+
                     panel:
-                        item.panel || "OTHER",
+                        item.panel ||
+                        "OTHER",
+
                     name:
-                        item.name || "",
+                        item.name ||
+                        "",
+
                     type:
-                        item.type || "",
+                        item.type ||
+                        "image/jpeg",
+
                     source:
-                        item.source || "upload",
+                        item.source ||
+                        "camera",
+
                     createdAt:
-                        item.createdAt || null
+                        item.createdAt ||
+                        null
                 })
             ),
 
         evidenceLoadedAt:
             new Date().toISOString()
     };
+
+
+    console.log(
+        "EVIDENCE INFORMATION:",
+        evidenceInformation
+    );
+
 
     /* =====================================================
        CHECKBOXES
@@ -728,10 +1506,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             ".rule-checkbox"
         );
 
+
     console.log(
         "CHECKBOX COUNT:",
         ruleCheckboxes.length
     );
+
 
     /* =====================================================
        RULE DETECTION
@@ -742,82 +1522,118 @@ document.addEventListener("DOMContentLoaded", async () => {
         switch (rule) {
 
             case "manufacturer":
+
                 return valueExists(
                     productData.manufacturer
                 );
 
+
             case "productName":
+
                 return valueExists(
                     productData.productName
                 );
 
+
             case "quantity":
+
                 return valueExists(
                     productData.netQuantity
                 );
 
+
             case "mrp":
+
                 return valueExists(
                     productData.mrp
                 );
 
+
             case "date":
+
                 return valueExists(
                     productData.packingDate
                 );
 
+
             case "consumerCare":
+
                 return valueExists(
                     productData.consumerCare
                 );
 
+
             case "address":
+
                 return valueExists(
                     productData.address
                 );
 
+
             case "additional":
+
                 return valueExists(
                     productData.additionalDeclarations
                 );
 
+
             default:
+
                 return false;
         }
     }
+
 
     function getDetectedValue(rule) {
 
         switch (rule) {
 
             case "manufacturer":
+
                 return productData.manufacturer;
 
+
             case "productName":
+
                 return productData.productName;
 
+
             case "quantity":
+
                 return productData.netQuantity;
 
+
             case "mrp":
+
                 return productData.mrp;
 
+
             case "date":
+
                 return productData.packingDate;
 
+
             case "consumerCare":
+
                 return productData.consumerCare;
 
+
             case "address":
+
                 return productData.address;
 
+
             case "additional":
+
                 return productData.additionalDeclarations;
 
+
             default:
+
                 return "";
         }
     }
+
 
     /* =====================================================
        RULE NAMES
@@ -852,11 +1668,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Additional Declarations"
         };
 
+
         return (
             names[rule] ||
             rule
         );
     }
+
 
     function getRuleDescription(rule) {
 
@@ -887,11 +1705,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "Additional product declarations."
         };
 
+
         return (
             descriptions[rule] ||
             "Compliance requirement."
         );
     }
+
 
     /* =====================================================
        RULE VISUAL STATE
@@ -907,14 +1727,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ".rule-item"
             );
 
+
         if (!ruleItem) {
             return;
         }
+
 
         const status =
             ruleItem.querySelector(
                 ".rule-status"
             );
+
 
         ruleItem.classList.remove(
             "verified",
@@ -922,24 +1745,36 @@ document.addEventListener("DOMContentLoaded", async () => {
             "pending"
         );
 
+
         if (!detected) {
 
             ruleItem.classList.add(
                 "missing"
             );
 
-            checkbox.checked = false;
-            checkbox.disabled = true;
+
+            checkbox.checked =
+                false;
+
+
+            checkbox.disabled =
+                true;
+
 
             if (status) {
+
                 status.textContent =
                     "Missing";
             }
 
+
             return;
         }
 
-        checkbox.disabled = false;
+
+        checkbox.disabled =
+            false;
+
 
         if (checkbox.checked) {
 
@@ -947,7 +1782,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "verified"
             );
 
+
             if (status) {
+
                 status.textContent =
                     "Verified";
             }
@@ -958,12 +1795,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "pending"
             );
 
+
             if (status) {
+
                 status.textContent =
                     "Detected";
             }
         }
     }
+
 
     /* =====================================================
        BUILD CHECKS
@@ -977,12 +1817,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             checkbox => {
 
                 const rule =
-                    checkbox.dataset.rule;
+                    checkbox.dataset.rule ||
+                    "";
+
 
                 const ruleItem =
                     checkbox.closest(
                         ".rule-item"
                     );
+
 
                 const name =
                     ruleItem
@@ -991,7 +1834,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                         )
                         ?.textContent
                         ?.trim() ||
-                    getRuleDisplayName(rule);
+                    getRuleDisplayName(
+                        rule
+                    );
+
 
                 const description =
                     ruleItem
@@ -1000,37 +1846,53 @@ document.addEventListener("DOMContentLoaded", async () => {
                         )
                         ?.textContent
                         ?.trim() ||
-                    getRuleDescription(rule);
+                    getRuleDescription(
+                        rule
+                    );
+
 
                 const detected =
-                    isRuleDetected(rule);
+                    isRuleDetected(
+                        rule
+                    );
+
 
                 let status;
 
+
                 if (!detected) {
 
-                    status = "fail";
+                    status =
+                        "fail";
 
                 } else if (
                     checkbox.checked
                 ) {
 
-                    status = "pass";
+                    status =
+                        "pass";
 
                 } else {
 
-                    status = "pending";
+                    status =
+                        "pending";
                 }
+
 
                 return {
 
                     rule,
+
                     name,
+
                     description,
+
                     detected,
 
                     extractedValue:
-                        getDetectedValue(rule),
+                        getDetectedValue(
+                            rule
+                        ),
 
                     officerVerified:
                         checkbox.checked,
@@ -1041,78 +1903,49 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
     }
 
-    /* =====================================================
-       INITIALIZE CHECKBOXES
-    ===================================================== */
-
-    ruleCheckboxes.forEach(
-        checkbox => {
-
-            const rule =
-                checkbox.dataset.rule;
-
-            const detected =
-                isRuleDetected(rule);
-
-            /*
-             * IMPORTANT:
-             * Missing fields stay unchecked.
-             * Detected fields require officer verification.
-             */
-
-            if (!detected) {
-
-                checkbox.checked = false;
-                checkbox.disabled = true;
-
-            } else {
-
-                checkbox.disabled = false;
-
-            }
-
-            updateRuleVisualState(
-                checkbox,
-                detected
-            );
-
-            checkbox.addEventListener(
-                "change",
-                () => {
-
-                    updateRuleVisualState(
-                        checkbox,
-                        isRuleDetected(rule)
-                    );
-
-                    calculateCompliance();
-                }
-            );
-        }
-    );
 
     /* =====================================================
-       SAVE COMPLIANCE RESULT
+       COMPLIANCE RESULT BUILDER
     ===================================================== */
 
-    function saveComplianceResult(
-        score,
-        passed,
-        failed,
-        pending,
-        total,
-        checks,
-        status
+    function buildComplianceResult(
+        calculated
     ) {
+
+        const {
+
+            score,
+
+            passed,
+
+            failed,
+
+            pending,
+
+            total,
+
+            checks,
+
+            status
+
+        } = calculated;
+
 
         const violations =
             checks
                 .filter(
                     check =>
-                        check.status === "fail"
+                        check.status ===
+                        "fail"
                 )
                 .map(
                     check => ({
+
+                        ruleCode:
+                            String(
+                                check.rule ||
+                                ""
+                            ).trim(),
 
                         title:
                             check.name,
@@ -1121,14 +1954,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                             check.description,
 
                         extractedValue:
-                            check.extractedValue || "",
+                            check.extractedValue ||
+                            "",
 
                         rule:
-                            check.rule
+                            check.rule,
+
+                        severity:
+                            "MEDIUM"
                     })
                 );
 
-        const result = {
+
+        return {
 
             inspectionId,
 
@@ -1175,59 +2013,182 @@ document.addEventListener("DOMContentLoaded", async () => {
             generatedAt:
                 new Date().toISOString()
         };
+    }
 
-        localStorage.setItem(
-            "complianceResult",
-            JSON.stringify(result)
-        );
+
+    /* =====================================================
+       SAVE FINAL COMPLIANCE RESULT
+    ===================================================== */
+
+    function saveComplianceResult(
+        calculated
+    ) {
+
+        if (!inspectionId) {
+
+            console.error(
+                "Cannot save compliance result because Inspection ID is missing."
+            );
+
+
+            return null;
+        }
+
+
+        const result =
+            buildComplianceResult(
+                calculated
+            );
+
+
+        const saved =
+            safeSetStorageJSON(
+                localStorage,
+                "complianceResult",
+                result
+            );
+
+
+        if (!saved) {
+
+            console.error(
+                "Final complianceResult could not be saved."
+            );
+
+
+            return null;
+        }
+
 
         console.log(
             "COMPLIANCE RESULT SAVED:",
             result
         );
 
+
         return result;
     }
 
+
     /* =====================================================
-       CALCULATE COMPLIANCE
+       UPDATE SCORE CIRCLE
+       IMPORTANT:
+       CSS --score MUST BE A NUMBER
+       Example:
+       --score: 75
+
+       NOT:
+       --score: 75%
     ===================================================== */
 
-    function calculateCompliance() {
+    function updateScoreCircle(
+        score
+    ) {
+
+        if (!scoreCircle) {
+            return;
+        }
+
+
+        scoreCircle.style.setProperty(
+            "--score",
+            score
+        );
+
+
+        scoreCircle.classList.remove(
+            "score-good",
+            "score-warning",
+            "score-danger"
+        );
+
+
+        if (score >= 90) {
+
+            scoreCircle.classList.add(
+                "score-good"
+            );
+
+        } else if (score >= 70) {
+
+            scoreCircle.classList.add(
+                "score-warning"
+            );
+
+        } else {
+
+            scoreCircle.classList.add(
+                "score-danger"
+            );
+        }
+    }
+
+
+    /* =====================================================
+       CALCULATE COMPLIANCE
+       SINGLE SOURCE OF TRUTH
+    ===================================================== */
+
+    function calculateCompliance(
+        saveFinalResult = false
+    ) {
 
         const checks =
             buildChecks();
 
+
         const total =
             checks.length;
+
 
         const passed =
             checks.filter(
                 check =>
-                    check.status === "pass"
+                    check.status ===
+                    "pass"
             ).length;
+
 
         const failed =
             checks.filter(
                 check =>
-                    check.status === "fail"
+                    check.status ===
+                    "fail"
             ).length;
+
 
         const pending =
             checks.filter(
                 check =>
-                    check.status === "pending"
+                    check.status ===
+                    "pending"
             ).length;
+
+
+        /*
+         * SCORE IS CALCULATED ONLY FROM
+         * ACTUAL COMPLIANCE CHECKS.
+         */
 
         const score =
             total > 0
                 ? Math.round(
-                    (passed / total) * 100
+                    (
+                        passed /
+                        total
+                    ) *
+                    100
                 )
                 : 0;
 
+
+        /* =================================================
+           STATUS
+        ================================================= */
+
         let status =
             "pending";
+
 
         if (
             pending === 0 &&
@@ -1247,32 +2208,41 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "non-compliant";
         }
 
+
         /* =================================================
-           UI
+           UPDATE SCORE CIRCLE
+        ================================================= */
+
+        updateScoreCircle(
+            score
+        );
+
+
+        /* =================================================
+           UPDATE SCORE TEXT
+        ================================================= */
+
+        if (complianceScore) {
+
+            complianceScore.textContent =
+                `${score}%`;
+        }
+
+
+        /* =================================================
+           VERIFICATION COUNT
         ================================================= */
 
         if (verificationCount) {
 
             verificationCount.textContent =
-                passed +
-                " / " +
-                total +
-                " PASSED";
+                `${passed} / ${total} PASSED`;
         }
 
-        if (complianceScore) {
 
-            complianceScore.textContent =
-                score + "%";
-        }
-
-        if (scoreCircle) {
-
-            scoreCircle.style.setProperty(
-                "--score",
-                score + "%"
-            );
-        }
+        /* =================================================
+           SCORE / STATUS MESSAGE
+        ================================================= */
 
         if (pending > 0) {
 
@@ -1281,20 +2251,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                 scoreBadge.textContent =
                     "IN REVIEW";
 
+
                 scoreBadge.className =
                     "score-badge pending";
             }
 
+
             if (scoreMessage) {
 
                 scoreMessage.textContent =
-                    passed +
-                    " passed, " +
-                    failed +
-                    " failed, " +
-                    pending +
-                    " awaiting officer verification.";
+                    `${passed} passed, ${failed} failed, ${pending} awaiting officer verification.`;
             }
+
 
             if (decisionText) {
 
@@ -1302,25 +2270,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "Complete officer verification for all detected declarations before generating the final result.";
             }
 
-        } else if (failed > 0) {
+
+        } else if (
+            failed > 0
+        ) {
 
             if (scoreBadge) {
 
                 scoreBadge.textContent =
                     "NON-COMPLIANT";
 
+
                 scoreBadge.className =
                     "score-badge non-compliant";
             }
 
+
             if (scoreMessage) {
 
                 scoreMessage.textContent =
-                    failed +
-                    " mandatory requirement(s) failed. Compliance score: " +
-                    score +
-                    "%.";
+                    `${failed} mandatory requirement(s) failed. Compliance score: ${score}%.`;
             }
+
 
             if (decisionText) {
 
@@ -1328,65 +2299,174 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "One or more mandatory declarations are missing or non-compliant.";
             }
 
-        } else {
+
+        } else if (
+            total > 0
+        ) {
 
             if (scoreBadge) {
 
                 scoreBadge.textContent =
                     "COMPLIANT";
 
+
                 scoreBadge.className =
                     "score-badge compliant";
             }
 
+
             if (scoreMessage) {
 
                 scoreMessage.textContent =
-                    "All " +
-                    total +
-                    " mandatory checklist items have been verified successfully.";
+                    `All ${total} mandatory checklist items have been verified successfully.`;
             }
+
 
             if (decisionText) {
 
                 decisionText.textContent =
                     "All mandatory declarations have been detected and verified by the officer.";
             }
+
+
+        } else {
+
+            if (scoreBadge) {
+
+                scoreBadge.textContent =
+                    "NO DATA";
+
+
+                scoreBadge.className =
+                    "score-badge pending";
+            }
+
+
+            if (scoreMessage) {
+
+                scoreMessage.textContent =
+                    "No compliance checklist items are available.";
+            }
+
+
+            if (decisionText) {
+
+                decisionText.textContent =
+                    "AI data is not available. Please return to the Inspection page and complete the scan.";
+            }
         }
 
-        saveComplianceResult(
-            score,
-            passed,
-            failed,
-            pending,
-            total,
-            checks,
-            status
-        );
 
-        console.log(
-            "COMPLIANCE:",
-            {
-                score,
-                total,
-                passed,
-                failed,
-                pending,
-                evidence:
-                    evidenceRecords.length
-            }
-        );
+        /* =================================================
+           CALCULATED RESULT
+        ================================================= */
 
-        return {
+        const calculated = {
+
             score,
+
             total,
+
             passed,
+
             failed,
+
             pending,
+
             checks,
+
             status
         };
+
+
+        /*
+         * Save ONLY when explicitly requested.
+         *
+         * Checkbox changes update UI only.
+         */
+
+        if (saveFinalResult) {
+
+            saveComplianceResult(
+                calculated
+            );
+        }
+
+
+        console.log(
+            "COMPLIANCE CALCULATION:",
+            calculated
+        );
+
+
+        return calculated;
     }
+
+
+    /* =====================================================
+       INITIALIZE CHECKBOXES
+    ===================================================== */
+
+    ruleCheckboxes.forEach(
+        checkbox => {
+
+            const rule =
+                checkbox.dataset.rule ||
+                "";
+
+
+            const detected =
+                isRuleDetected(
+                    rule
+                );
+
+
+            if (!detected) {
+
+                checkbox.checked =
+                    false;
+
+                checkbox.disabled =
+                    true;
+
+            } else {
+
+                checkbox.disabled =
+                    false;
+            }
+
+
+            updateRuleVisualState(
+                checkbox,
+                detected
+            );
+
+
+            checkbox.addEventListener(
+                "change",
+                () => {
+
+                    updateRuleVisualState(
+                        checkbox,
+                        isRuleDetected(
+                            rule
+                        )
+                    );
+
+
+                    /*
+                     * Recalculate UI only.
+                     * Do NOT save final result.
+                     */
+
+                    calculateCompliance(
+                        false
+                    );
+                }
+            );
+        }
+    );
+
 
     /* =====================================================
        OBSERVATION
@@ -1394,42 +2474,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (observation) {
 
+        /*
+         * Do not automatically create a final
+         * complianceResult while typing.
+         *
+         * Observation will be saved as part of
+         * the final result.
+         */
+
         observation.addEventListener(
             "input",
             () => {
 
-                const saved =
-                    localStorage.getItem(
-                        "complianceResult"
-                    );
-
-                if (!saved) {
-                    return;
-                }
-
-                try {
-
-                    const data =
-                        JSON.parse(saved);
-
-                    data.observation =
-                        observation.value.trim();
-
-                    localStorage.setItem(
-                        "complianceResult",
-                        JSON.stringify(data)
-                    );
-
-                } catch (error) {
-
-                    console.error(
-                        "Unable to save observation:",
-                        error
-                    );
-                }
+                console.log(
+                    "Observation updated."
+                );
             }
         );
     }
+
 
     /* =====================================================
        GENERATE FINAL RESULT
@@ -1445,22 +2508,95 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "GENERATE RESULT CLICKED"
                 );
 
-                const result =
-                    calculateCompliance();
 
-                if (result.pending > 0) {
+                /* -------------------------------------------
+                   FINAL CALCULATION
+                ------------------------------------------- */
+
+                const result =
+                    calculateCompliance(
+                        false
+                    );
+
+
+                /* -------------------------------------------
+                   ID SAFETY
+                ------------------------------------------- */
+
+                if (!inspectionId) {
+
+                    alert(
+                        "Inspection ID is missing. Please return to the Inspection page and start the inspection again."
+                    );
+
+
+                    return;
+                }
+
+
+                /* -------------------------------------------
+                   PENDING VERIFICATION
+                ------------------------------------------- */
+
+                if (
+                    result.pending > 0
+                ) {
 
                     alert(
                         "Please verify all detected declarations before generating the final result.\n\nPending verification: " +
                         result.pending
                     );
 
+
                     return;
                 }
 
+
+                /* -------------------------------------------
+                   SAVE FINAL COMPLIANCE RESULT
+                ------------------------------------------- */
+
+                const finalResult =
+                    saveComplianceResult(
+                        result
+                    );
+
+
+                if (!finalResult) {
+
+                    alert(
+                        "Unable to save the final compliance result. Please try again."
+                    );
+
+
+                    return;
+                }
+
+
                 /*
-                 * Update currentInspection
+                 * Add the latest observation to final result.
+                 *
+                 * saveComplianceResult() creates the object
+                 * before this section, so update it safely.
                  */
+
+                if (observation) {
+
+                    finalResult.observation =
+                        observation.value.trim();
+
+
+                    safeSetStorageJSON(
+                        localStorage,
+                        "complianceResult",
+                        finalResult
+                    );
+                }
+
+
+                /* -------------------------------------------
+                   UPDATE CURRENT INSPECTION
+                ------------------------------------------- */
 
                 try {
 
@@ -1469,39 +2605,133 @@ document.addEventListener("DOMContentLoaded", async () => {
                             "currentInspection"
                         );
 
+
                     let currentData =
                         savedCurrent
-                            ? JSON.parse(savedCurrent)
+                            ? JSON.parse(
+                                savedCurrent
+                            )
                             : {};
+
+
+                    if (
+                        !currentData ||
+                        typeof currentData !== "object" ||
+                        Array.isArray(currentData)
+                    ) {
+
+                        currentData = {};
+                    }
+
+
+                    /* ---------------------------------------
+                       PRESERVE INSPECTION ID
+                    --------------------------------------- */
 
                     currentData.inspectionId =
                         inspectionId;
 
+
+                    /* ---------------------------------------
+                       PRESERVE PRODUCT DATA
+                    --------------------------------------- */
+
                     currentData.product =
                         productData;
+
+
+                    currentData.productName =
+                        productData.productName;
+
+
+                    currentData.manufacturer =
+                        productData.manufacturer;
+
+
+                    currentData.netQuantity =
+                        productData.netQuantity;
+
+
+                    currentData.mrp =
+                        productData.mrp;
+
+
+                    currentData.packingDate =
+                        productData.packingDate;
+
+
+                    currentData.consumerCare =
+                        productData.consumerCare;
+
+
+                    currentData.address =
+                        productData.address;
+
+
+                    currentData.additionalDeclarations =
+                        productData.additionalDeclarations;
+
+
+                    /* ---------------------------------------
+                       PRESERVE AI RESULT
+                    --------------------------------------- */
 
                     currentData.aiAnalysis =
                         aiAnalysis;
 
+
                     currentData.rawOCR =
                         rawOCR;
 
+
+                    /* ---------------------------------------
+                       PRESERVE FINAL COMPLIANCE RESULT
+                    --------------------------------------- */
+
                     currentData.compliance =
-                        JSON.parse(
-                            localStorage.getItem(
-                                "complianceResult"
-                            )
-                        );
+                        finalResult;
+
+
+                    /* ---------------------------------------
+                       PRESERVE EVIDENCE METADATA
+                    --------------------------------------- */
 
                     currentData.evidence =
                         evidenceInformation;
 
-                    localStorage.setItem(
-                        "currentInspection",
-                        JSON.stringify(
+
+                    /* ---------------------------------------
+                       TIMESTAMP
+                    --------------------------------------- */
+
+                    currentData.savedAt =
+                        new Date().toISOString();
+
+
+                    const currentSaved =
+                        safeSetStorageJSON(
+                            localStorage,
+                            "currentInspection",
                             currentData
-                        )
-                    );
+                        );
+
+
+                    if (!currentSaved) {
+
+                        console.warn(
+                            "currentInspection could not be updated."
+                        );
+
+                    } else {
+
+                        /*
+                         * Keep in-memory copy aligned.
+                         */
+
+                        inspectionData =
+                            currentData;
+                    }
+
 
                 } catch (error) {
 
@@ -1511,6 +2741,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     );
                 }
 
+
+                /* -------------------------------------------
+                   DEBUG LOG
+                ------------------------------------------- */
+
                 console.log(
                     "FINAL COMPLIANCE RESULT:",
                     localStorage.getItem(
@@ -1518,9 +2753,24 @@ document.addEventListener("DOMContentLoaded", async () => {
                     )
                 );
 
-                /*
-                 * Navigate to result page
-                 */
+
+                console.log(
+                    "FINAL CURRENT INSPECTION:",
+                    localStorage.getItem(
+                        "currentInspection"
+                    )
+                );
+
+
+                console.log(
+                    "FINAL EVIDENCE COUNT:",
+                    evidenceRecords.length
+                );
+
+
+                /* -------------------------------------------
+                   NAVIGATE TO RESULT PAGE
+                ------------------------------------------- */
 
                 window.location.href =
                     "result.html";
@@ -1533,6 +2783,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             "generateBtn not found in compliance.html"
         );
     }
+
 
     /* =====================================================
        BACK
@@ -1550,6 +2801,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
     }
 
+
     /* =====================================================
        LOGOUT
     ===================================================== */
@@ -1565,9 +2817,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                         "Are you sure you want to logout?"
                     );
 
+
                 if (!confirmed) {
                     return;
                 }
+
+
+                /* -------------------------------------------
+                   LOCAL STORAGE
+                ------------------------------------------- */
 
                 localStorage.removeItem(
                     "officerName"
@@ -1586,6 +2844,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 );
 
                 localStorage.removeItem(
+                    "complianceAssessment"
+                );
+
+                localStorage.removeItem(
                     "inspectionDraft"
                 );
 
@@ -1596,6 +2858,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                 localStorage.removeItem(
                     "currentInspectionId"
                 );
+
+                localStorage.removeItem(
+                    "eParakhSavedInspectionMongoId"
+                );
+
+                localStorage.removeItem(
+                    "eParakhSavedInspectionId"
+                );
+
+
+                /* -------------------------------------------
+                   SESSION STORAGE
+                ------------------------------------------- */
 
                 sessionStorage.removeItem(
                     "eParakhCapturedImage"
@@ -1613,36 +2888,81 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "inspectionStarted"
                 );
 
-                /*
-                 * Clear IndexedDB
-                 */
+                sessionStorage.removeItem(
+                    "eParakhEvidenceReady"
+                );
+
+                sessionStorage.removeItem(
+                    "eParakhScanSource"
+                );
+
+                sessionStorage.removeItem(
+                    "currentInspectionId"
+                );
+
+                sessionStorage.removeItem(
+                    "eParakhStartNewInspection"
+                );
+
+
+                /* -------------------------------------------
+                   DELETE CURRENT SCANNER DATABASE
+                ------------------------------------------- */
 
                 try {
 
                     const request =
                         indexedDB.deleteDatabase(
-                            PANEL_DB_NAME
+                            EVIDENCE_DB_NAME
                         );
+
 
                     request.onsuccess =
                         () => {
 
                             console.log(
-                                "Scanner IndexedDB cleared."
+                                "Scanner IndexedDB cleared on logout."
                             );
+
 
                             window.location.href =
                                 "login.html";
                         };
+
 
                     request.onerror =
                         () => {
 
+                            console.warn(
+                                "Unable to clear scanner IndexedDB on logout."
+                            );
+
+
                             window.location.href =
                                 "login.html";
                         };
 
+
+                    request.onblocked =
+                        () => {
+
+                            console.warn(
+                                "Scanner IndexedDB deletion was blocked."
+                            );
+
+
+                            window.location.href =
+                                "login.html";
+                        };
+
+
                 } catch (error) {
+
+                    console.warn(
+                        "IndexedDB cleanup failed:",
+                        error
+                    );
+
 
                     window.location.href =
                         "login.html";
@@ -1651,45 +2971,70 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
     }
 
+
     /* =====================================================
-       INITIAL CALCULATION
+       INITIAL UI CALCULATION
+
+       IMPORTANT:
+       - Calculate UI only.
+       - Do NOT overwrite final complianceResult.
     ===================================================== */
 
     const initialResult =
-        calculateCompliance();
+        calculateCompliance(
+            false
+        );
+
+
+    /* =====================================================
+       FINAL DEBUG INFORMATION
+    ===================================================== */
 
     console.log(
         "======================================"
     );
 
+
     console.log(
         "COMPLIANCE READY"
     );
+
 
     console.log(
         "Inspection ID:",
         inspectionId
     );
 
+
     console.log(
         "Product:",
         productData
     );
+
 
     console.log(
         "AI Data:",
         aiData
     );
 
+
     console.log(
         "Evidence Images:",
         evidenceRecords.length
     );
 
+
+    console.log(
+        "Evidence:",
+        evidenceRecords
+    );
+
+
     console.log(
         "Initial Compliance:",
         initialResult
     );
+
 
     console.log(
         "======================================"

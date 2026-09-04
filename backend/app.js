@@ -10,6 +10,7 @@ const productRoutes = require('./routes/productRoutes');
 const inspectionRoutes = require('./routes/inspectionRoutes');
 const complianceRoutes = require('./routes/complianceRoutes');
 const scanRoutes = require('./routes/scanRoutes');
+const seniorRoutes = require('./routes/seniorRoutes');
 
 const {
     notFoundHandler,
@@ -34,15 +35,15 @@ app.use(
 );
 
 // Parse JSON request bodies
-app.use(express.json());
+app.use(express.json({ limit: "25mb" }));
 
 // Parse URL-encoded request bodies
 app.use(
     express.urlencoded({
-        extended: true
+        extended: true,
+        limit: "25mb"
     })
 );
-
 
 /*
 =========================================================
@@ -73,6 +74,9 @@ app.use(
 );
 
 // Authentication
+// POST /api/auth/login
+// POST /api/auth/register
+// GET  /api/auth/me
 app.use(
     '/api/auth',
     authRoutes
@@ -100,6 +104,19 @@ app.use(
 app.use(
     '/api/scans',
     scanRoutes
+);
+
+// Senior Officer
+// GET   /api/senior/dashboard
+// GET   /api/senior/inspectors
+// GET   /api/senior/inspectors/pending
+// PATCH /api/senior/inspectors/:id/approve
+// PATCH /api/senior/inspectors/:id/reject
+// GET   /api/senior/inspections
+// GET   /api/senior/inspections/:id
+app.use(
+    '/api/senior',
+    seniorRoutes
 );
 
 
