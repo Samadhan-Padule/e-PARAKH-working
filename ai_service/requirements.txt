@@ -1,0 +1,9 @@
+Flask
+flask-cors
+paddleocr
+paddlepaddle
+opencv-python-headless
+numpy
+Pillow
+requests
+reportlab
