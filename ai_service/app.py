@@ -1,13 +1,16 @@
+import os
+os.environ["PADDLE_PDX_ENABLE_MKLDNN_BYDEFAULT"] = "0"
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from paddleocr import PaddleOCR
-import os
 
 from extraction.declaration_extractor import extract_declarations
 from compliance.rule_engine import validate_extracted_data
 from vision.image_analyzer import analyze_image as analyze_vision
 from vision.placement_analyzer import analyze_placement
 from reports.report_service import generate_report
+
 app = Flask(__name__)
 
 CORS(app)
