@@ -1,8 +1,17 @@
 import os
+
+# ============================================================
+# ENVIRONMENT CONFIGURATION
+# ============================================================
+
+# Disable PaddlePaddle MKL-DNN / oneDNN by default.
+# This avoids the lib/PIR oneDNN runtime issue seen during
+# Railway inference.
 os.environ["PADDLE_PDX_ENABLE_MKLDNN_BYDEFAULT"] = "0"
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 from paddleocr import PaddleOCR
 
 from extraction.declaration_extractor import extract_declarations
@@ -11,10 +20,50 @@ from vision.image_analyzer import analyze_image as analyze_vision
 from vision.placement_analyzer import analyze_placement
 from reports.report_service import generate_report
 
+
+# ============================================================
+# FLASK APP
+# ============================================================
+
 app = Flask(__name__)
 
-CORS(app)
+# ------------------------------------------------------------
+# CORS
+# ------------------------------------------------------------
+# Allow:
+# 1. Local frontend during development
+# 2. Production Vercel frontend
+# ------------------------------------------------------------
 
+ALLOWED_ORIGINS = [
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "https://e-parakh-working.vercel.app",
+]
+
+CORS(
+    app,
+    resources={
+        r"/*": {
+            "origins": ALLOWED_ORIGINS
+        }
+    }
+)
+
+
+# ============================================================
+# UPLOAD CONFIGURATION
+# ============================================================
+
+UPLOAD_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "uploads"
+)
+
+os.makedirs(
+    UPLOAD_DIR,
+    exist_ok=True
+)
 
 
 # ============================================================
@@ -33,11 +82,18 @@ ocr = PaddleOCR(
     text_rec_score_thresh=0.5
 )
 
+
 # ============================================================
 # OCR HELPERS
 # ============================================================
 
 def _bbox_from_polygon(polygon):
+    """
+    Convert PaddleOCR polygon coordinates into:
+
+    [x1, y1, x2, y2]
+    """
+
     if polygon is None:
         return None
 
@@ -47,13 +103,30 @@ def _bbox_from_polygon(polygon):
     if not polygon:
         return None
 
-    points = polygon if isinstance(polygon[0], (list, tuple)) else None
+    points = (
+        polygon
+        if isinstance(polygon[0], (list, tuple))
+        else None
+    )
 
-    if not points or not all(len(point) >= 2 for point in points):
+    if not points:
         return None
 
-    xs = [float(point[0]) for point in points]
-    ys = [float(point[1]) for point in points]
+    if not all(
+        len(point) >= 2
+        for point in points
+    ):
+        return None
+
+    xs = [
+        float(point[0])
+        for point in points
+    ]
+
+    ys = [
+        float(point[1])
+        for point in points
+    ]
 
     return [
         round(min(xs), 2),
@@ -64,7 +137,13 @@ def _bbox_from_polygon(polygon):
 
 
 def run_ocr_detections(image_path):
-    result = ocr.predict(image_path)
+    """
+    Run PaddleOCR and return structured detections.
+    """
+
+    result = ocr.predict(
+        image_path
+    )
 
     detections = []
 
@@ -72,52 +151,93 @@ def run_ocr_detections(image_path):
 
         data = res.json
 
-        if isinstance(data, dict):
+        if not isinstance(data, dict):
+            continue
 
-            ocr_data = data.get("res", data)
+        ocr_data = data.get(
+            "res",
+            data
+        )
 
-            texts = ocr_data.get("rec_texts", [])
-            scores = ocr_data.get("rec_scores", [])
+        if not isinstance(
+            ocr_data,
+            dict
+        ):
+            continue
 
-            polygons = ocr_data.get(
-                "rec_polys",
-                ocr_data.get("dt_polys", [])
+        texts = ocr_data.get(
+            "rec_texts",
+            []
+        )
+
+        scores = ocr_data.get(
+            "rec_scores",
+            []
+        )
+
+        polygons = ocr_data.get(
+            "rec_polys",
+            ocr_data.get(
+                "dt_polys",
+                []
+            )
+        )
+
+        for index, text in enumerate(texts):
+
+            if not text:
+                continue
+
+            text = str(
+                text
+            ).strip()
+
+            if not text:
+                continue
+
+            score = (
+                scores[index]
+                if index < len(scores)
+                else None
             )
 
-            for index, text in enumerate(texts):
+            polygon = (
+                polygons[index]
+                if index < len(polygons)
+                else None
+            )
 
-                if not text or not str(text).strip():
-                    continue
+            detections.append({
 
-                score = (
-                    scores[index]
-                    if index < len(scores)
+                "text": text,
+
+                "confidence": (
+                    round(
+                        float(score),
+                        4
+                    )
+                    if score is not None
                     else None
-                )
+                ),
 
-                polygon = (
-                    polygons[index]
-                    if index < len(polygons)
-                    else None
+                "bbox": _bbox_from_polygon(
+                    polygon
                 )
-
-                detections.append({
-                    "text": str(text).strip(),
-                    "confidence": (
-                        round(float(score), 4)
-                        if score is not None
-                        else None
-                    ),
-                    "bbox": _bbox_from_polygon(polygon)
-                })
+            })
 
     return detections
 
 
 def run_ocr(image_path):
+    """
+    Return only OCR text.
+    """
+
     return [
         item["text"]
-        for item in run_ocr_detections(image_path)
+        for item in run_ocr_detections(
+            image_path
+        )
     ]
 
 
@@ -126,29 +246,56 @@ def run_ocr(image_path):
 # ============================================================
 
 def analyze_image(image_path):
+    """
+    Complete e-PARAKH AI pipeline:
 
+    1. OCR
+    2. Raw OCR text
+    3. Declaration extraction
+    4. Vision analysis
+    5. Placement analysis
+    6. Compliance validation
+    """
+
+    # --------------------------------------------------------
     # 1. OCR
-    detections = run_ocr_detections(image_path)
+    # --------------------------------------------------------
 
-    # 2. Raw OCR text
+    detections = run_ocr_detections(
+        image_path
+    )
+
+    # --------------------------------------------------------
+    # 2. RAW OCR TEXT
+    # --------------------------------------------------------
+
     raw_ocr_text = "\n".join(
         item["text"]
         for item in detections
     )
 
-    # 3. Extract declarations
+    # --------------------------------------------------------
+    # 3. EXTRACT DECLARATIONS
+    # --------------------------------------------------------
+
     extracted_data = extract_declarations(
         raw_ocr_text
     )
 
-    # 4. Vision analysis
+    # --------------------------------------------------------
+    # 4. VISION ANALYSIS
+    # --------------------------------------------------------
+
     vision_analysis = analyze_vision(
         image_path,
         detections,
         extracted_data
     )
 
-    # 5. Placement analysis
+    # --------------------------------------------------------
+    # 5. PLACEMENT ANALYSIS
+    # --------------------------------------------------------
+
     placement, evidence = analyze_placement(
         detections,
         extracted_data,
@@ -157,7 +304,10 @@ def analyze_image(image_path):
 
     vision_analysis["placement"] = placement
 
-    # 6. Compliance validation
+    # --------------------------------------------------------
+    # 6. COMPLIANCE VALIDATION
+    # --------------------------------------------------------
+
     compliance_result = validate_extracted_data(
         extracted_data
     )
@@ -175,53 +325,91 @@ def analyze_image(image_path):
 # HEALTH CHECK
 # ============================================================
 
-@app.route("/health", methods=["GET"])
+@app.route(
+    "/health",
+    methods=["GET"]
+)
 def health():
 
     return jsonify({
+
         "status": "success",
-        "service": "e-PARAKH AI OCR Service",
+
+        "service": (
+            "e-PARAKH AI OCR Service"
+        ),
+
         "ocr": "PaddleOCR",
+
         "reporting": "enabled"
-    })
+
+    }), 200
 
 
 # ============================================================
 # OCR API
 # ============================================================
 
-@app.route("/ocr", methods=["POST"])
+@app.route(
+    "/ocr",
+    methods=["POST"]
+)
 def ocr_image():
 
     if "image" not in request.files:
 
         return jsonify({
+
             "status": "error",
-            "message": "No image uploaded"
+
+            "message": (
+                "No image uploaded"
+            )
+
         }), 400
 
     image = request.files["image"]
 
-    if image.filename == "":
+    if not image.filename:
 
         return jsonify({
+
             "status": "error",
-            "message": "No image selected"
+
+            "message": (
+                "No image selected"
+            )
+
         }), 400
 
-    upload_dir = os.path.join("uploads")
+    # --------------------------------------------------------
+    # Secure filename
+    # --------------------------------------------------------
 
-    os.makedirs(
-        upload_dir,
-        exist_ok=True
-    )
-
-    image_path = os.path.join(
-        upload_dir,
+    filename = secure_filename(
         image.filename
     )
 
-    image.save(image_path)
+    if not filename:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": (
+                "Invalid image filename"
+            )
+
+        }), 400
+
+    image_path = os.path.join(
+        UPLOAD_DIR,
+        filename
+    )
+
+    image.save(
+        image_path
+    )
 
     try:
 
@@ -230,64 +418,124 @@ def ocr_image():
         )
 
         return jsonify({
+
             "status": "success",
-            "filename": image.filename,
+
+            "filename": filename,
+
             "text": extracted_text
-        })
+
+        }), 200
 
     except Exception as e:
 
+        app.logger.exception(
+            "OCR API failed"
+        )
+
         return jsonify({
+
             "status": "error",
+
             "message": str(e)
+
         }), 500
 
     finally:
 
-        if os.path.exists(image_path):
-            os.remove(image_path)
+        if os.path.exists(
+            image_path
+        ):
+
+            os.remove(
+                image_path
+            )
 
 
 # ============================================================
 # COMPLETE ANALYSIS API
+# + AUTOMATIC REPORT GENERATION
 # ============================================================
 
-# ============================================================
-# COMPLETE ANALYSIS API + AUTOMATIC REPORT GENERATION
-# ============================================================
-
-@app.route("/analyze", methods=["POST"])
+@app.route(
+    "/analyze",
+    methods=["POST"]
+)
 def analyze_image_route():
 
+    # --------------------------------------------------------
+    # Validate uploaded image
+    # --------------------------------------------------------
+
     if "image" not in request.files:
+
         return jsonify({
+
             "status": "error",
-            "message": "No image uploaded"
+
+            "message": (
+                "No image uploaded"
+            )
+
         }), 400
 
     image = request.files["image"]
 
-    if image.filename == "":
+    if not image.filename:
+
         return jsonify({
+
             "status": "error",
-            "message": "No image selected"
+
+            "message": (
+                "No image selected"
+            )
+
         }), 400
 
-    upload_dir = os.path.join("uploads")
-    os.makedirs(upload_dir, exist_ok=True)
+    # --------------------------------------------------------
+    # Secure filename
+    # --------------------------------------------------------
 
-    image_path = os.path.join(
-        upload_dir,
+    filename = secure_filename(
         image.filename
     )
 
-    image.save(image_path)
+    if not filename:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": (
+                "Invalid image filename"
+            )
+
+        }), 400
+
+    image_path = os.path.join(
+        UPLOAD_DIR,
+        filename
+    )
+
+    # --------------------------------------------------------
+    # Save uploaded image
+    # --------------------------------------------------------
+
+    image.save(
+        image_path
+    )
 
     try:
 
-        # ----------------------------------------------------
+        app.logger.info(
+            "Starting analysis for %s",
+            filename
+        )
+
+        # ====================================================
         # 1. COMPLETE AI ANALYSIS
-        # ----------------------------------------------------
+        # ====================================================
 
         (
             raw_ocr_text,
@@ -295,26 +543,44 @@ def analyze_image_route():
             vision_analysis,
             evidence,
             compliance_result
-        ) = analyze_image(image_path)
+        ) = analyze_image(
+            image_path
+        )
 
+        app.logger.info(
+            "OCR and compliance analysis completed for %s",
+            filename
+        )
 
-        # ----------------------------------------------------
+        # ====================================================
         # 2. GENERATE HTML + PDF REPORT
-        # ----------------------------------------------------
+        # ====================================================
 
         report = generate_report(
 
-            photograph_reference=image.filename,
+            photograph_reference=(
+                filename
+            ),
 
-            ocr_text=raw_ocr_text,
+            ocr_text=(
+                raw_ocr_text
+            ),
 
-            declarations=extracted_data,
+            declarations=(
+                extracted_data
+            ),
 
-            compliance=compliance_result,
+            compliance=(
+                compliance_result
+            ),
 
-            vision_summary=vision_analysis,
+            vision_summary=(
+                vision_analysis
+            ),
 
-            evidence=evidence,
+            evidence=(
+                evidence
+            ),
 
             remarks=(
                 "Generated automatically by "
@@ -324,72 +590,131 @@ def analyze_image_route():
             )
         )
 
+        app.logger.info(
+            "Report generated successfully for %s",
+            filename
+        )
 
-        # ----------------------------------------------------
+        # ====================================================
         # 3. RETURN COMPLETE RESPONSE
-        # ----------------------------------------------------
+        # ====================================================
 
         return jsonify({
 
             "status": "success",
 
-            "filename": image.filename,
+            "filename": filename,
 
+            # ------------------------------------------------
             # OCR
-            "raw_ocr_text": raw_ocr_text,
+            # ------------------------------------------------
 
+            "raw_ocr_text": (
+                raw_ocr_text
+            ),
+
+            # ------------------------------------------------
             # Extracted declarations
-            "extracted_data": extracted_data,
+            # ------------------------------------------------
 
-            "product": extracted_data,
+            "extracted_data": (
+                extracted_data
+            ),
 
+            "product": (
+                extracted_data
+            ),
+
+            # ------------------------------------------------
             # Vision
-            "vision_analysis": vision_analysis,
+            # ------------------------------------------------
 
+            "vision_analysis": (
+                vision_analysis
+            ),
+
+            # ------------------------------------------------
             # Evidence
-            "evidence": evidence,
+            # ------------------------------------------------
 
+            "evidence": (
+                evidence
+            ),
+
+            # ------------------------------------------------
             # Compliance
-            "compliance_result": compliance_result,
+            # ------------------------------------------------
 
+            "compliance_result": (
+                compliance_result
+            ),
+
+            # ------------------------------------------------
             # Report
+            # ------------------------------------------------
+
             "report": report
 
         }), 200
 
-
     except Exception as e:
+
+        # IMPORTANT:
+        # This makes the actual runtime exception visible
+        # in Railway logs.
+
+        app.logger.exception(
+            "Complete analysis API failed"
+        )
 
         return jsonify({
 
             "status": "error",
 
-            "message": "Unable to analyze the uploaded image.",
+            "message": (
+                "Unable to analyze the uploaded image."
+            ),
 
             "error": str(e)
 
         }), 500
 
-
     finally:
 
-        if os.path.exists(image_path):
-            os.remove(image_path)
+        # ----------------------------------------------------
+        # Always remove temporary uploaded image
+        # ----------------------------------------------------
+
+        if os.path.exists(
+            image_path
+        ):
+
+            os.remove(
+                image_path
+            )
+
+
 # ============================================================
 # REPORT GENERATION API
 # ============================================================
 
-@app.route("/report", methods=["POST"])
+@app.route(
+    "/report",
+    methods=["POST"]
+)
 def generate_report_route():
 
     try:
 
-        data = request.get_json(
-            silent=True
-        ) or {}
+        data = (
+            request.get_json(
+                silent=True
+            )
+            or {}
+        )
 
         # ----------------------------------------------------
-        # Extract data received from frontend / analyze API
+        # Photograph reference
         # ----------------------------------------------------
 
         photograph_reference = data.get(
@@ -400,6 +725,10 @@ def generate_report_route():
             )
         )
 
+        # ----------------------------------------------------
+        # OCR text
+        # ----------------------------------------------------
+
         ocr_text = data.get(
             "raw_ocr_text",
             data.get(
@@ -407,6 +736,10 @@ def generate_report_route():
                 ""
             )
         )
+
+        # ----------------------------------------------------
+        # Declarations
+        # ----------------------------------------------------
 
         declarations = data.get(
             "declarations",
@@ -416,6 +749,10 @@ def generate_report_route():
             )
         )
 
+        # ----------------------------------------------------
+        # Compliance
+        # ----------------------------------------------------
+
         compliance = data.get(
             "compliance",
             data.get(
@@ -423,6 +760,10 @@ def generate_report_route():
                 {}
             )
         )
+
+        # ----------------------------------------------------
+        # Vision
+        # ----------------------------------------------------
 
         vision_summary = data.get(
             "vision_summary",
@@ -432,19 +773,27 @@ def generate_report_route():
             )
         )
 
+        # ----------------------------------------------------
+        # Evidence
+        # ----------------------------------------------------
+
         evidence = data.get(
             "evidence",
             {}
         )
+
+        # ----------------------------------------------------
+        # Remarks
+        # ----------------------------------------------------
 
         remarks = data.get(
             "remarks",
             ""
         )
 
-        # ----------------------------------------------------
-        # Generate HTML + PDF report
-        # ----------------------------------------------------
+        # ====================================================
+        # Generate report
+        # ====================================================
 
         report = generate_report(
 
@@ -452,22 +801,34 @@ def generate_report_route():
                 photograph_reference
             ),
 
-            ocr_text=ocr_text,
+            ocr_text=(
+                ocr_text
+            ),
 
-            declarations=declarations,
+            declarations=(
+                declarations
+            ),
 
-            compliance=compliance,
+            compliance=(
+                compliance
+            ),
 
-            vision_summary=vision_summary,
+            vision_summary=(
+                vision_summary
+            ),
 
-            evidence=evidence,
+            evidence=(
+                evidence
+            ),
 
-            remarks=remarks
+            remarks=(
+                remarks
+            )
         )
 
-        # ----------------------------------------------------
-        # Success response
-        # ----------------------------------------------------
+        # ====================================================
+        # SUCCESS RESPONSE
+        # ====================================================
 
         return jsonify({
 
@@ -483,6 +844,10 @@ def generate_report_route():
         }), 201
 
     except Exception as e:
+
+        app.logger.exception(
+            "Report generation API failed"
+        )
 
         return jsonify({
 
@@ -503,12 +868,18 @@ def generate_report_route():
 
 if __name__ == "__main__":
 
+    # Railway provides PORT automatically.
+    # Local development falls back to 8000.
+
+    port = int(
+        os.environ.get(
+            "PORT",
+            8000
+        )
+    )
+
     app.run(
-
         host="0.0.0.0",
-
-        port=8000,
-
-        debug=True
-
+        port=port,
+        debug=False
     )
