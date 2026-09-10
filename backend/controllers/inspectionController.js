@@ -35,7 +35,6 @@ function getUserId(req, res) {
 	return userId;
 }
 
-
 /*
 =========================================================
 CREATE INSPECTION
@@ -43,8 +42,11 @@ POST /api/inspections
 
 IMPORTANT:
 - Inspector creates the inspection.
-- Senior Officer is automatically taken from
-  the logged-in Inspector's seniorOfficerId.
+- Senior Officer assignment is OPTIONAL.
+- If an active Senior Officer is assigned to the
+  Inspector, that reference is stored.
+- If no Senior Officer is assigned, inspection creation
+  still succeeds with seniorOfficer = null.
 - Compliance values are stored only.
 - This controller does NOT calculate compliance.
 =========================================================
@@ -55,7 +57,6 @@ async function createInspection(req, res, next) {
 		const userId = getUserId(req, res);
 
 		if (!userId) return;
-
 
 		/*
 		-----------------------------------------------------
@@ -72,7 +73,6 @@ async function createInspection(req, res, next) {
 			});
 		}
 
-
 		/*
 		-----------------------------------------------------
 		ONLY INSPECTORS CAN CREATE INSPECTIONS
@@ -86,37 +86,31 @@ async function createInspection(req, res, next) {
 			});
 		}
 
-
 		/*
 		-----------------------------------------------------
-		SENIOR OFFICER ASSIGNMENT
+		SENIOR OFFICER ASSIGNMENT - OPTIONAL
+		-----------------------------------------------------
+
+		If the Inspector has an assigned Senior Officer,
+		verify that the Senior Officer exists and is active.
+
+		If there is no assignment, continue normally.
 		-----------------------------------------------------
 		*/
 
-		if (!inspector.seniorOfficerId) {
-			return res.status(400).json({
-				success: false,
-				message:
-					'No Senior Officer is assigned to this Inspector account. Please contact the administrator.'
-			});
+		let seniorOfficerId = null;
+
+		if (inspector.seniorOfficerId) {
+			const seniorOfficer = await User.findOne({
+				_id: inspector.seniorOfficerId,
+				role: 'SENIOR_OFFICER',
+				status: 'ACTIVE'
+			}).lean();
+
+			if (seniorOfficer) {
+				seniorOfficerId = seniorOfficer._id;
+			}
 		}
-
-
-		const seniorOfficer = await User.findOne({
-			_id: inspector.seniorOfficerId,
-			role: 'SENIOR_OFFICER',
-			status: 'ACTIVE'
-		}).lean();
-
-
-		if (!seniorOfficer) {
-			return res.status(400).json({
-				success: false,
-				message:
-					'Assigned Senior Officer is not available or active.'
-			});
-		}
-
 
 		/*
 		-----------------------------------------------------
@@ -129,14 +123,12 @@ async function createInspection(req, res, next) {
 				.trim()
 				.toUpperCase();
 
-
 		if (!inspectionId) {
 			return res.status(400).json({
 				success: false,
 				message: 'Inspection ID is required.'
 			});
 		}
-
 
 		/*
 		-----------------------------------------------------
@@ -146,7 +138,6 @@ async function createInspection(req, res, next) {
 
 		const { product } = req.body;
 
-
 		if (!product) {
 			return res.status(400).json({
 				success: false,
@@ -154,14 +145,12 @@ async function createInspection(req, res, next) {
 			});
 		}
 
-
 		if (!isValidObjectId(product)) {
 			return res.status(400).json({
 				success: false,
 				message: 'Invalid product ID.'
 			});
 		}
-
 
 		/*
 		-----------------------------------------------------
@@ -175,14 +164,12 @@ async function createInspection(req, res, next) {
 				createdBy: userId
 			}).lean();
 
-
 		if (!productRecord) {
 			return res.status(404).json({
 				success: false,
 				message: 'Product not found.'
 			});
 		}
-
 
 		/*
 		-----------------------------------------------------
@@ -195,14 +182,12 @@ async function createInspection(req, res, next) {
 				inspectionId
 			}).lean();
 
-
 		if (existingInspection) {
 			return res.status(409).json({
 				success: false,
 				message: 'Inspection ID already exists.'
 			});
 		}
-
 
 		/*
 		-----------------------------------------------------
@@ -211,34 +196,21 @@ async function createInspection(req, res, next) {
 		*/
 
 		const inspectionData = {
-
 			inspectionId,
-
 			officer: userId,
-
-			seniorOfficer:
-				inspector.seniorOfficerId
-
+			seniorOfficer: seniorOfficerId
 		};
 
-
 		inspectionFields.forEach((field) => {
-
-			if (
-				field === 'inspectionId'
-			) {
+			if (field === 'inspectionId') {
 				return;
 			}
 
-			if (
-				req.body[field] !== undefined
-			) {
+			if (req.body[field] !== undefined) {
 				inspectionData[field] =
 					req.body[field];
 			}
-
 		});
-
 
 		/*
 		-----------------------------------------------------
@@ -251,19 +223,16 @@ async function createInspection(req, res, next) {
 				inspectionData
 			);
 
-
 		return res.status(201).json({
 			success: true,
 			message: 'Inspection report saved successfully.',
 			inspection
 		});
 
-
 	} catch (error) {
 		return next(error);
 	}
 }
-
 
 /*
 =========================================================
@@ -280,7 +249,6 @@ async function getInspections(req, res, next) {
 
 		if (!userId) return;
 
-
 		const inspections =
 			await Inspection.find({
 				officer: userId
@@ -294,27 +262,21 @@ async function getInspections(req, res, next) {
 				})
 				.lean();
 
-
 		return res.json({
 			success: true,
 			count: inspections.length,
 			inspections
 		});
 
-
 	} catch (error) {
 		return next(error);
 	}
 }
 
-
 /*
 =========================================================
 GET INSPECTION BY HUMAN-READABLE INSPECTION ID
 GET /api/inspections/by-id/:inspectionId
-
-Example:
-GET /api/inspections/by-id/EP-2026-483721
 =========================================================
 */
 
@@ -328,7 +290,6 @@ async function getInspectionByInspectionId(
 
 		if (!userId) return;
 
-
 		const inspectionId =
 			String(
 				req.params.inspectionId || ''
@@ -336,14 +297,12 @@ async function getInspectionByInspectionId(
 				.trim()
 				.toUpperCase();
 
-
 		if (!inspectionId) {
 			return res.status(400).json({
 				success: false,
 				message: 'Inspection ID is required.'
 			});
 		}
-
 
 		const inspection =
 			await Inspection.findOne({
@@ -359,7 +318,6 @@ async function getInspectionByInspectionId(
 				)
 				.lean();
 
-
 		if (!inspection) {
 			return res.status(404).json({
 				success: false,
@@ -368,18 +326,15 @@ async function getInspectionByInspectionId(
 			});
 		}
 
-
 		return res.json({
 			success: true,
 			inspection
 		});
 
-
 	} catch (error) {
 		return next(error);
 	}
 }
-
 
 /*
 =========================================================
@@ -396,14 +351,12 @@ async function getInspectionById(req, res, next) {
 
 		if (!userId) return;
 
-
 		if (!isValidObjectId(req.params.id)) {
 			return res.status(400).json({
 				success: false,
 				message: 'Invalid inspection database ID.'
 			});
 		}
-
 
 		const inspection =
 			await Inspection.findOne({
@@ -413,7 +366,6 @@ async function getInspectionById(req, res, next) {
 				.populate('product')
 				.lean();
 
-
 		if (!inspection) {
 			return res.status(404).json({
 				success: false,
@@ -421,18 +373,15 @@ async function getInspectionById(req, res, next) {
 			});
 		}
 
-
 		return res.json({
 			success: true,
 			inspection
 		});
 
-
 	} catch (error) {
 		return next(error);
 	}
 }
-
 
 /*
 =========================================================
@@ -440,10 +389,9 @@ UPDATE INSPECTION
 =========================================================
 
 IMPORTANT:
-Inspector can update their own record.
-
-inspectionId and seniorOfficer are NOT editable.
-They are controlled by the system.
+- Inspector can update their own record.
+- inspectionId and seniorOfficer are NOT editable.
+- Senior Officer assignment is system-controlled.
 =========================================================
 */
 
@@ -453,7 +401,6 @@ async function updateInspection(req, res, next) {
 
 		if (!userId) return;
 
-
 		if (!isValidObjectId(req.params.id)) {
 			return res.status(400).json({
 				success: false,
@@ -461,30 +408,21 @@ async function updateInspection(req, res, next) {
 			});
 		}
 
-
 		const updates = {};
 
-
 		inspectionFields.forEach((field) => {
-
 			/*
 			 * System-controlled fields.
 			 */
-			if (
-				field === 'inspectionId'
-			) {
+			if (field === 'inspectionId') {
 				return;
 			}
 
-			if (
-				req.body[field] !== undefined
-			) {
+			if (req.body[field] !== undefined) {
 				updates[field] =
 					req.body[field];
 			}
-
 		});
-
 
 		/*
 		-----------------------------------------------------
@@ -492,10 +430,7 @@ async function updateInspection(req, res, next) {
 		-----------------------------------------------------
 		*/
 
-		if (
-			req.body.product !== undefined
-		) {
-
+		if (req.body.product !== undefined) {
 			if (
 				!isValidObjectId(
 					req.body.product
@@ -507,13 +442,11 @@ async function updateInspection(req, res, next) {
 				});
 			}
 
-
 			const productRecord =
 				await Product.findOne({
 					_id: req.body.product,
 					createdBy: userId
 				}).lean();
-
 
 			if (!productRecord) {
 				return res.status(404).json({
@@ -522,11 +455,9 @@ async function updateInspection(req, res, next) {
 				});
 			}
 
-
 			updates.product =
 				req.body.product;
 		}
-
 
 		/*
 		-----------------------------------------------------
@@ -535,7 +466,6 @@ async function updateInspection(req, res, next) {
 		*/
 
 		delete updates.seniorOfficer;
-
 
 		/*
 		-----------------------------------------------------
@@ -560,7 +490,6 @@ async function updateInspection(req, res, next) {
 				.populate('product')
 				.lean();
 
-
 		if (!inspection) {
 			return res.status(404).json({
 				success: false,
@@ -568,19 +497,16 @@ async function updateInspection(req, res, next) {
 			});
 		}
 
-
 		return res.json({
 			success: true,
 			message: 'Inspection updated successfully.',
 			inspection
 		});
 
-
 	} catch (error) {
 		return next(error);
 	}
 }
-
 
 /*
 =========================================================
@@ -594,7 +520,6 @@ async function deleteInspection(req, res, next) {
 
 		if (!userId) return;
 
-
 		if (!isValidObjectId(req.params.id)) {
 			return res.status(400).json({
 				success: false,
@@ -602,13 +527,11 @@ async function deleteInspection(req, res, next) {
 			});
 		}
 
-
 		const inspection =
 			await Inspection.findOneAndDelete({
 				_id: req.params.id,
 				officer: userId
 			});
-
 
 		if (!inspection) {
 			return res.status(404).json({
@@ -617,18 +540,15 @@ async function deleteInspection(req, res, next) {
 			});
 		}
 
-
 		return res.json({
 			success: true,
 			message: 'Inspection deleted successfully.'
 		});
 
-
 	} catch (error) {
 		return next(error);
 	}
 }
-
 
 module.exports = {
 	createInspection,

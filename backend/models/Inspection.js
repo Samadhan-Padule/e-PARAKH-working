@@ -15,7 +15,6 @@ const inspectionSchema = new mongoose.Schema(
             uppercase: true
         },
 
-
         // =====================================================
         // INSPECTOR WHO PERFORMED THE INSPECTION
         // =====================================================
@@ -25,24 +24,6 @@ const inspectionSchema = new mongoose.Schema(
             required: true,
             index: true
         },
-
-
-        // =====================================================
-        // ASSIGNED SENIOR OFFICER
-        //
-        // This creates the hierarchy:
-        // Inspector → Senior Officer
-        //
-        // Senior dashboard will use this field to fetch
-        // completed reports belonging to that senior's team.
-        // =====================================================
-        seniorOfficer: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-            index: true
-        },
-
 
         // =====================================================
         // PRODUCT BEING INSPECTED
@@ -54,6 +35,23 @@ const inspectionSchema = new mongoose.Schema(
             index: true
         },
 
+        // =====================================================
+        // ASSIGNED SENIOR OFFICER
+        //
+        // Optional:
+        // An inspection can be created even when the inspector
+        // has no Senior Officer assigned.
+        //
+        // If a Senior Officer is assigned, the reference is
+        // stored so the Senior Dashboard can use it.
+        // =====================================================
+        seniorOfficer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: false,
+            default: null,
+            index: true
+        },
 
         // =====================================================
         // INSPECTION STATUS
@@ -74,7 +72,6 @@ const inspectionSchema = new mongoose.Schema(
             default: "PENDING"
         },
 
-
         // =====================================================
         // COMPLIANCE RESULT
         //
@@ -93,7 +90,6 @@ const inspectionSchema = new mongoose.Schema(
             default: "PENDING"
         },
 
-
         // =====================================================
         // COMPLIANCE SCORE
         // =====================================================
@@ -103,7 +99,6 @@ const inspectionSchema = new mongoose.Schema(
             max: 100,
             default: null
         },
-
 
         // =====================================================
         // PRODUCT EVIDENCE IMAGES
@@ -115,7 +110,6 @@ const inspectionSchema = new mongoose.Schema(
             default: []
         },
 
-
         // =====================================================
         // INSPECTOR OBSERVATIONS
         // =====================================================
@@ -124,43 +118,38 @@ const inspectionSchema = new mongoose.Schema(
             default: ""
         },
 
-
         // =====================================================
         // DETECTED VIOLATIONS
         // =====================================================
-        violations: {
-            type: [
-                {
-                    ruleCode: {
-                        type: String,
-                        trim: true
-                    },
+        violations: [
+            {
+                ruleCode: {
+                    type: String,
+                    trim: true
+                },
 
-                    title: {
-                        type: String,
-                        trim: true
-                    },
+                title: {
+                    type: String,
+                    trim: true
+                },
 
-                    description: {
-                        type: String,
-                        trim: true
-                    },
+                description: {
+                    type: String,
+                    trim: true
+                },
 
-                    severity: {
-                        type: String,
-                        enum: [
-                            "LOW",
-                            "MEDIUM",
-                            "HIGH",
-                            "CRITICAL"
-                        ],
-                        default: "MEDIUM"
-                    }
+                severity: {
+                    type: String,
+                    enum: [
+                        "LOW",
+                        "MEDIUM",
+                        "HIGH",
+                        "CRITICAL"
+                    ],
+                    default: "MEDIUM"
                 }
-            ],
-            default: []
-        },
-
+            }
+        ],
 
         // =====================================================
         // FINAL INSPECTOR REMARKS
@@ -169,7 +158,6 @@ const inspectionSchema = new mongoose.Schema(
             type: String,
             default: ""
         },
-
 
         // =====================================================
         // INSPECTION COMPLETION DATE
@@ -180,15 +168,16 @@ const inspectionSchema = new mongoose.Schema(
         }
     },
 
-
     {
         timestamps: true
     }
 );
 
+// =====================================================
+// EXPORT MODEL
+// =====================================================
 
-module.exports =
-    mongoose.model(
-        "Inspection",
-        inspectionSchema
-    );
+module.exports = mongoose.model(
+    "Inspection",
+    inspectionSchema
+);
